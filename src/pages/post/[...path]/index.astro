@@ -1,0 +1,32 @@
+---
+import { getAllPosts } from '@libs/Post';
+import { propsToFilename } from 'astro/assets/utils';
+import { getEntries } from 'astro:content';
+import Layout from "../../../layouts/Layout.astro";
+import BlogPost from 'src/components/BlogPost.astro';
+
+export async function getStaticPaths() {
+  const posts = await getAllPosts();
+
+  return posts.map((p) => {
+    return {
+      params: { path: p.slug },
+    };
+  });
+}
+
+// Collections query
+const {path} = Astro.params;
+const posts = await getAllPosts();
+const post = posts.find(p => p.slug === path);
+
+if(post == undefined) {
+  throw "Unable to load post";
+}
+
+---
+
+<Layout title={post.data.title}>
+  <BlogPost post={post} fullPost />
+</Layout>
+

@@ -9,6 +9,7 @@ const { title } = Astro.props;
 // Pacifico is used for my name heading
 import '@fontsource/capriola';
 import '@fontsource/inter';
+import '@fontsource/bricolage-grotesque/latin-600.css';
 import Navbar from '../components/Navbar.astro';
 ---
 
@@ -53,9 +54,21 @@ import Navbar from '../components/Navbar.astro';
       margin: auto;
       line-height: 1.5em;
       /* font-size: 1.25em; */
-      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      font-family:
+        'Inter',
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        Oxygen,
+        Ubuntu,
+        Cantarell,
+        'Open Sans',
+        'Helvetica Neue',
+        sans-serif;
       color: #333333;
-      background-color: #FAFAFA;
+      background-color: #fafafa;
       /* font-size: 5px; */
     }
     h1,
@@ -80,7 +93,7 @@ import Navbar from '../components/Navbar.astro';
       /* font-size: x-small; */
       font-style: italic;
       display: block;
-      color: #9CA3AF;
+      color: #9ca3af;
     }
 
     article:has(> time) > h2 {
@@ -91,7 +104,7 @@ import Navbar from '../components/Navbar.astro';
       transition: all 1s ease;
       text-decoration-color: transparent;
     }
-    
+
     h2 a:hover {
       text-decoration: underline;
       text-decoration-color: #fc7e0f;
@@ -101,6 +114,11 @@ import Navbar from '../components/Navbar.astro';
     article p a {
       color: #fc7e0f;
       text-decoration: underline;
+    }
+
+    article h2 {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: 2em;
     }
   </style>
 

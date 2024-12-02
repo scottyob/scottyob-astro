@@ -1,0 +1,49 @@
+---
+import { getAllPosts, type Post } from '@libs/Post';
+
+export interface Props {
+  post: Post;
+  fullPost?: boolean;
+}
+
+const posts = getAllPosts();
+
+const { post, fullPost } = Astro.props;
+const link = `/post/${post.slug}`;
+const { Content } = await post.content.render();
+---
+
+{
+  !fullPost && (
+    <article>
+      <h2>
+        <a href={link}>{post.data.title}</a>
+      </h2>
+      <time>
+        <strong>Published on </strong>Some date
+      </time>
+      <div set:html={post.excerpt} />
+      <div>
+        <a href={link} class="text-orange-600">
+          {' '}
+          Read More{' '}
+        </a>
+      </div>
+      {/* <post.content.Content /> */}
+    </article>
+  )
+}
+
+{
+  fullPost && (
+    <article>
+      <h2>
+        {post.data.title}
+      </h2>
+      <time>
+        <strong>Published on </strong>Some date
+      </time>
+      <Content />
+    </article>
+  )
+}

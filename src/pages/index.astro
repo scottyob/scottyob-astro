@@ -1,37 +1,43 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import '@fontsource/bricolage-grotesque/latin-600.css';
 
-import { getAllPosts } from '@libs/Post'
+import { getAllPosts } from '@libs/Post';
 import { Icon } from 'astro-icon/components';
 
 const pages = await getAllPosts();
 ---
 
-<Layout title="Welcome to Astro.">
+<Layout title="Scott's Recent Writing's">
   <main>
-	{pages.map(post => {
-    const link = `/post/${post.slug}`;
-		return <article>
-			<h2><a href={`/post/${post.slug}`}>{post.data.title}</a></h2>
-			<time><strong>Published on </strong>Some date</time>
-      <div set:html={post.excerpt}></div>
-      <div><a href={link} class="text-orange-600">Read More</a></div>
-			{/* <post.content.Content /> */}
-		</article>
-	})}
+    {
+      pages.map((post) => {
+        const link = `/post/${post.slug}`;
+        return (
+          <article>
+            <h2>
+              <a href={`/post/${post.slug}`}>{post.data.title}</a>
+            </h2>
+            <time>
+              <strong>Published on </strong>Some date
+            </time>
+            <div set:html={post.excerpt} />
+            <div>
+              <a href={link} class="text-orange-600">
+                Read More
+              </a>
+            </div>
+            {/* <post.content.Content /> */}
+          </article>
+        );
+      })
+    }
 
     <article>
       <h2>Article 1</h2>
-	  <time>Published November 19, 2025</time>
+      <time>Published November 19, 2025</time>
       <p>And I am some text covering the article</p>
     </article>
   </main>
 </Layout>
 
-<style>
-  h2 {
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-size: 2em;
-  }
-</style>
+<style></style>
