@@ -1,0 +1,99 @@
+---
+// import { ImPencil2, ImMan } from "react-icons/im";
+// import { GiCampCookingPot, GiLibertyWing, GiMountainClimbing } from "react-icons/gi";
+// import { BsCardList } from "react-icons/bs";
+import { Icon } from 'astro-icon/components';
+import '@fontsource/exo-2/500.css';
+
+const liClass = 'transition group duration-300 whitespace-nowrap';
+
+// Underline components
+const underlineClass =
+  'block group-hover:max-w-[75%] m-auto transition-all duration-500 h-0.5';
+
+const unselected =
+  underlineClass + ' max-w-0 bg-orange-50 group-hover:bg-orange-400';
+
+const selected = underlineClass + ' max-w-[85%] bg-orange-500';
+
+const pathname = Astro.url.pathname;
+---
+
+<ul
+  class={[
+    'Navbar flex flex-wrap justify-center text-gray-400 text-s italic pt-3 mb-8 max-w-2xl w-[80%] m-auto',
+    '[&>li]:ml-3',
+    '[&>li]:mr-3',
+    '[&_svg]:inline [&_svg]:mr-1',
+    //   exo_2.class,
+  ].join(' ')}
+>
+  <li class={liClass}>
+    <a href="/"><Icon name="noto:black-nib" class="-scale-x-100" />Writings/Projects</a>
+    {
+      pathname === '/' || pathname.toLowerCase().startsWith('/post') ? (
+        <span class={selected} />
+      ) : (
+        <span class={unselected} />
+      )
+    }
+  </li>
+  <li class={liClass}>
+    <a href="/about"><Icon name="noto:identification-card" />About</a>
+    {
+      pathname.startsWith('/about') ? (
+        <span class={selected} />
+      ) : (
+        <span class={unselected} />
+      )
+    }
+  </li>
+  <li class={liClass}>
+    <a href="/bucketlist"><Icon name="noto:memo" />Bucket List</a>
+    {
+      pathname.startsWith('/bucketlist') ? (
+        <span class={selected} />
+      ) : (
+        <span class={unselected} />
+      )
+    }
+  </li>
+  <li class={liClass}>
+    <a href="/recipes"><Icon name="noto:hamburger" />Cooking</a>
+    {
+      pathname.startsWith('/recipes') ? (
+        <span class={selected} />
+      ) : (
+        <span class={unselected} />
+      )
+    }
+  </li>
+  <li class={liClass}>
+    <a href="/climbing"><Icon name="noto:person-climbing" class="-scale-x-100" />Climbing</a>
+    {
+      pathname.startsWith('/climbing') ? (
+        <span class={selected} />
+      ) : (
+        <span class={unselected} />
+      )
+    }
+  </li>
+  <li class={liClass}>
+    <a href="/flying"><Icon name="noto:parachute" />Flying</a>
+      {
+        pathname.startsWith('/flying') ? (
+          <span class={selected} />
+        ) : (
+          <span class={unselected} />
+        )
+      }
+    </a>
+  </li>
+</ul>
+
+<style>
+    .Navbar {
+        font-family: 'Exo 2';
+        font-weight: 500;
+    }
+</style>
