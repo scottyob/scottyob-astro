@@ -4,11 +4,28 @@ import tailwind from '@astrojs/tailwind';
 
 import icon from 'astro-icon';
 
+import mdx from '@astrojs/mdx';
+
 // https://astro.build/config
 export default defineConfig({
-    integrations: [tailwind(), icon({
-        include: {
-            "noto": ["black-nib", "identification-card", "memo", "hamburger", "person-climbing", "parachute"],
-        }
-    })],
+  integrations: [
+    tailwind(),
+    icon({
+      include: {
+        noto: [
+          'black-nib',
+          'identification-card',
+          'memo',
+          'hamburger',
+          'person-climbing',
+          'parachute',
+          'up-right-arrow',
+        ],
+        "noto-v1": [
+            'up-right-arrow',
+        ]
+      },
+    }),
+    mdx(),
+  ],
 });

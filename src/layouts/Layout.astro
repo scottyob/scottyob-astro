@@ -56,6 +56,7 @@ import Navbar from '../components/Navbar.astro';
       font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       color: #333333;
       background-color: #FAFAFA;
+      /* font-size: 5px; */
     }
     h1,
     h2,
@@ -75,8 +76,8 @@ import Navbar from '../components/Navbar.astro';
     }
 
     article time {
-      margin-bottom: 1em;
-      font-size: x-small;
+      margin-bottom: 1.5em;
+      /* font-size: x-small; */
       font-style: italic;
       display: block;
       color: #9CA3AF;
@@ -84,6 +85,22 @@ import Navbar from '../components/Navbar.astro';
 
     article:has(> time) > h2 {
       margin-bottom: 0em;
+    }
+
+    h2 a {
+      transition: all 1s ease;
+      text-decoration-color: transparent;
+    }
+    
+    h2 a:hover {
+      text-decoration: underline;
+      text-decoration-color: #fc7e0f;
+      transition: all 1s ease;
+    }
+
+    article p a {
+      color: #fc7e0f;
+      text-decoration: underline;
     }
   </style>
 
