@@ -1,4 +1,5 @@
 ---
+import BlogPost from '@components/BlogPost.astro';
 import Layout from '../layouts/Layout.astro';
 
 import { getAllPosts } from '@libs/Post';
@@ -10,33 +11,10 @@ const pages = await getAllPosts();
 <Layout title="Scott's Recent Writing's">
   <main>
     {
-      pages.map((post) => {
-        const link = `/post/${post.slug}`;
-        return (
-          <article>
-            <h2>
-              <a href={`/post/${post.slug}`}>{post.data.title}</a>
-            </h2>
-            <time>
-              <strong>Published on </strong>Some date
-            </time>
-            <div set:html={post.excerpt} />
-            <div>
-              <a href={link} class="text-orange-600">
-                Read More
-              </a>
-            </div>
-            {/* <post.content.Content /> */}
-          </article>
-        );
-      })
+      pages.map((post) => (
+        <BlogPost post={post} fullPost={false} />
+      ))
     }
-
-    <article>
-      <h2>Article 1</h2>
-      <time>Published November 19, 2025</time>
-      <p>And I am some text covering the article</p>
-    </article>
   </main>
 </Layout>
 

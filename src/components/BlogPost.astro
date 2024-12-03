@@ -10,7 +10,14 @@ const posts = getAllPosts();
 
 const { post, fullPost } = Astro.props;
 const link = `/post/${post.slug}`;
-const { Content } = await post.content.render();
+const Content = fullPost ? (await post.content.render()).Content : undefined;
+
+const dateStr = new Intl.DateTimeFormat('en-US', {
+  weekday: 'short',
+  year: 'numeric',
+  month: 'short',
+  day: '2-digit',
+}).format(post.data.date);
 ---
 
 {
@@ -19,14 +26,14 @@ const { Content } = await post.content.render();
       <h2>
         <a href={link}>{post.data.title}</a>
       </h2>
-      <time>
-        <strong>Published on </strong>Some date
+      <time datetime={post.data.date.toISOString().slice(0,10)}>
+        <strong>Published on </strong>
+        {dateStr}
       </time>
       <div set:html={post.excerpt} />
       <div>
         <a href={link} class="text-orange-600">
-          {' '}
-          Read More{' '}
+          Continue Reading
         </a>
       </div>
       {/* <post.content.Content /> */}
@@ -35,13 +42,12 @@ const { Content } = await post.content.render();
 }
 
 {
-  fullPost && (
+  fullPost && Content && (
     <article>
-      <h2>
-        {post.data.title}
-      </h2>
-      <time>
-        <strong>Published on </strong>Some date
+      <h2>{post.data.title}</h2>
+      <time datetime={post.data.date.toISOString().slice(0,10)}>
+        <strong>Published on </strong>
+        {dateStr}
       </time>
       <Content />
     </article>

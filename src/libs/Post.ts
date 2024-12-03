@@ -29,11 +29,13 @@ export async function getAllPosts(): Promise<Post[]> {
             "content": post,
             "data": post.data,
             "excerpt": getExcerpt(post.body),
-            "slug": post.slug,
+            "slug": post.slug.replace(/\/page$/, ""),
         }
     }))
 
-    return pages;
+
+
+    return pages.sort((a, b) => b.data.date.getTime() - a.data.date.getTime() );
 }
 
 

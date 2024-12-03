@@ -4,7 +4,14 @@
     "strictNullChecks": true,
     "baseUrl": ".",
     "paths": {
-      "@libs/*": ["src/libs/*"],
-    }
+      "@libs/*": [
+        "src/libs/*",
+      ],
+      "@components/*": [
+        "src/components/*",
+      ]
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
   }
 }

@@ -1,9 +1,8 @@
 ---
 import { getAllPosts } from '@libs/Post';
-import { propsToFilename } from 'astro/assets/utils';
-import { getEntries } from 'astro:content';
-import Layout from "../../../layouts/Layout.astro";
+import Layout from '../../../layouts/ArticleLayout.astro';
 import BlogPost from 'src/components/BlogPost.astro';
+import { format } from 'date-fns';
 
 export async function getStaticPaths() {
   const posts = await getAllPosts();
@@ -16,17 +15,22 @@ export async function getStaticPaths() {
 }
 
 // Collections query
-const {path} = Astro.params;
+const { path } = Astro.params;
 const posts = await getAllPosts();
-const post = posts.find(p => p.slug === path);
+const post = posts.find((p) => p.slug === path);
 
-if(post == undefined) {
-  throw "Unable to load post";
+if (post == undefined) {
+  throw 'Unable to load post';
 }
 
+const { Content } = await post.content.render();
+const dateStr = format(post.data.date, 'Mo MMMM, yyyy');
 ---
 
-<Layout title={post.data.title}>
-  <BlogPost post={post} fullPost />
+<Layout title={post.data.title} heroImage={post.data.hero}>
+  <aside slot="header">
+    <time datetime={post.data.date.toISOString()}>{dateStr}</time>
+  </aside>
+  <h1>{post.data.title}</h1>
+  <Content />
 </Layout>
-

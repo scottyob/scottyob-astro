@@ -1,0 +1,39 @@
+---
+import { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+export interface GalleryImage {
+  image: ImageMetadata;
+  altText: string;
+  width?: number;
+}
+
+export interface Props {
+  images: GalleryImage[];
+  gap?: string;
+  gallery?: string;
+  defaultWidth?: number;
+}
+
+const defaults = {
+  gap: 'gap-4',
+  gallery: 'gallery',
+};
+
+const { images, gap, gallery, defaultWidth } = Object.assign({}, defaults, Astro.props);
+console.log(images);
+---
+
+<div class={'flex flex-wrap justify-center items-center ' + gap}>
+  {
+    images.map((img, i) => (
+      <a data-fslightbox={gallery} href={img.image.src}>
+        <Image src={img.image} alt={img.altText} width={img.width || defaultWidth} />
+      </a>
+    ))
+  }
+</div>
+
+<script>
+  import FsLightbox from 'fslightbox';
+</script>
