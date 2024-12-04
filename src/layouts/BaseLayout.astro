@@ -1,0 +1,90 @@
+---
+import '@fontsource/inter';
+import '@fontsource/bricolage-grotesque/latin-600.css';
+import '@fontsource/bricolage-grotesque/latin-500.css';
+import '@fontsource/bricolage-grotesque/latin-400.css';
+import '@fontsource/bricolage-grotesque';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="list-disc">
+  <head>
+    <meta charset="UTF-8" />
+    {description && <meta name="description" content={description} />}
+    <meta name="viewport" content="width=device-width" />
+    <meta name="view-transition" content="same-origin" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <slot />
+
+  <style is:global>
+    /* https://dev.to/swyx/100-bytes-of-css-to-look-great-everywhere-19pd */
+    html {
+      padding-top: 0em;
+      margin: auto;
+      line-height: 1.5em;
+      font-size: 1em;
+      font-family:
+        'Inter',
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        Oxygen,
+        Ubuntu,
+        Cantarell,
+        'Open Sans',
+        'Helvetica Neue',
+        sans-serif;
+      color: #333333;
+      background-color: #fafafa;
+      /* font-size: 5px; */
+    }
+    h1,
+    h2,
+    h3 {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: 1.25em;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-weight: 600;
+      margin: 3em 0 1em;
+    }
+
+    p,
+    ul,
+    ol {
+      margin-bottom: 2em;
+      /* color: #1d1d1d; */
+      /* font-family: sans-serif; */
+    }
+
+    article ul {
+        list-style-type: disc;
+        padding-left: 40px;
+    }
+
+    article a {
+      color: #fc7e0f;
+      text-decoration: underline;
+    }
+  </style>
+
+
+</html>

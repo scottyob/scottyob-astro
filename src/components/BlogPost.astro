@@ -32,8 +32,8 @@ const dateStr = new Intl.DateTimeFormat('en-US', {
       </time>
       <div set:html={post.excerpt} />
       <div>
-        <a href={link} class="text-orange-600">
-          Continue Reading
+        <a href={link} style="color: #333">
+          {'↳ '}Continue Reading...
         </a>
       </div>
       {/* <post.content.Content /> */}

@@ -1,118 +1,107 @@
 ---
-import { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 
-import '@fontsource/inter';
-import '@fontsource/bricolage-grotesque/latin-600.css';
-import '@fontsource/bricolage-grotesque/latin-500.css';
-import '@fontsource/bricolage-grotesque';
+import BaseLayout from './BaseLayout.astro';
+import type { Post } from '@libs/Post';
 
 interface Props {
-  title: string;
-  description?: string;
-  heroImage?: ImageMetadata;
+  article: Post
 }
 
-const { title, description, heroImage } = Astro.props;
+// Article's data
+const article = Astro.props.article.data;
+
+// If the hero image should be down the side of the page
+const heroOnSide = article.hero && !article.forceHeroOnTop;
+
+let heroStyle = undefined;
+if(heroOnSide && article.heroObjectPosition) {
+  heroStyle = `object-position: ${article.heroObjectPosition};`
+}
+
+console.log("Hero style: ", heroStyle);
+console.log("Hero on side", heroOnSide);
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    {description && <meta name="description" content={description} />}
-    <meta name="viewport" content="width=device-width" />
-    <meta name="view-transition" content="same-origin" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="generator" content={Astro.generator} />
-    <title>{title}</title>
-  </head>
-
+<BaseLayout title={article.title} description={article.description}>
   <body>
-    {heroImage && <Image class="hero" src={heroImage} alt="Page Title Image" />}
-    <article>
-      <header>
-        <slot name="header" />
-      </header>
-      <slot />
-    </article>
+    <div class={'layout-wrapper' + (heroOnSide ? '-hero' : undefined)}>
+      {
+        article.hero && (
+          <Image class="hero" src={article.hero} alt="Page Title Image" style={heroStyle} />
+        )
+      }
+      <article>
+        <header>
+          <slot name="header" />
+        </header>
+        <slot />
+      </article>
+    </div>
   </body>
+</BaseLayout>
 
-  <style is:global>
-    html {
-      /* max-width: 70ch; */
-      /* padding: 3em 1em; */
-      margin: auto;
-      line-height: 1.75;
-      font-size: 1.25em;
+<style is:global>
 
-      font-family:
-        'Inter',
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        'Segoe UI',
-        Roboto,
-        Oxygen,
-        Ubuntu,
-        Cantarell,
-        'Open Sans',
-        'Helvetica Neue',
-        sans-serif;
+  html {
+    margin: 0;
+    padding: 0;
+    color: #444;
+    background-color: #eee;
+  }
+
+  body {
+    
+  }
+
+  article {
+    max-width: 70ch;
+    margin: 2em auto;
+    margin-bottom: 0;
+  }
+
+  article h1 {
+    margin-top: 0;
+    line-height: 1;
+    font-weight: 600;
+    font-size: 2em;
+  }
+
+  article aside {
+    color: #777;
+    font-size: small;
+    margin-bottom: 0;
+    line-height: 1.4;
+  }
+
+  article img {
+    margin: auto;
+    padding: 1em;
+  }
+
+  img.hero {
+    height: 33vh;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  @media (min-width: 921px) {
+    .layout-wrapper-hero {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
     }
+    .layout-wrapper-hero img.hero {
+      height: 100vh;
+      grid-column: 1 / 6;
+      position: sticky;
+      top: 0;
 
-    body {
-      color: #444;
-      background-color: #eee;
+      /* Some hacks to avoid over bright images */
+      filter: opacity(60%) saturate(0%) sepia(30%);
     }
-
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-      margin: 3em 0 1em;
-      font-family: 'Bricolage Grotesque', serif;
-      font-size: 1.1em;
-      font-weight: 500;
+    .layout-wrapper-hero article {
+      grid-column: 6/13;
+      margin: 2em;
     }
-
-    article h1 {
-      margin-top: 0;
-      line-height: 1;
-      font-weight: 600;
-      font-size: 1.3em;
-    }
-
-    article aside {
-      color: #777;
-      font-size: small;
-      margin-bottom: 0;
-      line-height: 1.4;
-    }
-
-    p,
-    ul,
-    ol {
-      margin-bottom: 2em;
-      color: #1d1d1d;
-      font-family: sans-serif;
-    }
-
-    article {
-      line-height: 1.5;
-      /* font-size: 1.437rem; */
-      /* max-width: 700px; */
-      max-width: 70ch;
-      margin: 0 auto;
-      padding: 40px 20px;
-    }
-
-    .hero {
-      height: 33vh;
-      width: 100%;
-      object-fit: cover;
-    }
-  </style>
-</html>
+  }
+</style>

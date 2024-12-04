@@ -27,7 +27,7 @@ const { Content } = await post.content.render();
 const dateStr = format(post.data.date, 'Mo MMMM, yyyy');
 ---
 
-<Layout title={post.data.title} heroImage={post.data.hero}>
+<Layout article={post}>
   <aside slot="header">
     <time datetime={post.data.date.toISOString()}>{dateStr}</time>
   </aside>

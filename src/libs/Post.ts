@@ -10,6 +10,7 @@ function getExcerpt(content: string, length = 100) {
         excerpt = content.split(EXCERPT_SEPERATOR)[0].trim();
     }
 
+    excerpt = excerpt.replace(/^(import.*)\s*$/gm, "");
     return marked.parse(excerpt);
 }
 

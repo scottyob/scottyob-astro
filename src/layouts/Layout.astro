@@ -11,19 +11,10 @@ import '@fontsource/capriola';
 import '@fontsource/inter';
 import '@fontsource/bricolage-grotesque/latin-600.css';
 import Navbar from '../components/Navbar.astro';
+import BaseLayout from './BaseLayout.astro';
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="description" content="Astro description" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="view-transition" content="same-origin" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="generator" content={Astro.generator} />
-    <title>{title}</title>
-  </head>
+<BaseLayout title={title} description="Recent writing from the blog of Scott">
   <header>
     <h1 class="text-center text-3xl"><a href="/">Scott O'Brien</a></h1>
     <nav>
@@ -33,95 +24,44 @@ import Navbar from '../components/Navbar.astro';
   <body>
     <slot />
   </body>
+</BaseLayout>
 
-  <style is:global>
+<style is:global>
+  header h1 {
+    font-family: 'Capriola', cursive;
+    margin: 1em;
+    margin-bottom: 0em;
+    font-size: 36px;
+  }
 
-    h1 {
-      font-family: 'Playfair Display', 'Georgia', serif;
-    }
+  article time {
+    margin-bottom: 1.5em;
+    font-size: small;
+    font-style: italic;
+    display: block;
+    color: #9ca3af;
+  }
 
-    header h1 {
-      font-family: 'Capriola', cursive;
-      margin: 1em;
-      margin-bottom: 0em;
-      font-size: 36px;
-    }
+  article:has(> time) > h2 {
+    margin-bottom: 0em;
+  }
 
-    /* https://dev.to/swyx/100-bytes-of-css-to-look-great-everywhere-19pd */
-    html {
-      max-width: 70ch;
-      padding: 3em 1em;
-      padding-top: 0em;
-      margin: auto;
-      line-height: 1.5em;
-      /* font-size: 1.25em; */
-      font-family:
-        'Inter',
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        'Segoe UI',
-        Roboto,
-        Oxygen,
-        Ubuntu,
-        Cantarell,
-        'Open Sans',
-        'Helvetica Neue',
-        sans-serif;
-      color: #333333;
-      background-color: #fafafa;
-      /* font-size: 5px; */
-    }
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-      margin: 3em 0 1em;
-    }
+  h2 a {
+    transition: all 1s ease;
+    text-decoration-color: transparent;
+    color: #333;
+  }
 
-    p,
-    ul,
-    ol {
-      margin-bottom: 2em;
-      /* color: #1d1d1d; */
-      /* font-family: sans-serif; */
-    }
+  h2 a:hover {
+    text-decoration: underline;
+    text-decoration-color: #fc7e0f;
+    transition: all 1s ease;
+    text-decoration-thickness: 2px;
+  }
 
-    article time {
-      margin-bottom: 1.5em;
-      font-size: small;
-      font-style: italic;
-      display: block;
-      color: #9ca3af;
-    }
+  html {
+    max-width: 70ch;
+    padding: 3em 1em;
+  }
 
-    article:has(> time) > h2 {
-      margin-bottom: 0em;
-    }
-
-    h2 a {
-      transition: all 1s ease;
-      text-decoration-color: transparent;
-    }
-
-    h2 a:hover {
-      text-decoration: underline;
-      text-decoration-color: #fc7e0f;
-      transition: all 1s ease;
-    }
-
-    article p a {
-      color: #fc7e0f;
-      text-decoration: underline;
-    }
-
-    article h2 {
-      font-family: 'Bricolage Grotesque', sans-serif;
-      font-size: 2em;
-    }
-  </style>
-
-
-</html>
+</style>

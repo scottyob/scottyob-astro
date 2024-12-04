@@ -6,10 +6,13 @@ const blogCollection = defineCollection({
     schema: ({image}) => z.object({
         // TODO:  Consider expanding with some examples of https://docs.astro.build/en/guides/content-collections/#defining-datatypes-with-zod
         title: z.string(),
+        description: z.string().optional(),
         tags: z.array(z.string()).optional(),
         image: z.string().optional(),
         date: z.date(),
         hero: image().optional(),
+        forceHeroOnTop: z.boolean().optional(),
+        heroObjectPosition: z.string().optional(),
     })
 });
 // 3. Export a single `collections` object to register your collection(s)

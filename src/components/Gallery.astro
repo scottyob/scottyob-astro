@@ -1,11 +1,16 @@
 ---
 import { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
+import type { JsxElement } from 'typescript';
+import type { HTMLAttributes } from 'astro/types';
 
 export interface GalleryImage {
-  image: ImageMetadata;
+  image: ImageMetadata | string;
   altText: string;
   width?: number;
+  child?: JsxElement;
+  renderAs?: 'image' | 'video';
+  videoProps?: HTMLAttributes<'video'>;
 }
 
 export interface Props {
@@ -20,17 +25,45 @@ const defaults = {
   gallery: 'gallery',
 };
 
-const { images, gap, gallery, defaultWidth } = Object.assign({}, defaults, Astro.props);
-console.log(images);
+const { images, gap, gallery, defaultWidth } = Object.assign(
+  {},
+  defaults,
+  Astro.props
+);
 ---
 
 <div class={'flex flex-wrap justify-center items-center ' + gap}>
   {
-    images.map((img, i) => (
-      <a data-fslightbox={gallery} href={img.image.src}>
-        <Image src={img.image} alt={img.altText} width={img.width || defaultWidth} />
-      </a>
-    ))
+    images.map((img, i) => {
+      const renderAs = img.renderAs || 'image';
+      let href = undefined;
+      let component = undefined;
+
+      if (renderAs == 'image') {
+        const image = img.image as ImageMetadata;
+        href = image.src;
+        component = (
+          <Image
+            src={image}
+            alt={img.altText}
+            width={img.width || defaultWidth}
+          />
+        );
+      } else if (renderAs == 'video') {
+        href = img.image as string;
+        component = (
+          <video width={img.width || defaultWidth} {...img.videoProps}>
+            <source src={href} />
+          </video>
+        )
+      }
+
+      return (
+        <a data-fslightbox={gallery} href={href}>
+          {component}
+        </a>
+      );
+    })
   }
 </div>
 

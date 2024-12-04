@@ -19,11 +19,13 @@ export default defineConfig({
         'hamburger',
         'person-climbing',
         'parachute',
-        'up-right-arrow',
       ],
       "noto-v1": [
           'up-right-arrow',
       ]
     },
   }), mdx(), react()],
+  vite: {
+    assetsInclude: ["**/*.bin"],
+  }
 });
