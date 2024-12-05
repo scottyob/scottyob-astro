@@ -25,12 +25,15 @@ const { title, description } = Astro.props;
     <link
       rel="alternate"
       type="application/rss+xml"
-      title="Scott O'Brien\'s Website",
-      href={new URL("rss.xml", Astro.site)}
+      title="Scott O'Brien\'s Website"
+      ,
+      href={new URL('rss.xml', Astro.site)}
     />
     <title>{title}</title>
   </head>
-  <slot />
+  <body>
+    <slot />
+  </body>
 
   <style is:global>
     /* https://dev.to/swyx/100-bytes-of-css-to-look-great-everywhere-19pd */
@@ -91,12 +94,11 @@ const { title, description } = Astro.props;
       list-style-type: decimal;
     }
 
-    article a, .hyperlink {
+    main a,
+    .hyperlink {
       color: #fc7e0f;
       text-decoration: underline;
     }
-
-
 
     article pre {
       padding: 1.25rem;
@@ -148,8 +150,5 @@ const { title, description } = Astro.props;
     lite-youtube {
       margin-bottom: 2em;
     }
-
   </style>
-
-
 </html>

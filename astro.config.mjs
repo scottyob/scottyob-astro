@@ -20,8 +20,8 @@ export default defineConfig({
         'person-climbing',
         'parachute',
       ],
-      "noto-v1": [
-          'up-right-arrow',
+      "fa-brands": [
+          '*',
       ]
     },
   }), mdx(), react()],

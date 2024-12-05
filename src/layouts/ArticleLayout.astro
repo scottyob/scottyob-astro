@@ -23,21 +23,23 @@ if (heroOnSide && article.heroObjectPosition) {
 ---
 
 <BaseLayout title={article.title} description={article.description}>
-  <body>
-    <div class={'layout-wrapper' + (heroOnSide ? '-hero' : undefined)}>
-      {
-        article.hero &&
-          (article.style == 'img-left' || article.style == 'img-top') && (
-            <Image
-              class="hero"
-              src={article.hero}
-              alt="Page Title Image"
-              style={heroStyle}
-            />
-          )
-      }
-      <div class="article-wrapper">
+  <div class={'layout-wrapper' + (heroOnSide ? '-hero' : undefined)}>
+    {
+      article.hero &&
+        (article.style == 'img-left' || article.style == 'img-top') && (
+          <Image
+            class="hero"
+            src={article.hero}
+            alt="Page Title Image"
+            style={heroStyle}
+          />
+        )
+    }
+    <div class="article-wrapper">
+      <header>
         <Navbar />
+      </header>
+      <main>
         <article>
           <header>
             <slot name="header" />
@@ -49,9 +51,9 @@ if (heroOnSide && article.heroObjectPosition) {
           }
           <slot />
         </article>
-      </div>
+      </main>
     </div>
-  </body>
+  </div>
 </BaseLayout>
 
 <style is:global>

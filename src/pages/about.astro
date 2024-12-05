@@ -1,0 +1,49 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Icon } from 'astro-icon/components';
+---
+
+<Layout title="about">
+  <!-- <div class="pt-20 flex justify-center gap-3"> -->
+  <div class="pt-20 flex gap-3 text-[40px] h-screen w-screen justify-center items-center absolute top-0 left-0 -z-50">
+    <a
+      class="transition hover:scale-150"
+      target="_blank"
+      href="https://www.instagram.com/scottyob/"
+    >
+      <Icon name="fa-brands:instagram" />
+    </a>
+    <a
+      class="transition hover:scale-150"
+      target="_blank"
+      href="https://www.github.com/scottyob"
+    >
+      <Icon name="fa-brands:github" />
+      <!-- <AiOutlineGithub size={42} /> -->
+    </a>
+    <a
+      class="transition hover:scale-150"
+      target="_blank"
+      href="https://www.linkedin.com/in/scott-o-brien-087304a1/"
+    >
+      <Icon name="fa-brands:linkedin" />
+      <!-- <AiOutlineLinkedin size={42} /> -->
+    </a>
+    <a
+      class="transition hover:scale-150"
+      target="_blank"
+      href="https://www.goodreads.com/user/show/71179681-scott-o-brien"
+    >
+      <Icon name="fa-brands:goodreads" />
+      <!-- <FaGoodreads size={42} /> -->
+    </a>
+    <a
+      class="transition hover:scale-150"
+      target="_blank"
+      href="https://twitter.com/scottyob"
+    >
+      <Icon name="fa-brands:twitter" />
+      <!-- <AiOutlineTwitter size={42} /> -->
+    </a>
+  </div>
+</Layout>
