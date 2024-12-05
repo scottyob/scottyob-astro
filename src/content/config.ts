@@ -13,6 +13,8 @@ const blogCollection = defineCollection({
         hero: image().optional(),
         forceHeroOnTop: z.boolean().optional(),
         heroObjectPosition: z.string().optional(),
+        style: z.enum(['img-left', 'img-top', 'img-between']).default('img-left'),
+        draft: z.boolean().optional(),
     })
 });
 // 3. Export a single `collections` object to register your collection(s)

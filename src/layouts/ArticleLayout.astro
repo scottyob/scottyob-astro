@@ -3,46 +3,58 @@ import { Image } from 'astro:assets';
 
 import BaseLayout from './BaseLayout.astro';
 import type { Post } from '@libs/Post';
+import Navbar from '@components/Navbar.astro';
 
 interface Props {
-  article: Post
+  article: Post;
 }
 
 // Article's data
 const article = Astro.props.article.data;
 
 // If the hero image should be down the side of the page
-const heroOnSide = article.hero && !article.forceHeroOnTop;
+const heroOnSide =
+  article.hero && !article.forceHeroOnTop && article.style == 'img-left';
 
 let heroStyle = undefined;
-if(heroOnSide && article.heroObjectPosition) {
-  heroStyle = `object-position: ${article.heroObjectPosition};`
+if (heroOnSide && article.heroObjectPosition) {
+  heroStyle = `object-position: ${article.heroObjectPosition};`;
 }
-
-console.log("Hero style: ", heroStyle);
-console.log("Hero on side", heroOnSide);
 ---
 
 <BaseLayout title={article.title} description={article.description}>
   <body>
     <div class={'layout-wrapper' + (heroOnSide ? '-hero' : undefined)}>
       {
-        article.hero && (
-          <Image class="hero" src={article.hero} alt="Page Title Image" style={heroStyle} />
-        )
+        article.hero &&
+          (article.style == 'img-left' || article.style == 'img-top') && (
+            <Image
+              class="hero"
+              src={article.hero}
+              alt="Page Title Image"
+              style={heroStyle}
+            />
+          )
       }
-      <article>
-        <header>
-          <slot name="header" />
-        </header>
-        <slot />
-      </article>
+      <div class="article-wrapper">
+        <Navbar />
+        <article>
+          <header>
+            <slot name="header" />
+          </header>
+          {
+            article.style == 'img-between' && article.hero && (
+              <Image src={article.hero} alt="Page Title Image" class="p-8" />
+            )
+          }
+          <slot />
+        </article>
+      </div>
     </div>
   </body>
 </BaseLayout>
 
 <style is:global>
-
   html {
     margin: 0;
     padding: 0;
@@ -51,13 +63,13 @@ console.log("Hero on side", heroOnSide);
   }
 
   body {
-    
   }
 
   article {
     max-width: 70ch;
     margin: 2em auto;
     margin-bottom: 0;
+    margin-top: 4em;
   }
 
   article h1 {
@@ -80,7 +92,7 @@ console.log("Hero on side", heroOnSide);
   }
 
   img.hero {
-    height: 33vh;
+    height: 50vh;
     width: 100%;
     object-fit: cover;
   }
@@ -99,9 +111,13 @@ console.log("Hero on side", heroOnSide);
       /* Some hacks to avoid over bright images */
       filter: opacity(60%) saturate(0%) sepia(30%);
     }
-    .layout-wrapper-hero article {
+    .layout-wrapper-hero .article-wrapper {
       grid-column: 6/13;
+      max-width: 70ch;
+    }
+    .layout-wrapper-hero article {
       margin: 2em;
+      margin-top: 3em;
     }
   }
 </style>

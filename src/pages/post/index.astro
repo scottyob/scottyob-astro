@@ -1,0 +1,40 @@
+---
+import { number } from 'astro:schema';
+import Layout from '../../layouts/Layout.astro';
+
+import { getAllPosts, type Post } from '@libs/Post.ts';
+
+const posts = await getAllPosts();
+const postsByYear = posts.reduce(
+  (acc, post) => {
+    const year = post.data.date.getFullYear();
+    if (!acc[year]) {
+      acc[year] = [];
+    }
+    acc[year].push(post);
+    return acc;
+  },
+  {} as { [year: number]: Post[] }
+);
+---
+
+<Layout title="All Posts">
+  <article>
+    {
+      Object.entries(postsByYear)
+        .sort((a, b) => parseInt(b[0]) - parseInt(a[0])) // sort years in descending order
+        .map(([year, posts]) => (
+          <div>
+            <h2>{year}</h2>
+            <ul>
+              {posts.map((p) => (
+                <li>
+                  <a href={`/post/${p.slug}`}>{p.data.title}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+    }
+  </article>
+</Layout>

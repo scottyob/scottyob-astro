@@ -1,0 +1,11 @@
+---
+export interface Props {
+    gistId: string;
+}
+
+const { gistId } = Astro.props;
+const url = `https://gist.github.com/${gistId}.js`;
+
+---
+
+<script is:inline src={url} />

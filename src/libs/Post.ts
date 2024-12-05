@@ -1,5 +1,4 @@
-import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
-import { getCollection, type CollectionEntry, type InferEntrySchema, type Render } from 'astro:content';
+import { getCollection, type CollectionEntry, type InferEntrySchema } from 'astro:content';
 import { marked } from 'marked';
 
 const EXCERPT_SEPERATOR = '{/* --- */}';
@@ -22,21 +21,26 @@ export interface Post {
 }
 
 export async function getAllPosts(): Promise<Post[]> {
-    const allBlogPosts = (await getCollection('posts'));
+    const allBlogPosts = (await getCollection('posts')).filter(p => !p.data.draft);
 
     const pages = await Promise.all(allBlogPosts.map(async (post) => {
+        if (!post.data.style) {
+            post.data.style = "img-left";
+        }
+
+        if (post.data.draft) {
+            console.log("Yeah");
+        }
 
         return {
             "content": post,
             "data": post.data,
-            "excerpt": getExcerpt(post.body),
+            "excerpt": await getExcerpt(post.body),
             "slug": post.slug.replace(/\/page$/, ""),
         }
     }))
 
-
-
-    return pages.sort((a, b) => b.data.date.getTime() - a.data.date.getTime() );
+    return pages.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 }
 
 

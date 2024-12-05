@@ -29,13 +29,14 @@ We've got a pretty basic topology going on in our DC, it's just a VSS with the o
 
 Introduced in Puppet 2.7 is [network device management](http://puppetlabs.com/blog/puppet-network-device-management/).  This more or less is an expect script to manage interfaces and vlans on IOS devices.  For this lab, we will be using cisco IOU with the following topology
 
-<img src={img} />
+<img src={img.src} />
 
 #### Setting up the Devices
 
 Ideally, you would have a few puppet nodes that manage a few devices each to spread out the load, for the purposes of this exercise, I created a single vm running Centos6 with both puppet-server and puppet installed.  For this machine to manage the switches, I added the following into the device.conf file
 
-```[root@localhost ~]# cat /etc/puppet/device.conf
+```
+[root@localhost ~]# cat /etc/puppet/device.conf
 [dc_sw1]
 type cisco
 url telnet://puppet:cisco@10.0.1.131/
@@ -54,7 +55,8 @@ url telnet://puppet:cisco@10.0.1.134/
 
 To update the devices, you have to run **puppet device**.  The first time you run it, a certificate will be created that needs to be signed on the puppet master.
 
-```[root@localhost ~]# puppet device --verbose
+```
+[root@localhost ~]# puppet device --verbose
 info: starting applying configuration to dc_sw4 at telnet://puppet:cisco@10.0.1.134/
 info: Creating a new SSL key for dc_sw4
 warning: peer certificate won't be verified in this SSL session
@@ -70,7 +72,8 @@ warning: peer certificate won't be verified in this SSL session
 
 so we'll need to sign our devices
 
-```[root@localhost ~]# puppetca --sign dc_sw4
+```
+[root@localhost ~]# puppetca --sign dc_sw4
 notice: Signed certificate request for dc_sw4
 notice: Removing file Puppet::SSL::CertificateRequest dc_sw4 at '/var/lib/puppet/ssl/ca/requests/dc_sw4.pem'
 ```
@@ -79,7 +82,8 @@ notice: Removing file Puppet::SSL::CertificateRequest dc_sw4 at '/var/lib/puppet
 
 If you look up to the device configuration file, we need to create a local user for puppet to log into the switch (remember, it acts much like an expect script)
 
-```username puppet privilege 15 password 0 cisco
+```
+username puppet privilege 15 password 0 cisco
 line vty 0 4
 privilege level 15
 password cisco
@@ -92,7 +96,8 @@ transport input all
 
 so with no more ado, we can easily simply abstract the behaviour of these ports using puppet syntax 🙂
 
-```define esxport( $port ){
+```
+define esxport( $port ){
 
 interface {
 "${port}":
@@ -127,7 +132,8 @@ A lot of the states don't yet seem to be supported by this module.  This means 
 
 #### Results
 
-```[root@localhost ~]# puppet device --verbose
+```
+[root@localhost ~]# puppet device --verbose
 info: starting applying configuration to dc_sw4 at telnet://puppet:cisco@10.0.1.134/
 info: Caching catalog for dc_sw4
 info: Applying configuration version '1355007108'

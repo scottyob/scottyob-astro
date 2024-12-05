@@ -24,12 +24,12 @@ For my challenges, I'm going to use both [Project Euler](https://projecteuler.ne
 This one threw me slightly.  Nice and easy to play with iterators, but I don't get why I needed to give it a type in rust.  I'd have thought the range might have been smart enough to infer the type?
 
 Python:
-```
+```python
 print(sum(x for x in list(range(1,1000)) if x % 3 == 0 or x % 5 == 0 ))
 ```
 
 Rust:
-```
+```rust
 fn main() {
     let sum: i32 = (1..1000).filter(|x| x % 3 == 0 || x % 5 == 0).sum();
         println!("{}", sum);

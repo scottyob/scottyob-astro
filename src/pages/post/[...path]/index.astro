@@ -1,8 +1,7 @@
 ---
 import { getAllPosts } from '@libs/Post';
 import Layout from '../../../layouts/ArticleLayout.astro';
-import BlogPost from 'src/components/BlogPost.astro';
-import { format } from 'date-fns';
+import { format, toZonedTime } from 'date-fns-tz';
 
 export async function getStaticPaths() {
   const posts = await getAllPosts();
@@ -24,13 +23,17 @@ if (post == undefined) {
 }
 
 const { Content } = await post.content.render();
-const dateStr = format(post.data.date, 'Mo MMMM, yyyy');
+const zonedDate = toZonedTime(post.data.date, 'UTC');
+const dateStr = format(zonedDate, 'EEEE do MMMM, yyyy', { timeZone: 'UTC' });
+console.log(post.data.date);
 ---
 
 <Layout article={post}>
-  <aside slot="header">
-    <time datetime={post.data.date.toISOString()}>{dateStr}</time>
-  </aside>
-  <h1>{post.data.title}</h1>
+  <slot name="header" slot="header">
+    <aside>
+      <time datetime={post.data.date.toISOString()}>{dateStr}</time>
+    </aside>
+    <h1>{post.data.title}</h1>
+  </slot>
   <Content />
 </Layout>

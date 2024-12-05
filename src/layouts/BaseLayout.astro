@@ -22,6 +22,12 @@ const { title, description } = Astro.props;
     <meta name="view-transition" content="same-origin" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Scott O'Brien\'s Website",
+      href={new URL("rss.xml", Astro.site)}
+    />
     <title>{title}</title>
   </head>
   <slot />
@@ -76,14 +82,73 @@ const { title, description } = Astro.props;
     }
 
     article ul {
-        list-style-type: disc;
-        padding-left: 40px;
+      list-style-type: disc;
+      padding-left: 40px;
     }
 
-    article a {
+    article ol {
+      padding-left: 40px;
+      list-style-type: decimal;
+    }
+
+    article a, .hyperlink {
       color: #fc7e0f;
       text-decoration: underline;
     }
+
+
+
+    article pre {
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      margin-bottom: 2em;
+    }
+
+    blockquote {
+      padding-left: 2rem;
+      margin-bottom: 2em;
+      margin-left: 1em;
+      font-style: italic;
+      position: relative;
+      overflow: hidden;
+
+      &::before,
+      &::after {
+        position: absolute;
+        color: #777;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      p + p {
+        margin-top: 1rem;
+      }
+
+      &::before {
+        content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='%23777777'><path d='M9.983 3v7.391C9.983 16.095 6.252 19.961 1 21l-.995-2.151C2.437 17.932 4 15.211 4 13H0V3h9.983zM24 3v7.391c0 5.704-3.748 9.571-9 10.609l-.996-2.151C16.437 17.932 18 15.211 18 13h-3.983V3H24z'/></svg>");
+        left: 0;
+      }
+
+      &::after {
+        content: '';
+        left: 5px;
+        top: 25px;
+        width: 1px;
+        height: 100%;
+        background-color: currentColor;
+      }
+    }
+
+    code {
+      font-size: 14px;
+    }
+
+    lite-youtube {
+      margin-bottom: 2em;
+    }
+
   </style>
 
 

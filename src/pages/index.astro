@@ -3,7 +3,6 @@ import BlogPost from '@components/BlogPost.astro';
 import Layout from '../layouts/Layout.astro';
 
 import { getAllPosts } from '@libs/Post';
-import { Icon } from 'astro-icon/components';
 
 const pages = await getAllPosts();
 ---
@@ -11,11 +10,21 @@ const pages = await getAllPosts();
 <Layout title="Scott's Recent Writing's">
   <main>
     {
-      pages.map((post) => (
-        <BlogPost post={post} fullPost={false} />
-      ))
+      () => {
+        let imageLeft = false;
+        return pages.slice(0, 10).map((post) => {
+          if (post.data.hero) {
+            imageLeft = !imageLeft;
+          }
+          return (
+            <BlogPost post={post} imageDir={imageLeft ? 'left' : 'right'} />
+          );
+        });
+      }
     }
+    <p class="text-center text-xl">
+      <a href="/post" class="hyperlink">~ Read More ~</a>
+    </p>
   </main>
 </Layout>
 
-<style></style>

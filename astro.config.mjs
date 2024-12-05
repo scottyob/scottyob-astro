@@ -26,6 +26,7 @@ export default defineConfig({
     },
   }), mdx(), react()],
   vite: {
-    assetsInclude: ["**/*.bin"],
-  }
+    assetsInclude: ["**/*.bin", "**/*.zip"],
+  },
+  site: 'https://www.scottyob.com/',
 });

@@ -1,69 +1,106 @@
 ---
-title: "Hydroponic Kratky Lettuce Attempts"
+title: 'Hydroponic Kratky Lettuce Attempts'
 date: 2021-12-05T11:01:04-08:00
 type: post
 tags:
- - gardening
+  - gardening
 hero: attempt2/finished.jpg
 hideHero: true
 ---
 
-import a1_1 from "./attempt1/setup1.jpg"
-import a1_2 from "./attempt1/setup2.jpg"
-import a1_3 from "./attempt1/setup3.jpg"
-import a1_4 from "./attempt1/failure.jpg"
+import a1_1 from './attempt1/setup1.jpg';
+import a1_2 from './attempt1/setup2.jpg';
+import a1_3 from './attempt1/setup3.jpg';
+import a1_4 from './attempt1/failure.jpg';
 
-import a2_1 from "./attempt2/finished.jpg";
-import a2_2 from "./attempt2/in enclosure.jpg";
-import a2_3 from "./attempt2/mason jars.jpg";
-import a2_4 from "./attempt2/measuring EC.jpg";
-import a2_5 from "./attempt2/nutrient solution.jpg";
-import a2_6 from "./attempt2/seedlings.jpg";
-import a2_7 from "./attempt2/temperature.jpg";
+import a2_1 from './attempt2/finished.jpg';
+import a2_2 from './attempt2/in enclosure.jpg';
+import a2_3 from './attempt2/mason jars.jpg';
+import a2_4 from './attempt2/measuring EC.jpg';
+import a2_5 from './attempt2/nutrient solution.jpg';
+import a2_6 from './attempt2/seedlings.jpg';
+import a2_7 from './attempt2/temperature.jpg';
 
-import ImageGallery from 'react-image-gallery';
+import Gallery from '@components/Gallery.astro';
 
-
-This year i've decided to start playing with Hydroponics as a hobby.  I've been interested in starting with the [Kratky Method](https://en.wikipedia.org/wiki/Kratky_method) of gardening.  The idea is to grow lettuce in mason jars and see how growing without soil does.  I've previously enjoyed growing my own alfalfa micro-greens, so this is the next obvious step.
+This year i've decided to start playing with Hydroponics as a hobby. I've been interested in starting with the [Kratky Method](https://en.wikipedia.org/wiki/Kratky_method) of gardening. The idea is to grow lettuce in mason jars and see how growing without soil does. I've previously enjoyed growing my own alfalfa micro-greens, so this is the next obvious step.
 
 {/* --- */}
 
 ## Attempt #1
-These didn't go so good.  I had planted some seedlings in Rockwool, and left them in a container out in the sun to act as a mini-greenhouse.  In the SF Bay area getting towards winter, I feel it may have been too cold, and most of my seedlings ended up dying off.  The mason jar didn't do so well once it was planted either.  ~6 weeks in I'd call my first attempt a failure.
 
+These didn't go so good. I had planted some seedlings in Rockwool, and left them in a container out in the sun to act as a mini-greenhouse. In the SF Bay area getting towards winter, I feel it may have been too cold, and most of my seedlings ended up dying off. The mason jar didn't do so well once it was planted either. ~6 weeks in I'd call my first attempt a failure.
 
-<ImageGallery items={
-    [
-        a1_3,
-        a1_1,
-        a1_2,
-        a1_4,
-    ].map((img, i) => {return {original: img, thumbnail: img}})}
-/>
+<Gallery gallery="6weeks" defaultWidth={200} style="highlight-first" images={[
+    {
+        image: a1_3,
+        altText: "Lettuce sitting in jar",
+        width: 500
+    },
+    {
+        image: a1_1,
+        altText: "Seedling in Rockwool",
+    },
+    {
+        image: a1_2,
+        altText: "Seedling Root",
+    },
+    {
+        image: a1_4,
+        altText: "Sitting Outside",
+    },
 
+]} />
 
 ## Attempt 2
-- 22nd November:  Planted seeds in Rockwool
-- ~29th November:  Started moving to a half-nutrient watering solution
-- 5th December (+13 days):  Moved to mason jars
 
-I decided to try and move indoors.  I got a [150 Watt LED bulb (5000K)](https://www.acehardware.com/departments/lighting-and-electrical/light-bulbs/led-bulbs/3933314) to provide the light, and turned my old proofing box to a simple 9 hour a day timer.  I find this is a good time of a year for indoor growing as the temperature with the grow light on is between 14c and 23c of a day.  The ideal temperature for growing is 13-18c, so I'm curious to see how they go indoors in the warmer climate.
+- 22nd November: Planted seeds in Rockwool
+- ~29th November: Started moving to a half-nutrient watering solution
+- 5th December (+13 days): Moved to mason jars
+
+I decided to try and move indoors. I got a [150 Watt LED bulb (5000K)](https://www.acehardware.com/departments/lighting-and-electrical/light-bulbs/led-bulbs/3933314) to provide the light, and turned my old proofing box to a simple 9 hour a day timer. I find this is a good time of a year for indoor growing as the temperature with the grow light on is between 14c and 23c of a day. The ideal temperature for growing is 13-18c, so I'm curious to see how they go indoors in the warmer climate.
 
 I'm using [this guide](https://growguru.co.za/blogs/hydroponic/ph-ppm-ec-water-for-hydroponic-plants) for measuring the lettuce levels:
+
 - **PH**: 5.5-6.5
 - **EC**: 0.8-1.2
 
-<ImageGallery items={
-    [
-        a2_1,
-        a2_2,
-        a2_3,
-        a2_4,
-        a2_5,
-        a2_6,
-        a2_7,
-    ].map((img, i) => {return {original: img, thumbnail: img}})}
+<Gallery
+  gallery="attempt2"
+  defaultWidth={120}
+  style="highlight-first"
+  images={[
+    {
+      image: a2_1,
+      altText: 'Planted Indoors',
+      width: 400,
+    },
+    {
+      image: a2_2,
+      altText: 'Plants indoors under grow light',
+    },
+    {
+      image: a2_3,
+      altText: 'Seedlings in jars',
+    },
+    {
+      image: a2_4,
+      altText: 'EC measuring tool',
+    },
+    {
+      image: a2_5,
+      altText: 'Water with nutrient',
+    },
+    {
+      image: a2_6,
+      altText: 'Seedlings under grow light',
+    },
+    {
+      image: a2_7,
+      altText: 'History graph of controlled temperature',
+    },
+  ]}
 />
 
 
-note:  Work in progress.  Will update once plants have had more of a chance to grow.
+note: Work in progress. Will update once plants have had more of a chance to grow.

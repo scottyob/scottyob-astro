@@ -1,16 +1,14 @@
 ---
-import { getAllPosts, type Post } from '@libs/Post';
+import { type Post } from '@libs/Post';
+import { Image } from 'astro:assets';
 
 export interface Props {
   post: Post;
-  fullPost?: boolean;
+  imageDir: 'left' | 'right';
 }
 
-const posts = getAllPosts();
-
-const { post, fullPost } = Astro.props;
+const { post, imageDir } = Astro.props;
 const link = `/post/${post.slug}`;
-const Content = fullPost ? (await post.content.render()).Content : undefined;
 
 const dateStr = new Intl.DateTimeFormat('en-US', {
   weekday: 'short',
@@ -18,38 +16,28 @@ const dateStr = new Intl.DateTimeFormat('en-US', {
   month: 'short',
   day: '2-digit',
 }).format(post.data.date);
+
+const floatStyle = `float: ${imageDir};`;
 ---
 
-{
-  !fullPost && (
-    <article>
-      <h2>
-        <a href={link}>{post.data.title}</a>
-      </h2>
-      <time datetime={post.data.date.toISOString().slice(0,10)}>
-        <strong>Published on </strong>
-        {dateStr}
-      </time>
-      <div set:html={post.excerpt} />
-      <div>
-        <a href={link} style="color: #333">
-          {'↳ '}Continue Reading...
-        </a>
-      </div>
-      {/* <post.content.Content /> */}
-    </article>
-  )
-}
-
-{
-  fullPost && Content && (
-    <article>
-      <h2>{post.data.title}</h2>
-      <time datetime={post.data.date.toISOString().slice(0,10)}>
-        <strong>Published on </strong>
-        {dateStr}
-      </time>
-      <Content />
-    </article>
-  )
-}
+<article class="page-excerpt overflow-auto">
+  <h2>
+    <a href={link}>{post.data.title}</a>
+  </h2>
+  <time datetime={post.data.date.toISOString().slice(0, 10)}>
+    <strong>Published on </strong>
+    {dateStr}
+  </time>
+  {
+    post.data.hero && (
+      <Image
+        class={'p-2 clear-both'}
+        style={floatStyle}
+        src={post.data.hero}
+        alt="Article Cover Image"
+        width={200}
+      />
+    )
+  }
+  <div set:html={post.excerpt} class="shrink" />
+</article>

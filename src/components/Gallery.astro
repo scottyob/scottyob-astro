@@ -1,5 +1,5 @@
 ---
-import { ImageMetadata } from 'astro';
+import { type ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import type { JsxElement } from 'typescript';
 import type { HTMLAttributes } from 'astro/types';
@@ -18,14 +18,16 @@ export interface Props {
   gap?: string;
   gallery?: string;
   defaultWidth?: number;
+  style?: 'default' | 'highlight-first';
 }
 
 const defaults = {
-  gap: 'gap-4',
+  gap: 'p-4',
   gallery: 'gallery',
+  style: 'default',
 };
 
-const { images, gap, gallery, defaultWidth } = Object.assign(
+const { images, gap, gallery, defaultWidth, style } = Object.assign(
   {},
   defaults,
   Astro.props
@@ -46,6 +48,7 @@ const { images, gap, gallery, defaultWidth } = Object.assign(
           <Image
             src={image}
             alt={img.altText}
+            class="p-1"
             width={img.width || defaultWidth}
           />
         );
@@ -55,11 +58,20 @@ const { images, gap, gallery, defaultWidth } = Object.assign(
           <video width={img.width || defaultWidth} {...img.videoProps}>
             <source src={href} />
           </video>
-        )
+        );
+      }
+
+      // Calculate the css based on the local style
+      let css = undefined;
+      if (style == 'highlight-first') {
+        css = 'flex: 1 1 0;';
+        if (i == 0) {
+          css = 'flex-basis: 100%;';
+        }
       }
 
       return (
-        <a data-fslightbox={gallery} href={href}>
+        <a data-fslightbox={gallery} href={href} style={css}>
           {component}
         </a>
       );
@@ -68,5 +80,6 @@ const { images, gap, gallery, defaultWidth } = Object.assign(
 </div>
 
 <script>
+  // eslint-disable-next-line
   import FsLightbox from 'fslightbox';
 </script>
