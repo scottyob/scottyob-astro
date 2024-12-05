@@ -1,0 +1,145 @@
+---
+layout: ../../layouts/Layout.astro
+title: The Bucket List
+---
+
+import Item from './Item.react';
+import { YouTube } from 'astro-embed';
+import { Image } from 'astro:assets';
+
+import lava from './img/lava.jpg';
+import glider from './img/glider.jpg';
+import picnic from './img/picnic_tree.jpg';
+
+<title>The Bucket List</title>
+
+## The Bucket List
+
+The bucket list was started back in February, 2013. The idea is to create a list of all the things that I'd like to accomplish and experience over the years.
+
+I hope this list being in a public place will want people to experience these with me. This list is ever growing, shrinking, and changing (and yes, was inspired by the movie)
+
+### Outstanding
+
+<ul>
+  <Item client:only="react" title="Scuba dive the Great Barrier Reef">
+    This one is kind of funny.  Things that are so close to your doorstep you don't tend to do.
+    I'm now half way around the world and this will likely be the "Good Barrier Reef" before I get a chance to do it.
+  </Item>
+  <Item client:only="react" title="Paramotor Horseshoe Bend">
+    I'd need to learn to Paramotor first.
+
+    Paragliding is definitely a passion these days.  This looks amazing though!
+    <YouTube class="w-[400px]" id="p9Ltv5S-qKk" />
+
+  </Item>
+  <Item client:only="react" title="Picnic under a tree watching clouds from above">
+      This one is going to seem silly.  I'd like it to be a very low cloud day, so we can watch the clouds rise, looking like big marshmallows from above while relaxing with a picnic rug, under a tree, for hours.
+
+      [Here's a picture from Dall-E](https://labs.openai.com/s/9frUj3jGbZc6FAKE86vXY17b) that does a pretty good job to show it
+      <Image src={picnic} alt="AI Generated picnic scene" />
+
+  </Item>
+  <Item client:only="react" title="Learn to Kite Surf" />
+  <Item client:only="react" title="See something majestic" />
+  <Item client:only="react" title="Ski down a double black run at Perisher (confidently)" />
+  <Item client:only="react" title="Learn Flight of the Bublebee on Piano">
+    It's hard..
+    <YouTube class="w-[400px]" id="QZWW5xG_1wM" />
+  </Item>
+  <Item client:only="react" title="Write a piece of music I'm very proud of" />
+  <Item client:only="react" title="See flowing lava">
+    Bethany and I got to see flowing lava at the Halemaʻumaʻu crater in Hawaii. This was just before the 2018 eruptions, so got lucky with our timing. Due to there not being flowing lava at the time, we only saw this from afar. I would very much like to keep this on the bucket list in hope of one day seeing it free-flowing up close.
+    <Image src={lava} alt="Flowing lava" />
+  </Item>
+  <Item client:only="react" title="Visit the Maldives (Nathan Hu recommends Tahiti instead)" />
+  <Item client:only="react" title="Maintain a bee hive" />
+  <Item client:only="react" title="Snow Mobile">
+    Maybe try <a href="https://laketahoesnowmobile.com/book-your-tour-now/">this?</a>
+  </Item>
+  <Item client:only="react" title="Bake a loaf of sourdough from Scratch (more scratch than you'd imagine)">
+    I'd like to bake a loaf of sourdough from scratch.  It contains three ingredients; Flour, Water, Salt.
+    I'd like to grow my own wheat for the flour, and collect my own salt from the ocean.
+  </Item>
+  <Item client:only="react" title="[Paragliding] Get to 15,000 ft of altitude" />
+</ul>
+
+### Completed
+
+<ul>
+  <Item client:only="react" title="White water rafing down a river">
+    Story and photo to go here
+  </Item>
+  <Item
+    client:only="react"
+    title="Sky Diving (done twice, Completed last in 2012)"
+  />
+  <Item client:only="react" title="Skydive Solo (completed late 2013)">
+    <div css="padding:56.25% 0 0 0;position:relative;">
+      <iframe
+        src="https://player.vimeo.com/video/87970062?badge=0&amp;autopause=0&amp;quality_selector=1&amp;player_id=0&amp;app_id=58479"
+        frameborder="0"
+        allow="autoplay; fullscreen; picture-in-picture"
+        css="position:absolute;top:0;left:0;width:100%;height:100%;"
+        title="Skydiving Adventure 2013"
+      ></iframe>
+    </div>
+    <script src="https://player.vimeo.com/api/player.js"></script>
+  </Item>
+  <Item
+    client:only="react"
+    title="Hang Gliding (completed 20th December, 2012)"
+  />
+  <Item client:only="react" title="CCNA Certified (Completed early 2012)" />
+  <Item client:only="react" title="Fly a plane (Completed early 2012)">
+    This one is interesting. Something I always wanted to do. I've been very
+    fortunante to have had a number of pilot friends let me take controls over
+    the years. It's amazing, but, far too expensive for me to want to pick up.
+    I'll stick with Paragliding
+  </Item>
+  <Item client:only="react" title="Fly a glider">
+    Got to complete it on November 2018. Went with Sam, Nick and Jay and did a
+    lesson day at Hollister. Loved it, but far too expensive as a hobby. I'm
+    very much into Paragliding now as a cheaper source of flying the skies
+    <Image src={glider} alt="Flying gliders" />
+  </Item>
+</ul>
+
+### Completed Paragliding Bucket List
+
+- Cove Club
+- Mission to Ed Levin
+
+### Yearly Challenges
+
+A new life goal is to set and try and achieve a little challenge every year. Past challenges have been as follows.
+
+- 2012 - NO coffee
+- 2013 - Enter a gym at least 2 days a week
+- 2014 - Learn [Pirates of the Caribbean](https://www.youtube.com/watch?v=n4JD-3-UAzM) (Jarrod Radnich Version) [Fail!]
+- 2015-2023 - Stopped.
+- 2024 - Play the piano at least 2 days a week
+
+## 2024 Goals
+
+### 2024 Paragliding Challenges
+
+- [] Mission to Ed and back
+- [] Finish a sprint league task
+- [] P4 certified
+- [] Fly Mt. Tam
+- [] Fly Windy Hill Preserve
+- [] Fly Potato Hill (if open)
+- [] Palo Buque to Iquique (if weather and travel permits)
+
+### Project Work
+
+- [] Document Website
+- [] Family Tasks Habbit and Streak tracker
+  - [] Project Website
+- [] Finish Chessboard Bugfixes
+  - [] Project Website
+- [] A ([Working](https://www.scottyob.com/post/2022-11-27-ardupilot-postmortem/)) Autonomous RC Plane
+- [] CNC Machine Proof of Concept
+- [] Design custom keyboard.
+  - [] Project Website
