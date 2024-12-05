@@ -1,0 +1,107 @@
+---
+import { getAllRecipes } from '@libs/Recipes';
+import Layout from '../../layouts/Layout.astro';
+import { Image } from 'astro:assets';
+
+export async function getRecipeCategories() {
+  const recipes = await getAllRecipes();
+  const categoties = Array.from(
+    new Set(recipes.flatMap((recipe) => recipe.data.categories))
+  ).sort();
+
+  return {
+    recipes,
+    categoties,
+  };
+}
+
+// Return all categoties, and a no category option
+export async function getStaticPaths() {
+  const { categoties } = await getRecipeCategories();
+  const ret = categoties.map((c) => ({
+    params: { category: c },
+  }));
+  ret.push({
+    params: { category: undefined },
+  });
+  return ret;
+}
+
+// Tag styles for tailwind css
+const tagStyles = {
+  selected: 'bg-green-200 font-bold',
+  unselected: 'bg-gray-100',
+  common: 'rounded-md text-sm p-1 mb-1',
+};
+
+let { recipes, categoties } = await getRecipeCategories();
+const { category } = Astro.params;
+
+if(category) {
+  recipes = recipes.filter((r) => r.data.categories?.includes(category));
+}
+
+---
+
+<Layout title="My Cookbook">
+  <!-- Categories List -->
+  <header>
+    <nav class="mb-4 flex flex-row flex-wrap justify-center space-x-3">
+      {
+        categoties.map((c) => {
+          const tagStyle = [
+            tagStyles.common,
+            c == category ? tagStyles.selected : tagStyles.unselected,
+          ].join(' ');
+          const tagUrl = c == category ? '/recipes' : `/recipes/${c}`;
+
+          return (
+            <span class={tagStyle}>
+              <a class="no-underline font-semibold" href={tagUrl}>
+                {c}
+              </a>
+            </span>
+          );
+        })
+      }
+    </nav>
+  </header>
+
+  <!-- Recipes List -->
+  <div class="flex flex-row flex-wrap justify-center">
+    {
+      recipes.map((r) => {
+        let img = <div class="grow" />;
+        if (r.data.hero) {
+          img = (
+            <Image
+              class="object-cover aspect-square rounded-md"
+              src={r.data.hero}
+              alt={r.data.title}
+              width={250}
+              height={250}
+            />
+          );
+        }
+
+        return (
+          <a
+            href={`/recipe/${r.slug}`}
+            class="text-sm md:text-base w-24 md:w-52 p-3 flex flex-col md:min-h-[274px] transition hover:translate-y-2 hover:scale-110 no-underline"
+          >
+            {img}
+            <h2 class="text-center mt-0 font-normal text-[16px]">
+              {r.data.title}
+            </h2>
+          </a>
+        );
+      })
+    }
+  </div>"
+</Layout>
+
+<style is:global>
+  html {
+    max-width: 1500px;
+  }
+</style>

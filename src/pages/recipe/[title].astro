@@ -1,0 +1,54 @@
+---
+import { getAllRecipes } from '@libs/Recipes';
+
+export async function getStaticPaths() {
+  const recipes = await getAllRecipes();
+
+  return recipes.map((r) => ({
+    params: { title: r.slug },
+  }));
+}
+
+export interface Params {
+  title: string;
+}
+
+const { title } = Astro.params;
+
+const recipe = (await getAllRecipes()).find((r) => r.slug == title);
+if (!recipe) {
+  throw new Error('Recipe excepted');
+}
+
+import Layout from '../../layouts/ArticleLayout.astro';
+import { Image } from 'astro:assets';
+const { Content } = await recipe.content.render();
+---
+
+<Layout article={recipe.content}>
+  <article>
+    <h1 class="text-center mt-24 mb-2">{recipe.data.title}</h1>
+    {
+      recipe.data.categories && (
+        <ul class="list-none m-0 flex flex-wrap justify-center text-sm italic">
+          {recipe.data.categories.map((c) => (
+            <li class="p-1"><a href={`/recipes/${c}`}>{c}</a></li>
+          ))}
+        </ul>
+      )
+    }
+    {
+      recipe.data.hero && (
+        <a href={recipe.data.hero.src} target="_blank">
+          <Image
+            src={recipe.data.hero}
+            alt={recipe.data.title}
+            width={400}
+            class="mb-2"
+          />
+        </a>
+      )
+    }
+    <Content />
+  </article>
+</Layout>

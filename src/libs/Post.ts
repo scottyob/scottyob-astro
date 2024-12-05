@@ -28,10 +28,6 @@ export async function getAllPosts(): Promise<Post[]> {
             post.data.style = "img-left";
         }
 
-        if (post.data.draft) {
-            console.log("Yeah");
-        }
-
         return {
             "content": post,
             "data": post.data,

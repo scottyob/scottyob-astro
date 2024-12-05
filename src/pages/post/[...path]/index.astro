@@ -25,7 +25,6 @@ if (post == undefined) {
 const { Content } = await post.content.render();
 const zonedDate = toZonedTime(post.data.date, 'UTC');
 const dateStr = format(zonedDate, 'EEEE do MMMM, yyyy', { timeZone: 'UTC' });
-console.log(post.data.date);
 ---
 
 <Layout article={post}>

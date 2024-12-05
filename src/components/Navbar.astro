@@ -61,7 +61,7 @@ const pathname = Astro.url.pathname;
   <li class={liClass}>
     <a href="/recipes"><Icon name="noto:hamburger" />Cooking</a>
     {
-      pathname.startsWith('/recipes') ? (
+      pathname.startsWith('/recipe') ? (
         <span class={selected} />
       ) : (
         <span class={unselected} />

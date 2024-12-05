@@ -4,9 +4,10 @@ import { Image } from 'astro:assets';
 import BaseLayout from './BaseLayout.astro';
 import type { Post } from '@libs/Post';
 import Navbar from '@components/Navbar.astro';
+import type { CollectionEntry } from 'astro:content';
 
 interface Props {
-  article: Post;
+  article: CollectionEntry<'posts'> | CollectionEntry<'recipes'>;
 }
 
 // Article's data
@@ -14,7 +15,7 @@ const article = Astro.props.article.data;
 
 // If the hero image should be down the side of the page
 const heroOnSide =
-  article.hero && !article.forceHeroOnTop && article.style == 'img-left';
+  article.hero && article.style == 'img-left';
 
 let heroStyle = undefined;
 if (heroOnSide && article.heroObjectPosition) {
