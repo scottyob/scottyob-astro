@@ -2,7 +2,7 @@ import { useStore } from '@nanostores/react';
 import { $highlightedDatesStore } from './stores';
 
 import {
-  ResponsiveCalendar,
+  ResponsiveCalendarCanvas,
   type CalendarDatum,
   type DateOrString,
 } from '@nivo/calendar';
@@ -67,7 +67,7 @@ export default function Calendar(props: Props) {
   console.log("Days to highlight: ", daysToHighlight);
   console.log("Rendering!!!", data);
   return (
-    <ResponsiveCalendar
+    <ResponsiveCalendarCanvas
       data={data}
       from={props.from}
       to={props.to}
@@ -82,16 +82,16 @@ export default function Calendar(props: Props) {
       minValue={props.minValue}
       maxValue={props.maxValue}
       legends={[
-        {
-          anchor: 'bottom-right',
-          direction: 'row',
-          translateY: 36,
-          itemCount: 4,
-          itemWidth: 42,
-          itemHeight: 36,
-          itemsSpacing: 14,
-          itemDirection: 'right-to-left',
-        },
+        // {
+        //   anchor: 'bottom-right',
+        //   direction: 'row',
+        //   translateY: 36,
+        //   itemCount: 4,
+        //   itemWidth: 42,
+        //   itemHeight: 36,
+        //   itemsSpacing: 14,
+        //   itemDirection: 'right-to-left',
+        // },
       ]}
     />
   );

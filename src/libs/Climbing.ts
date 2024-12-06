@@ -59,7 +59,7 @@ export async function GetClimbs(): Promise<Climb[]> {
     return obj;
   });
 
-  return results.filter(c => c.Rating != undefined && c.Rating != "").map((r, i) => {
+  return results.filter(c => c.Rating != undefined && c.Rating != "" && c.Date).map((r, i) => {
     const date = r['Date'] ?? '01-01-1980';
     return {
       num: i+1,
