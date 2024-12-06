@@ -1,9 +1,11 @@
 ---
 interface Props {
   title: string;
+  description? : string;
 }
 
-const { title } = Astro.props;
+let { title, description } = Astro.props;
+description = description ?? 'Recent writing from the blog of Scott';
 
 // Fonts
 // Pacifico is used for my name heading
@@ -14,7 +16,7 @@ import Navbar from '../components/Navbar.astro';
 import BaseLayout from './BaseLayout.astro';
 ---
 
-<BaseLayout title={title} description="Recent writing from the blog of Scott">
+<BaseLayout title={title} description={description}>
   <header>
     <h1 class="text-center text-3xl"><a href="/">Scott O'Brien</a></h1>
     <nav>

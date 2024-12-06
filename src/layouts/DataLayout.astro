@@ -1,0 +1,65 @@
+---
+import Layout from './BaseLayout.astro';
+import Navbar from '@components/Navbar.astro';
+import { Image } from 'astro:assets';
+
+export interface Props {
+  title: string;
+  description: string;
+  hero?: ImageMetadata;
+}
+
+const { title, description, hero } = Astro.props;
+---
+
+<Layout title={title} description={description}>
+  <div class="layout-wrapper xl:grid xl:grid-cols-12 min-h-96">
+    {
+      hero && (
+        <Image
+          class="hero-image max-h-[30vh] object-cover xl:max-h-screen h-[100%] xl:col-start-1 xl:col-end-4 xl:sticky xl:top-0"
+          src={hero}
+          alt={`Cover photo - ${description}`}
+          height={1000}
+          quality={40}
+        />
+      )
+    }
+
+    <div class="right-content m-8 mt-0 xl:col-start-4 xl:col-end-13">
+      <div class="max-w-[70ch]">
+        <Navbar />
+      </div>
+      <h1 class="mt-6">{title}</h1>
+      <main>
+        <slot />
+      </main>
+    </div>
+  </div>
+
+  <slot name="data" />
+</Layout>
+
+<style is:global>
+  html {
+    width: 100%;
+    max-width: 100%;
+  }
+</style>
+
+<style>
+  .layout-wrapper {
+    color: #444;
+    background-color: #eee;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
+
+  @media (min-width: 768px) {
+    .hero-image {
+      /* filter: opacity(60%) saturate(80%) sepia(30%); */
+    }
+  }
+</style>

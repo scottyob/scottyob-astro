@@ -1,0 +1,33 @@
+---
+export type Props = {
+    title?: string;
+}
+
+const { title } = Astro.props;
+
+const writeStyles = {
+  data: 'max-w-[40ch]',
+  withoutData: 'max-w-[70ch]',
+  both: 'mr-4', //'m-8',
+};
+const writeupStyle = [
+  Astro.slots.has('data') ? writeStyles.data : writeStyles.withoutData,
+  writeStyles.both,
+].join(' ');
+---
+
+<article class="">
+  {title && <h2>{title}</h2>}
+  <div class="content-wrapper flex flex-wrap max-w-[120ch]">
+    <div class={writeupStyle}>
+      <slot />
+    </div>
+    {
+      Astro.slots.has('data') && (
+        <div class="grow min-w-[40ch] max-w-[60ch]">
+          <slot name="data" />
+        </div>
+      )
+    }
+  </div>
+</article>
