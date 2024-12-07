@@ -1,20 +1,44 @@
 import { useStore } from '@nanostores/react';
-import { $highlightedDatesStore } from './stores';
+import { $climbingFilterStore, $highlightedDatesStore } from './stores';
 
 import {
   ResponsiveCalendarCanvas,
-  type CalendarDatum,
   type DateOrString,
 } from '@nivo/calendar';
-import { useEffect } from 'react';
+import type { Climb } from '@libs/Climbing';
+import { getFilteredData } from './ClimbingDataFilter';
 
 export type Props = {
-  data: CalendarDatum[];
+  data: Climb[];
   from: DateOrString; // ex 2023-01-01
   to: DateOrString; // ex 2023-01-01
   minValue: number;
   maxValue: number;
   storeName?: string;
+};
+
+const getClimbsByDay = (climbs: Climb[]) => {
+  // Climbs by day
+  return climbs.reduce(
+    (accumulator: { day: string; value: number }[], climb) => {
+      // Extract date from the current climb object
+      const { date } = climb;
+
+      // Check if an entry for this date already exists in the accumulator
+      const existingEntry = accumulator.find((entry) => entry.day === date);
+
+      if (existingEntry) {
+        // If an entry exists, increment its value
+        existingEntry.value += 1;
+      } else {
+        // If no entry exists, create a new one with value 1
+        accumulator.push({ day: date, value: 1 });
+      }
+
+      return accumulator;
+    },
+    []
+  );
 };
 
 /*
@@ -58,14 +82,18 @@ export default function Calendar(props: Props) {
   let colors = generateRange(props.minValue, props.maxValue);
   colors[0] = '#fc7e0f33'; // Highlight color
 
-  const existingDates = props.data.map((d) => d.day);
-  const daysToHighlight = highlightedDates.filter(d => !existingDates.find(x => x == d));
+  // Load up climb with any data filters
+  const filters = useStore($climbingFilterStore);
+  const climbsByDay = getClimbsByDay(getFilteredData(props.data, filters));
+  const existingDates = climbsByDay.map((d) => d.day);
+  const daysToHighlight = highlightedDates.filter(
+    (d) => !existingDates.find((x) => x == d)
+  );
   const data = [
-    ...daysToHighlight.map(d => ({day: d, value: 0})), ...props.data
-  ]
+    ...daysToHighlight.map((d) => ({ day: d, value: 0 })),
+    ...climbsByDay,
+  ];
 
-  console.log("Days to highlight: ", daysToHighlight);
-  console.log("Rendering!!!", data);
   return (
     <ResponsiveCalendarCanvas
       data={data}
@@ -81,18 +109,7 @@ export default function Calendar(props: Props) {
       align="top-left"
       minValue={props.minValue}
       maxValue={props.maxValue}
-      legends={[
-        // {
-        //   anchor: 'bottom-right',
-        //   direction: 'row',
-        //   translateY: 36,
-        //   itemCount: 4,
-        //   itemWidth: 42,
-        //   itemHeight: 36,
-        //   itemsSpacing: 14,
-        //   itemDirection: 'right-to-left',
-        // },
-      ]}
+      legends={[]}
     />
   );
 }

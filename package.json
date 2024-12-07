@@ -28,6 +28,7 @@
     "@nivo/calendar": "^0.88.0",
     "@nivo/core": "^0.88.0",
     "@nivo/line": "^0.88.0",
+    "@nivo/sankey": "^0.88.0",
     "@types/fslightbox-react": "^1.7.8",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",

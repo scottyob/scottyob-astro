@@ -23,7 +23,7 @@ const hasData = Astro.slots.has("data") || Astro.slots.has("data-big");
     </div>
     {
       Astro.slots.has('data') && (
-        <div class="m-2 w-[60ch] self-center">
+        <div class="m-2 w-[60ch] self-center mx-auto">
           <slot name="data" />
         </div>
       )
