@@ -3,7 +3,7 @@ import { useStore } from '@nanostores/react';
 import { atom, type WritableAtom } from 'nanostores';
 import type React from 'react';
 import { useState } from 'react';
-import { $climbingFilterStore, type Filter, type FilterStore } from './stores';
+import { $climbingFilterStore, type FilterStore } from './stores';
 
 
 // Returns filtered climbs
@@ -17,6 +17,7 @@ export function getFilteredData(data: Climb[], filters: FilterStore) {
 
 export type Props = {
   dataFilter: "Hard Boulders" | "Project Climbs?";
+  toggleGroup?: string;
   name?: string;
   children?: React.ReactNode;
 };
@@ -43,11 +44,14 @@ export default function DataFilter(props: Props) {
   };
 
   const apply = () => {
-    $climbingFilterStore.set([...store, { name: name, filter: dataFilter }]);
+    // Remove any previous filters that are part of this toggle group
+    const newStore = store.filter((filter) => filter.toggleGroup != props.toggleGroup);
+    $climbingFilterStore.set([...newStore, { name: name, filter: dataFilter }]);
   };
 
   // Clicking will toggle on and off.
-  const [ toggled, setToggled ] = useState(false);
+  let [ toggled, setToggled ] = useState(false);
+  toggled = toggled && applied;
 
   return (
     <span

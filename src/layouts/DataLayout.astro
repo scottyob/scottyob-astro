@@ -47,9 +47,7 @@ const { title, description, hero } = Astro.props;
     width: 100%;
     max-width: 100%;
   }
-</style>
-
-<style is:global>
+  
   .layout-wrapper {
     color: #444;
     background-color: #eee;
@@ -76,6 +74,9 @@ const { title, description, hero } = Astro.props;
   }
 
   .data-layout-table {
+    max-width: 100%;
+    overflow-x: auto;
+
     h2 {
       text-align: center;
     }

@@ -5,5 +5,5 @@ import { atom } from 'nanostores';
 export const $highlightedDatesStore = atom<{ [key: string]: string[] }>({});
 
 export type Filter = (arr: Array<Climb>) => Array<Climb>;
-export type FilterStore = { name: string; filter: Filter }[];
+export type FilterStore = { name: string; filter: Filter; toggleGroup?: string }[];
 export const $climbingFilterStore = atom<FilterStore>([]);
