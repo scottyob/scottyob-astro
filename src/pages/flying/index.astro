@@ -1,0 +1,42 @@
+---
+import Navbar from '@components/Navbar.astro';
+import Layout from '../../layouts/BaseLayout.astro';
+import { GetFlights } from '@libs/flying';
+import FlyCalendar from '@components/flying/FlyCalendar';
+
+const flights = await GetFlights();
+// const flights = "TODO:  Load flights";
+---
+
+<Layout title="Flying Log" description="Paragliding Flying Logbook">
+  <!-- Hero Image -->
+  <div
+    class="hero-container w-full max-h-[75vh] flex items-stretch content-center overflow-hidden"
+  >
+    <!-- <video src="/ParaglidingHeader.mp4" class="block object-cover object-center w-full" autoplay loop muted /> -->
+  </div>
+  <header class="w-full mt-0 pt-0 text-center">
+    <h1 class="text-2xl">Paragliding Logbook</h1>
+    <Navbar />
+  </header>
+
+  <main>
+    <div>
+      <h3>Debug flight log</h3>
+      <div class="m-2">
+        <FlyCalendar client:only="react" flights={flights} />
+
+        {flights}
+      </div>
+    </div>
+  </main>
+
+  <style is:global>
+    .flying-calendar {
+      background: linear-gradient(to right top, #0089f2 50%, #ddd 50%);
+      background-size: 100% calc(100% - 100vh + 129px);
+      background-repeat: no-repeat;
+      margin: 0;
+    }
+  </style>
+</Layout>
