@@ -3,16 +3,26 @@ import Navbar from '@components/Navbar.astro';
 import Layout from '../../layouts/BaseLayout.astro';
 import { GetFlights } from '@libs/flying';
 import FlyCalendar from '@components/flying/FlyCalendar';
+import prettyMs from 'pretty-ms';
 import '@fontsource/capriola/latin-400.css';
+import FlightGraphs from '@components/flying/FlightsGraphs';
 
 const flights = await GetFlights();
+const flightCount = flights.length;
+const totalSeconds = flights.reduce((a, b) => a + (b.durationSeconds ?? 0), 0);
+const totalHours = (totalSeconds / 60.0 / 60.0).toFixed(2);
+const totalTime = prettyMs(totalSeconds * 1000, {
+  verbose: true,
+  hideSeconds: true,
+});
 
-const statClass = "text-orange-600 font-bold text-xl italic font-[capriola]"
+const statClass = 'text-orange-600 font-bold text-xl italic font-[capriola]';
 ---
 
 <Layout title="Flying Log" description="Paragliding Flying Logbook">
   <div
     class="flyingpage-layout-container snap-y overflow-y-scroll h-lvh w-full"
+    style="scroll-padding-block-start: 200px;"
   >
     <!-- Hero Image -->
     <div
@@ -25,201 +35,37 @@ const statClass = "text-orange-600 font-bold text-xl italic font-[capriola]"
         loop
         muted></video>
     </div>
-    <header class="w-full m-0 pt-0 text-center snap-start">
+    <header class="w-full m-0 pt-0 text-center snap-start" style="">
       <h1 class="text-2xl">Paragliding Logbook</h1>
       <Navbar />
     </header>
 
-    <main class="w-full">
-      <div class="flex min-w-0 flex-wrap w-full">
-        <div class="m-4 self-center">
-          <div><span class={statClass}>100</span> flights</div>
-          <div><span class={statClass}>500</span> minutes</div>
-        </div>
-        <div class="grow shrink">
-          <div class="min-w-[390px]">
-            <FlyCalendar client:only="react" flights={flights} />
-          </div>
-        </div>
-        <div class="text-xs rotate-90">
-          Minutes Per Day
-        </div>
+    <main class="w-full text-center mt-16">
+      <div class="ml-16 mr-16">
+        Completed <span class={statClass}>{flightCount} Flights</span><i
+          >(so far..),</i
+        > flight time is currently up to <span class={statClass}
+          >{totalHours} Hours </span
+        ><span class="text-xs"
+          >(or <span class={statClass + ' text-xs'}>{totalTime}</span>)</span
+        >
       </div>
+      <div class="min-h-[212px]">
+      <FlyCalendar client:only="react" flights={flights} />
+      </div>
+
+      <div class="flex flex-wrap m-8 space-x-4 space-y-4">
+        <div class="m-auto">
+          <h3>Badges</h3>
+          Badges go here
+        </div>
+        <div class="grow">
+          <FlightGraphs client:only="react" flights={flights} />
+        </div>
+      
+      </div>
+
     </main>
-
-    <div class="container">
-      <h1>Lorem Ipsum Dolor Sit Amet</h1>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec
-        odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla
-        quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent
-        mauris. Fusce nec tellus sed augue semper porta. Mauris massa.
-        Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad
-        litora torquent per conubia nostra, per inceptos himenaeos.
-      </p>
-      <ul>
-        <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</li>
-        <li>Praesent libero. Sed cursus ante dapibus diam.</li>
-        <li>Sed nisi. Nulla quis sem at nibh elementum imperdiet.</li>
-        <li>Duis sagittis ipsum. Praesent mauris.</li>
-        <li>Fusce nec tellus sed augue semper porta. Mauris massa.</li>
-      </ul>
-      <blockquote>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec
-          odio. Praesent libero. Sed cursus ante dapibus diam.
-        </p>
-        <cite>Jane Doe</cite>
-      </blockquote>
-      <section>
-        <h2>Sed Consectetur Adipiscing Elit</h2>
-        <p>
-          Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-          accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae
-          ab illo inventore veritatis et quasi architecto beatae vitae dicta
-          sunt explicabo.
-        </p>
-        <ol>
-          <li>
-            Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-            accusantium doloremque laudantium, totam rem aperiam
-          </li>
-          <li>
-            Eaque ipsa quae ab illo inventore veritatis et quasi architecto
-            beatae vitae dicta sunt explicabo
-          </li>
-          <li>
-            Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut
-            fugit, sed quia consequuntur magni dolores eos qui ratione
-            voluptatem sequi nesciunt
-          </li>
-        </ol>
-      </section>
-      <aside>
-        <h3>Lorem Ipsum</h3>
-        <p>
-          Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet,
-          consectetur, adipisci velit, sed quia non numquam eius modi tempora
-          incidunt ut labore et dolore magna aliqua.
-        </p>
-      </aside>
-    </div>
-
-    <div class="container">
-      <h1>Lorem Ipsum Dolor Sit Amet</h1>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec
-        odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla
-        quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent
-        mauris. Fusce nec tellus sed augue semper porta. Mauris massa.
-        Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad
-        litora torquent per conubia nostra, per inceptos himenaeos.
-      </p>
-      <ul>
-        <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</li>
-        <li>Praesent libero. Sed cursus ante dapibus diam.</li>
-        <li>Sed nisi. Nulla quis sem at nibh elementum imperdiet.</li>
-        <li>Duis sagittis ipsum. Praesent mauris.</li>
-        <li>Fusce nec tellus sed augue semper porta. Mauris massa.</li>
-      </ul>
-      <blockquote>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec
-          odio. Praesent libero. Sed cursus ante dapibus diam.
-        </p>
-        <cite>Jane Doe</cite>
-      </blockquote>
-      <section>
-        <h2>Sed Consectetur Adipiscing Elit</h2>
-        <p>
-          Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-          accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae
-          ab illo inventore veritatis et quasi architecto beatae vitae dicta
-          sunt explicabo.
-        </p>
-        <ol>
-          <li>
-            Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-            accusantium doloremque laudantium, totam rem aperiam
-          </li>
-          <li>
-            Eaque ipsa quae ab illo inventore veritatis et quasi architecto
-            beatae vitae dicta sunt explicabo
-          </li>
-          <li>
-            Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut
-            fugit, sed quia consequuntur magni dolores eos qui ratione
-            voluptatem sequi nesciunt
-          </li>
-        </ol>
-      </section>
-      <aside>
-        <h3>Lorem Ipsum</h3>
-        <p>
-          Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet,
-          consectetur, adipisci velit, sed quia non numquam eius modi tempora
-          incidunt ut labore et dolore magna aliqua.
-        </p>
-      </aside>
-    </div>
-
-    <div class="container">
-      <h1>Lorem Ipsum Dolor Sit Amet</h1>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec
-        odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla
-        quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent
-        mauris. Fusce nec tellus sed augue semper porta. Mauris massa.
-        Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad
-        litora torquent per conubia nostra, per inceptos himenaeos.
-      </p>
-      <ul>
-        <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</li>
-        <li>Praesent libero. Sed cursus ante dapibus diam.</li>
-        <li>Sed nisi. Nulla quis sem at nibh elementum imperdiet.</li>
-        <li>Duis sagittis ipsum. Praesent mauris.</li>
-        <li>Fusce nec tellus sed augue semper porta. Mauris massa.</li>
-      </ul>
-      <blockquote>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec
-          odio. Praesent libero. Sed cursus ante dapibus diam.
-        </p>
-        <cite>Jane Doe</cite>
-      </blockquote>
-      <section>
-        <h2>Sed Consectetur Adipiscing Elit</h2>
-        <p>
-          Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-          accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae
-          ab illo inventore veritatis et quasi architecto beatae vitae dicta
-          sunt explicabo.
-        </p>
-        <ol>
-          <li>
-            Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-            accusantium doloremque laudantium, totam rem aperiam
-          </li>
-          <li>
-            Eaque ipsa quae ab illo inventore veritatis et quasi architecto
-            beatae vitae dicta sunt explicabo
-          </li>
-          <li>
-            Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut
-            fugit, sed quia consequuntur magni dolores eos qui ratione
-            voluptatem sequi nesciunt
-          </li>
-        </ol>
-      </section>
-      <aside>
-        <h3>Lorem Ipsum</h3>
-        <p>
-          Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet,
-          consectetur, adipisci velit, sed quia non numquam eius modi tempora
-          incidunt ut labore et dolore magna aliqua.
-        </p>
-      </aside>
-    </div>
   </div>
 </Layout>
 
