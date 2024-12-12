@@ -9,6 +9,7 @@ import FlightLocationGraph from './FlightLocationGraph';
 
 export type Props = {
   flights: Flight[];
+  height: number;
 };
 
 const SelectedA = tw.a`
@@ -60,7 +61,7 @@ function TabItem(props: TabItemProps) {
 
 export default function FlightGraphs(props: Props) {
   const [selected, setSelected] = useState('Flights');
-  const graphHeight = 400;
+  const graphHeight = props.height;
 
   return (
     <>

@@ -1,0 +1,15 @@
+---
+import type { Flight } from '@libs/flying';
+import FlightCard from './FlightCard.astro'
+
+type Props = {
+    flights: Flight[]
+};
+
+const { flights } = Astro.props;
+---
+
+<div>
+    {flights.map(f => <FlightCard flight={f} />).slice(110, 120)}
+</div>
+

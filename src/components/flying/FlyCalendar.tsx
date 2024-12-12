@@ -2,23 +2,14 @@ import type { Flight } from '@libs/flying';
 import { Calendar } from '@nivo/calendar';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import './flycal.css';
-import { useEffect, useRef } from 'react';
-import { compute } from 'compute-scroll-into-view'
+import { useEffect, useRef, useState } from 'react';
+import { compute } from 'compute-scroll-into-view';
+import { Modal } from 'pretty-modal';
 
 export type Props = {
   flights: Flight[];
+  verticle?: boolean;
 };
-
-function calculateDimensions(width: number) {
-  // Define the maximum possible height
-  let RATIO = 0.2; // Ratio number to keep a calendar looking good
-  RATIO = 0.14; // Ratio number to keep a calendar looking good
-
-  return {
-    height: width > 1050 ? 210 : width * 0.2,
-    width: width > 1050 ? 1050 : width,
-  };
-}
 
 const logbookStats = (flights: Flight[]) => {
   flights = flights.sort((a, b) => a.date.localeCompare(b.date));
@@ -64,73 +55,101 @@ const flightsByYear = (flights: Flight[]): Flight[][] => {
 };
 
 export default function FlyCalendar(props: Props) {
-  
   const messagesEndRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const { verticle } = props;
+
   // Effect to scroll to the bottom of chat messages
   useEffect(() => {
     if (messagesEndRef.current) {
-      console.log("It is set");
+      console.log('It is set');
 
-      const currentMonth = new Date().toLocaleString("en-US", { month: "short" }); // e.g., "Dec"
-      const elements = Array.from(messagesEndRef.current.querySelectorAll("text")); // get all descendant elements
-      const lastElementWithMonthText = elements.findLast((element) => element.textContent.trim() === currentMonth);
-      
+      const currentMonth = new Date().toLocaleString('en-US', {
+        month: 'short',
+      }); // e.g., "Dec"
+      const elements = Array.from(
+        messagesEndRef.current.querySelectorAll('text')
+      ); // get all descendant elements
+      const lastElementWithMonthText = elements.findLast(
+        (element) => element.textContent.trim() === currentMonth
+      );
+
       // lastElementWithMonthText.scrollIntoView({inline: "center"});
 
       const actions = compute(lastElementWithMonthText, {
-         scrollMode: 'if-needed',
-         inline: "center",
+        scrollMode: 'if-needed',
+        inline: 'center',
       });
 
-      actions.forEach(({el, top, left}) => {
+      actions.forEach(({ el, top, left }) => {
         // el.scrollTop = top;
         el.scrollLeft = left;
-      }) 
+      });
       // messagesEndRef.current.scrollLeft = actions.
 
       // lastElementWithMonthText.scrollIntoView({ inline: 'start', boundary: carousel });
     }
   }, [messagesEndRef]);
-  
+
   // Generate one calendar per year
-  const flights = () => {
+  const flights = (mode?: 'verticle' | 'horizontal' | 'small') => {
+    let height = 0;
+    let width = 0;
+    switch (mode) {
+      case 'verticle':
+        height = 650;
+        width = 120;
+        break;
+      case 'small':
+        height = 100;
+        width = 300;
+        break;
+      default:
+        height = 100;
+        width = 600;
+    }
+
     const yearFlights = flightsByYear(props.flights);
     return yearFlights.map((flights, i) => {
       const stats = logbookStats(flights);
-      // debugger;
-
-      // const { width, height } = calculateDimensions(maxWidth);
 
       return (
         <div
-          key={i}
-          className="snap-center text-xs shrink-0"
+          key={'mode-' + i}
+          className={'snap-center text-xs shrink-0 '}
           id={
             (i == yearFlights.length - 1 && 'current-year-calendar') ||
             undefined
           }
         >
-          <div className="italic text-left">
-            {stats.from.substring(0, 4)}
-          </div>
+          {!verticle && (
+            <div className="italic text-left">{stats.from.substring(0, 4)}</div>
+          )}
           <div className="m-auto">
             <Calendar
               data={minutesByDay(stats.flights)}
               from={stats.from}
               to={stats.to}
+              direction={ mode == "verticle" ? 'vertical' : 'horizontal'}
               emptyColor="#eeeeee"
               colors={['#61cdbb', '#97e3d5', '#e8c1a0', '#f47560']}
-              margin={{ top: 20, right: 0, bottom: 1, left: 0 }}
+              margin={{
+                top: 20,
+                right: verticle ? 10 : 0,
+                bottom: 1,
+                left: 20,
+              }}
               yearSpacing={40}
               monthBorderColor="#ffffff"
-              dayBorderWidth={2}
+              dayBorderWidth={1}
               dayBorderColor="#ffffff"
               align="top-left"
               minValue={stats.minValue}
               maxValue={stats.maxValue}
               legends={[]}
-              height={100} // width / 8}
-              width={600}
+              height={height} // width / 8}
+              width={width}
             />
           </div>
         </div>
@@ -139,11 +158,38 @@ export default function FlyCalendar(props: Props) {
   };
 
   return (
-              <div
-                className="inline-flex overflow-x-scroll max-w-full"
-                ref={messagesEndRef}
-              >
-                  {flights()}
-              </div>
+    <>
+      <Modal
+        open={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+        }}
+      >
+        <div className='md:hidden -m-4'>
+          {flights('small')}
+        </div>
+        <div className='hidden md:block'>
+          {flights('horizontal')}
+        </div>
+      </Modal>
+
+      <div
+        className={
+          'inline-flex overflow-x-scroll max-w-full snap-x snap-mandatory ' +
+          (verticle && 'mt-16 calendar-fade')
+        }
+        ref={messagesEndRef}
+      >
+        <div className="min-w-[60px]">.</div>
+        {flights(verticle ? 'verticle' : 'horizontal')}
+        <div className="min-w-[60px]">.</div>
+      </div>
+      <div
+        className="text-xs italic text-orange-600 text-right mr-8 cursor-pointer"
+        onClick={() => setIsOpen(true)}
+      >
+        (...See More)
+      </div>
+    </>
   );
 }

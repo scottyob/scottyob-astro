@@ -27,6 +27,9 @@ export default defineConfig({
   }), mdx(), react()],
   vite: {
     assetsInclude: ["**/*.bin", "**/*.zip"],
+    optimizeDeps: {
+      include: ["leaflet"]
+    }
   },
   site: 'https://www.scottyob.com/',
 });

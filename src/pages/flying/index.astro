@@ -6,6 +6,7 @@ import FlyCalendar from '@components/flying/FlyCalendar';
 import prettyMs from 'pretty-ms';
 import '@fontsource/capriola/latin-400.css';
 import FlightGraphs from '@components/flying/FlightsGraphs';
+import FlightList from '@components/flying/FlightList.astro';
 
 const flights = await GetFlights();
 const flightCount = flights.length;
@@ -22,7 +23,7 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
 
 <Layout title="Flying Log" description="Paragliding Flying Logbook">
   <div
-    class="flyingpage-layout-container snap-y overflow-y-scroll h-lvh w-full"
+    class="flyingpage-layout-container overflow-y-scroll overflow-x-hidden h-lvh w-full"
     style="scroll-padding-block-start: 200px;"
   >
     <!-- Hero Image -->
@@ -69,21 +70,20 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
     </header>
 
     <main class="w-full text-center">
-      <div class="min-h-[212px] mt-4">
+      <div class="min-h-[212px] mt-4 lg:hidden">
         <FlyCalendar client:only="react" flights={flights} />
       </div>
 
-      <div class="flex flex-wrap">
+      <div class="flex flex-wrap lg:mt-16">
         <!-- Flights left hand bar (wide displays) -->
-        <div class="max-w-[200px]">
-          <FlyCalendar client:only="react" flights={flights} />
+        <div class="w-[200px] min-h-[650px] hidden lg:block">
+          <FlyCalendar client:only="react" flights={flights} verticle />
         </div>
-        <!-- <div class="m-auto">
-          <h3>Badges</h3>
-          Badges go here
-        </div> -->
-        <div class="grow">
-          <FlightGraphs client:only="react" flights={flights} />
+        <div class="grow lg:border-l lg:pl-2">
+          <div class="min-h-[550px]">
+            <FlightGraphs client:only="react" flights={flights} height={550} />
+          </div>
+          <FlightList flights={flights} />
         </div>
       </div>
     </main>

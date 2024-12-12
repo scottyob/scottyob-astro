@@ -1,16 +1,14 @@
-.calendar-container {
+.calendar-fade {
   --mask: linear-gradient(
-      to bottom,
+      to right,
       rgba(0, 0, 0, 0) 0,
       rgba(0, 0, 0, 0.8) 20%,
       rgba(0, 0, 0, 1) 50%,
-      rgba(0, 0, 0, 0.2) 80%,
+      rgba(0, 0, 0, 0.2) 85%,
       rgba(0, 0, 0, 0) 0
     )
     100% 50% / 100% 100% repeat-x;
 
-  border: 1px #d8d8d8 dashed;
-  font: 2em/1.6em Arial;
-  /* -webkit-mask: var(--mask); */
+  -webkit-mask: var(--mask);
   mask: var(--mask);
 }
