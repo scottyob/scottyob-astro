@@ -10,13 +10,14 @@ import FlightGraphs from '@components/flying/FlightsGraphs';
 const flights = await GetFlights();
 const flightCount = flights.length;
 const totalSeconds = flights.reduce((a, b) => a + (b.durationSeconds ?? 0), 0);
-const totalHours = (totalSeconds / 60.0 / 60.0).toFixed(2);
+const totalHours = totalSeconds / 60.0 / 60.0;
 const totalTime = prettyMs(totalSeconds * 1000, {
   verbose: true,
   hideSeconds: true,
 });
 
-const statClass = 'text-orange-600 font-bold text-xl italic font-[capriola]';
+const statClassStyles = 'font-bold text-sm font-[capriola] italic';
+const metricClassStyles = 'text-orange-500 text-2xl not-italic';
 ---
 
 <Layout title="Flying Log" description="Paragliding Flying Logbook">
@@ -35,36 +36,56 @@ const statClass = 'text-orange-600 font-bold text-xl italic font-[capriola]';
         loop
         muted></video>
     </div>
-    <header class="w-full m-0 pt-0 text-center snap-start" style="">
-      <h1 class="text-2xl">Paragliding Logbook</h1>
-      <Navbar />
+
+    <header
+      class="w-full m-0 pt-0 snap-start"
+      style=""
+    >
+      <div class=" flex flex-grow flex-wrap items-center justify-center "}>
+        <!-- Flight Stats -->
+        <div class={statClassStyles + " self-end text-center order-2 md:order-1"}>
+          <div>
+            <span class={metricClassStyles}>{flightCount}</span> Flights
+          </div>
+          <div>
+            <span class={metricClassStyles + ' pl-10'}
+              >{Math.round(totalHours)}</span
+            > Hours
+          </div>
+          <div class="text-xs m-2 text-gray-300">
+            (or <span class="text-orange-300">{totalTime}</span>)
+          </div>
+        </div>
+
+        <!-- Header Middle / Nav -->
+        <div class="header-middle text-center min-w-full md:order-2 md:min-w-[490px]">
+          <h1 class="text-2xl text-center">Paragliding Logbook</h1>
+          <Navbar />
+        </div>
+        
+        <!-- Badges to go here -->
+        <div class="order-3 md:order-3" />
+      </div>
     </header>
 
-    <main class="w-full text-center mt-16">
-      <div class="ml-16 mr-16">
-        Completed <span class={statClass}>{flightCount} Flights</span><i
-          >(so far..),</i
-        > flight time is currently up to <span class={statClass}
-          >{totalHours} Hours </span
-        ><span class="text-xs"
-          >(or <span class={statClass + ' text-xs'}>{totalTime}</span>)</span
-        >
-      </div>
-      <div class="min-h-[212px]">
-      <FlyCalendar client:only="react" flights={flights} />
+    <main class="w-full text-center">
+      <div class="min-h-[212px] mt-4">
+        <FlyCalendar client:only="react" flights={flights} />
       </div>
 
-      <div class="flex flex-wrap m-8 space-x-4 space-y-4">
-        <div class="m-auto">
+      <div class="flex flex-wrap">
+        <!-- Flights left hand bar (wide displays) -->
+        <div class="max-w-[200px]">
+          <FlyCalendar client:only="react" flights={flights} />
+        </div>
+        <!-- <div class="m-auto">
           <h3>Badges</h3>
           Badges go here
-        </div>
+        </div> -->
         <div class="grow">
           <FlightGraphs client:only="react" flights={flights} />
         </div>
-      
       </div>
-
     </main>
   </div>
 </Layout>

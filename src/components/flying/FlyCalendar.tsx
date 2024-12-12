@@ -129,8 +129,8 @@ export default function FlyCalendar(props: Props) {
               minValue={stats.minValue}
               maxValue={stats.maxValue}
               legends={[]}
-              height={180} // width / 8}
-              width={1000}
+              height={100} // width / 8}
+              width={600}
             />
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function FlyCalendar(props: Props) {
 
   return (
               <div
-                className="flex flex-wrap max-w-full justify-center overflow-x-scroll"
+                className="inline-flex overflow-x-scroll max-w-full"
                 ref={messagesEndRef}
               >
                   {flights()}

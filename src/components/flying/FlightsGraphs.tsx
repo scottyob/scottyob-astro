@@ -5,6 +5,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { useState } from 'react';
 import tw from 'tailwind-styled-components';
 import FlightYearGraph from './FlightYearGraph';
+import FlightLocationGraph from './FlightLocationGraph';
 
 export type Props = {
   flights: Flight[];
@@ -59,11 +60,11 @@ function TabItem(props: TabItemProps) {
 
 export default function FlightGraphs(props: Props) {
   const [selected, setSelected] = useState('Flights');
-  const graphHeight = 600;
+  const graphHeight = 400;
 
   return (
     <>
-      <ul className="flex flex-wrap -mb-px list-none">
+      <ul className="flex flex-wrap -mb-px list-none text-xs">
         <TabItem
           selected={selected}
           setSelected={setSelected}
@@ -79,40 +80,31 @@ export default function FlightGraphs(props: Props) {
           setSelected={setSelected}
           title="By Location"
         />
-        <TabItem selected={selected} setSelected={setSelected} title="Map" />
       </ul>
 
       <div
-        className={` border-gray-200 border-solid border-2 rounded-3xl min-h-[${
+        className={` min-h-[${
           graphHeight + 5
         }px]`}
       >
-        <div style={{ display: 'flex' }}>
-          <div style={{ flex: '1 1 auto' }}>
-            <AutoSizer disableHeight>
-              {({ width }) => {
-                return (
-                  <>
-                    {selected == 'Flights' && (
-                      <FlightPlotGraph
-                        flights={props.flights}
-                        width={width}
-                        height={graphHeight}
-                      />
-                    )}
-                    {selected == 'By Year' && (
-                      <FlightYearGraph
-                        flights={props.flights}
-                        width={width}
-                        height={graphHeight}
-                      />
-                    )}
-                  </>
-                );
-              }}
-            </AutoSizer>
-          </div>
-        </div>
+          {selected == 'Flights' && (
+            <FlightPlotGraph
+              flights={props.flights}
+              height={graphHeight}
+            />
+          )}
+          {selected == 'By Year' && (
+            <FlightYearGraph
+              flights={props.flights}
+              height={graphHeight}
+            />
+          )}
+          {selected == 'By Location' && (
+            <FlightLocationGraph
+              flights={props.flights}
+              height={graphHeight}
+            />
+          )}
       </div>
     </>
   );
