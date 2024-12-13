@@ -1,0 +1,28 @@
+---
+import { GetFlights } from '@libs/flying';
+import BasePage from '../index.astro'
+
+export async function getStaticPaths() {
+  const flights = await GetFlights();
+  const sites = Array.from(
+    new Set(flights.map((f) => f.location).filter((s) => s))
+  );
+  
+  return sites.map((s) => {
+    if(!s) {
+      throw new Error("Expected a Location");
+    }
+    return {
+      params: { site : s.replaceAll(" ", "-")}
+    }
+  });
+}
+
+let { site } = Astro.params;
+site = site.replaceAll("-", " ");
+let flights = await GetFlights();
+flights = flights.filter((f) => f.location === site);
+
+---
+
+<BasePage flights={flights} headingPostfix={`> Locations > ${site}`}/>

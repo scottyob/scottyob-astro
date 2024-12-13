@@ -1,0 +1,36 @@
+---
+import { GetFlights } from '@libs/flying';
+
+
+export async function getStaticPaths() {
+  const flights = await GetFlights();
+
+  return flights.map((f) => {
+    console.log(f.id.toString());
+    return {
+      params: { id: f.id.toString()},
+    };
+  });
+}
+
+const { id } = Astro.params;
+const flights = await GetFlights();
+const flight = flights.find((f) => f.id.toString() == id);
+
+if(!flight) 
+  throw new Error("No flight with ID found");
+
+import Layout from '../../../layouts/DataLayout.astro'
+import { marked } from 'marked';
+import FlightPreview from '@components/flying/FlightPreview';
+import CesiumReplay from '@components/flying/3DReplay/CesiumReplay.astro';
+const content = marked.parse(flight?.comments ?? "");
+---
+
+<Layout title='Flight Logbook Entry' description='Flight Logbook Entry'>
+  <div class="min-h-[600px]">
+    <CesiumReplay flight={flight} />
+    <!-- <FlightPreview client:only="react" flight={flight} height={500} interactive /> -->
+  </div>
+  <div set:html={content} />
+</Layout>

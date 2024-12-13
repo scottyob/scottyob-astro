@@ -49,7 +49,7 @@ export default function FlightCard(props: Props) {
   return (
     <div className="w-full p-8 text-left border-b last:border-none border-gray-200 flex flex-wrap">
       {/* Left hand flight preview & picture */}
-      <div className="p-4 m-4 text-center ml-auto mr-auto">
+      <a target='_blank' href={`/flying/flight/${flight.id.toString()}`} className="p-4 m-4 text-center ml-auto mr-auto">
         <div
           style={{ height: HEIGHT, borderWidth: BORDER_WIDTH, }}
           className={`border-gray-400 bg-white border-8 aspect-video rotate-12`}
@@ -61,10 +61,10 @@ export default function FlightCard(props: Props) {
           <FlightPreview flight={flight} height={HEIGHT - BORDER_WIDTH * 2} />
         </div>
         <div className="text-center">#{flight.number}</div>
-      </div>
+      </a>
       {/* Stats */}
       <div className="w-0 min-w-[20ch] max-w-[40ch] grow m-4">
-        {s(flight.date)}: Flight from {s(flight.location)} took{' '}
+        {s(flight.date)}: Flight from <a href={`/flying/site/${flight.location?.replaceAll(" ", "-")}`}>{s(flight.location)}</a> took{' '}
         {s(
           prettyMilliseconds(flight.durationSeconds * 1000, {
             hideSeconds: true,
@@ -74,16 +74,14 @@ export default function FlightCard(props: Props) {
         . The altitude gain was {s(flight.altitudeGainMeters, 'meters', 'feet')}
         , reaching a max altitude of{' '}
         {s(flight.maxAltitudeMeters, 'meters', 'feet')}. The flight was on a{' '}
-        {s(flight.wing)} wing, covering a max distance of{' '}
+        <a href={`/flying/wing/${flight.wing?.replaceAll(" ", "-")}`}>{s(flight.wing)}</a> wing, covering a max distance of{' '}
         {s(flight.maxDistanceMeters, 'meters')}
       </div>
       {/* Writeup */}
       <div className="w-0 min-w-[20ch] grow m-4 flight-writeup-summary">
-        {flight.excerpt ? (
-          <div dangerouslySetInnerHTML={{ __html: flight.excerpt }} />
-        ) : (
-          ''
-        )}
+        <div className="max-w-[70ch]">
+          {flight.excerpt && (<div dangerouslySetInnerHTML={{ __html: flight.excerpt}}></div>)}
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,46 @@
+---
+import { GetFlights } from '@libs/flying';
+
+
+export async function getStaticPaths() {
+  const flights = await GetFlights();
+
+  return flights.map((f) => {
+    console.log(f.id.toString());
+    return {
+      params: { id: f.id.toString()},
+    };
+  });
+}
+
+const { id } = Astro.params;
+const flights = await GetFlights();
+const flight = flights.find((f) => f.id.toString() == id);
+
+if(!flight) 
+  throw new Error("No flight with ID found");
+
+import CesiumReplay from '@components/flying/3DReplay/CesiumReplay.astro';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Flight Replay" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="view-transition" content="same-origin" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Scott O'Brien\'s Website"
+      href={new URL('rss.xml', Astro.site)}
+    />
+    <title>Flight Replay</title>
+  </head>
+  <body>
+    <CesiumReplay flight={flight} />
+  </body>
+</html>

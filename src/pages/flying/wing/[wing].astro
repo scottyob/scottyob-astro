@@ -1,0 +1,28 @@
+---
+import { GetFlights } from '@libs/flying';
+import BasePage from '../index.astro'
+
+export async function getStaticPaths() {
+  const flights = await GetFlights();
+  const wings = Array.from(
+    new Set(flights.map((f) => f.wing).filter((w) => w))
+  );
+  
+  return wings.map((w) => {
+    if(!w) {
+      throw new Error("Expected a wing");
+    }
+    return {
+      params: { wing: w.replaceAll(" ", "-")}
+    }
+  });
+}
+
+let { wing } = Astro.params;
+wing = wing.replaceAll("-", " ");
+let flights = await GetFlights();
+flights = flights.filter((f) => f.wing === wing);
+
+---
+
+<BasePage flights={flights} headingPostfix={`> wings > ${wing}`}/>

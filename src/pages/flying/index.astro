@@ -1,7 +1,7 @@
 ---
 import Navbar from '@components/Navbar.astro';
 import Layout from '../../layouts/BaseLayout.astro';
-import { GetFlights } from '@libs/flying';
+import { GetFlights, type Flight } from '@libs/flying';
 import FlyCalendar from '@components/flying/FlyCalendar';
 import prettyMs from 'pretty-ms';
 import '@fontsource/capriola/latin-400.css';
@@ -9,7 +9,17 @@ import FlightGraphs from '@components/flying/FlightsGraphs';
 import FlightList from '@components/flying/FlightList.astro';
 import FlightCardList from '@components/flying/FlightCardList';
 
-const flights = await GetFlights();
+export type Props = {
+  flights?: Flight[]
+  headingPostfix?: string;
+}
+
+// Get filtered flights, or get directly from disk
+let { flights, headingPostfix } = Astro.props;
+if(!flights) {
+  flights = await GetFlights();
+}
+
 const flightCount = flights.length;
 const totalSeconds = flights.reduce((a, b) => a + (b.durationSeconds ?? 0), 0);
 const totalHours = totalSeconds / 60.0 / 60.0;
@@ -62,7 +72,7 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
         <div
           class="header-middle text-center min-w-full md:order-2 md:min-w-[490px]"
         >
-          <h1 class="text-2xl text-center">Paragliding Logbook</h1>
+          <h1 class="text-2xl text-center"><a href="/flying/">Paragliding Logbook </a>{headingPostfix}</h1>
           <Navbar />
         </div>
 

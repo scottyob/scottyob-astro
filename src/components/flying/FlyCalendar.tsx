@@ -175,8 +175,8 @@ export default function FlyCalendar(props: Props) {
 
       <div
         className={
-          'inline-flex overflow-x-scroll max-w-full snap-x snap-mandatory ' +
-          (verticle && 'mt-16 calendar-fade')
+          'inline-flex overflow-x-scroll max-w-full snap-x ' +
+          (verticle && 'mt-16 calendar-fade snap-mandatory')
         }
         ref={messagesEndRef}
       >

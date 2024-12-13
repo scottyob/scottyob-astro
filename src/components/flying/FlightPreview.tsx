@@ -1,18 +1,21 @@
 //import { getFlightUrl, type Flight } from '@libs/flying';
-import type { Flight } from '@libs/flying'
+import type { Flight } from '@libs/flying';
 
 type Props = {
   flight: Flight;
   height: number;
+  interactive?: boolean;
 };
 
-import '@maptiler/leaflet-maptilersdk';
+// import '@maptiler/leaflet-maptilersdk';
+// import 'leaflet/dist/leaflet.css';
 
-import 'leaflet/dist/leaflet.css';
 import { useEffect, useState } from 'react';
 import IGCParser, { type IGCFile } from 'igc-parser';
-import Map, { Source, Layer, type MapRef } from 'react-map-gl/maplibre';
+import Map, { Source, Layer, type MapRef } from 'react-map-gl';
 import axios from 'axios';
+import { Threebox } from 'threebox-plugin';
+// import { Threebox } from 'threebox-plugin/dist/threebox';  
 
 type LatLng = {
   lat: number;
@@ -33,9 +36,10 @@ const getBounds = (positions: LatLng[]) => {
 };
 
 export default function FlightPreview(props: Props) {
-  const { flight, height } = props;
+  const { flight, height, interactive } = props;
   const [map, setMap] = useState<MapRef | null>(null);
   const [igc, setIgc] = useState<IGCFile | null>(null);
+  const [positionsRef, setPositionsRef] = useState(null);
 
   // Download the flight image
   useEffect(() => {
@@ -57,7 +61,73 @@ export default function FlightPreview(props: Props) {
     const bounds = getBounds(positions);
 
     // debugger;
-    map.fitBounds([bounds.min, bounds.max], { animate: false, padding: 20 });
+
+    
+    // Play with Threebox
+    map.on('style.load', function () {
+      console.log('map loaded');
+
+      let tb: Threebox | undefined = undefined;
+
+      map.getMap().addLayer({
+        id: "custom layer",
+        type: "custom",
+        renderingMode: "3d",
+        onAdd: function (map, mbxContext) {
+          tb = new Threebox(map, mbxContext, { defaultLights: true });
+          if (!igc) return;
+
+          for (let i = 1; i < igc.fixes.length - 1; i++) {
+            // Draw a line between each point with altitude with the point before
+            const line_segment = tb.line({
+              geometry: [
+                [igc.fixes[i].longitude, igc.fixes[i].latitude, igc.fixes[i].gpsAltitude * 1.5],
+                [igc.fixes[i - 1].longitude, igc.fixes[i - 1].latitude, igc.fixes[i - 1].gpsAltitude * 1.5],
+              ],
+              color: '#dd0000', // color based on latitude of endpoint
+              width: 4,
+              opacity: 1,
+            });
+            tb.add(line_segment);
+
+          }
+
+
+          // for (line of lines) {
+					// 	var lineOptions = {
+					// 		geometry: line,
+					// 		color: (line[1][1]/180) * 0xffffff, // color based on latitude of endpoint
+					// 		width: Math.random() + 1 // random width between 1 and 2
+					// 	}
+
+					// 	let lineMesh = tb.line(lineOptions);
+
+					// 	tb.add(lineMesh)
+					// }
+
+        },
+        render: function(gl, matrix) {
+          if(tb) {
+            tb.update();
+          }
+        }
+      })
+
+      // map.getMap().addLayer({
+      //   id: 'custom_layer',
+      //   type: 'custom',
+      //   renderingMode: '3d',
+      //   onAdd: function (map, mbxContext) {
+      //     window.tb = new Threebox(
+      //       map,
+      //       mbxContext,
+      //       { defaultLights: true }
+      //     );
+      //   }
+      // });
+    });
+
+
   }, [map]);
 
   if (!igc) {
@@ -76,6 +146,7 @@ export default function FlightPreview(props: Props) {
     return {
       lat: p.latitude,
       lng: p.longitude,
+      alt: p.gpsAltitude,
     };
   });
   const lastPosition = positions.at(-1) as LatLng;
@@ -84,7 +155,7 @@ export default function FlightPreview(props: Props) {
     type: 'Feature',
     geometry: {
       type: 'LineString',
-      coordinates: positions.map((p) => [p.lng, p.lat]),
+      coordinates: positions.map((p) => [p.lng, p.lat, p.alt]),
     },
   };
 
@@ -101,23 +172,36 @@ export default function FlightPreview(props: Props) {
         // Satelite Style
         // mapStyle="https://api.maptiler.com/maps/satellite/style.json?key=KFYBsfFWC5kx8RrE5mb8"
 
-        // Map style
-        mapStyle="https://api.maptiler.com/maps/streets/style.json?key=KFYBsfFWC5kx8RrE5mb8"
-        attributionControl={false}
-        scrollZoom={false}
-        touchZoomRotate={false}
-        dragPan={false}
-        doubleClickZoom={false}
+        // Normal Map style
+        // mapStyle="https://api.maptiler.com/maps/streets/style.json?key=KFYBsfFWC5kx8RrE5mb8"
+
+        // 3D Map Style???
+        mapStyle="mapbox://styles/mapbox/satellite-v9"
+        mapboxAccessToken="pk.eyJ1Ijoic2NvdHR5b2IiLCJhIjoiY200bWN2ZTRxMGIzZzJpbjBrN2Z2MmgyaSJ9.uLLI2T-mOqaYejD2K3a_MQ"
+        terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
+        attributionControl={interactive}
+        scrollZoom={interactive}
+        touchZoomRotate={interactive}
+        dragPan={interactive}
+        doubleClickZoom={interactive}
       >
         <Source type="geojson" data={data}>
           <Layer
             type="line"
+            id='lines'
             paint={{
               'line-width': 2,
               'line-color': 'green',
             }}
           />
         </Source>
+        <Source
+          id="mapbox-dem"
+          type="raster-dem"
+          url="mapbox://mapbox.mapbox-terrain-dem-v1"
+          tileSize={512}
+          maxzoom={14}
+        />
       </Map>
     </div>
   );
