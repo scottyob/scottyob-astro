@@ -7,6 +7,7 @@ import prettyMs from 'pretty-ms';
 import '@fontsource/capriola/latin-400.css';
 import FlightGraphs from '@components/flying/FlightsGraphs';
 import FlightList from '@components/flying/FlightList.astro';
+import FlightCardList from '@components/flying/FlightCardList';
 
 const flights = await GetFlights();
 const flightCount = flights.length;
@@ -23,7 +24,7 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
 
 <Layout title="Flying Log" description="Paragliding Flying Logbook">
   <div
-    class="flyingpage-layout-container overflow-y-scroll overflow-x-hidden h-lvh w-full"
+    class="flyingpage-layout-container overflow-y-scroll overflow-x-hidden h-lvh w-full bg-[#fefefe] text-[#444]"
     style="scroll-padding-block-start: 200px;"
   >
     <!-- Hero Image -->
@@ -38,13 +39,12 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
         muted></video>
     </div>
 
-    <header
-      class="w-full m-0 pt-0 snap-start"
-      style=""
-    >
-      <div class=" flex flex-grow flex-wrap items-center justify-center "}>
+    <header class="w-full m-0 pt-0 snap-start" style="">
+      <div class="flex flex-grow flex-wrap items-center justify-center" }>
         <!-- Flight Stats -->
-        <div class={statClassStyles + " self-end text-center order-2 md:order-1"}>
+        <div
+          class={statClassStyles + ' self-end text-center order-2 md:order-1'}
+        >
           <div>
             <span class={metricClassStyles}>{flightCount}</span> Flights
           </div>
@@ -59,13 +59,15 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
         </div>
 
         <!-- Header Middle / Nav -->
-        <div class="header-middle text-center min-w-full md:order-2 md:min-w-[490px]">
+        <div
+          class="header-middle text-center min-w-full md:order-2 md:min-w-[490px]"
+        >
           <h1 class="text-2xl text-center">Paragliding Logbook</h1>
           <Navbar />
         </div>
-        
+
         <!-- Badges to go here -->
-        <div class="order-3 md:order-3" />
+        <div class="order-3 md:order-3"></div>
       </div>
     </header>
 
@@ -83,7 +85,14 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
           <div class="min-h-[550px]">
             <FlightGraphs client:only="react" flights={flights} height={550} />
           </div>
-          <FlightList flights={flights} />
+          <div class="m-4">
+            <FlightCardList
+              client:only="react"
+              flights={flights}
+              itemsPerPage={5}
+            />
+            <!-- <FlightList flights={flights} /> -->
+          </div>
         </div>
       </div>
     </main>

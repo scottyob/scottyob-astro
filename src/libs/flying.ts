@@ -1,5 +1,3 @@
-
-
 import { google } from 'googleapis';
 import IGCParser from 'igc-parser';
 import { distanceTo } from 'geolocation-utils';
@@ -11,11 +9,13 @@ import matter from 'gray-matter';
 import { DateTime } from 'luxon';
 import { basename } from 'path';
 import { GscWaypoints, type Waypoint } from './waypoints';
+import { marked } from 'marked';
 
 export interface FlightIgcFile {
   fileName: string; // eg. someIgcFile.igc
   fileNameWitoutExtension: string; // eg. someIgcFile
   filePath: string; // eg.  ./public/logbook/flights/someIgc/someIgcFile.igc
+  filePathUrl: string; // eg.  /logbook/flights/someIgc/someIgcFile.igc
 }
 
 export interface Flight {
@@ -30,6 +30,7 @@ export interface Flight {
   igcFile?: FlightIgcFile;
   comments?: string;
   commentsTruncated?: string;
+  excerpt?: string;
   commentsFileName?: string;
 
   /*
@@ -58,6 +59,17 @@ export type Launch = {
 
 // Cache of all the flights in the database
 let flights: Flight[] = [];
+
+function getExcerpt(content: string, length = 100) {
+  const EXCERPT_SEPERATOR = '{/* --- */}';
+  let excerpt = content.split(' ').slice(0, length).join(' ') + '...';
+  if (content.includes(EXCERPT_SEPERATOR)) {
+    excerpt = content.split(EXCERPT_SEPERATOR)[0].trim();
+  }
+
+  excerpt = excerpt.replace(/^(import.*)\s*$/gm, '');
+  return marked.parse(excerpt);
+}
 
 function truncateComments(comments: string, maxLength: number): string {
   if (comments.length <= maxLength) {
@@ -90,10 +102,10 @@ async function getSpreadsheetFlights(): Promise<Flight[]> {
         'base64'
       ).toString(),
       client_email: process.env.CLIENT_EMAIL,
-      client_id: process.env.CLIENT_ID
+      client_id: process.env.CLIENT_ID,
     },
     projectId: process.env.PROJECT_ID,
-    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
+    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
   });
 
   // Create a Google Sheets API instance
@@ -106,7 +118,7 @@ async function getSpreadsheetFlights(): Promise<Flight[]> {
   // Retrieve the values from the specified range
   const response = await sheets.spreadsheets.values.get({
     spreadsheetId,
-    range
+    range,
   });
 
   // Extract the values from the response
@@ -138,7 +150,7 @@ async function getSpreadsheetFlights(): Promise<Flight[]> {
       fileName: r.fileName,
       comments: r.comment,
       location: r.location,
-      locationUrl: urlFriendlyLocationName(r.location)
+      locationUrl: urlFriendlyLocationName(r.location),
     };
   });
 }
@@ -184,16 +196,9 @@ function parseFile(
       },
       0
     ),
-    altitudeGainMeters: igc.fixes
-      .map((value, index) => {
-        if (index == 0) {
-          return 0;
-        }
-        const difference =
-          value.gpsAltitude! - igc.fixes[index - 1].gpsAltitude!;
-        return difference > 0 ? difference : 0;
-      })
-      .reduce((partialSum, a) => partialSum + a, 0),
+    altitudeGainMeters:
+      Math.max(...igc.fixes.map((f) => f.gpsAltitude)) -
+      igc.fixes[0].gpsAltitude,
     launchTime: igc.fixes[0].timestamp,
     waypoints: GscWaypoints(rawFile, igc),
     ...(igc?.task?.comment && { comment: igc?.task?.comment }),
@@ -211,7 +216,7 @@ function replaceLocations(fileName: string, logbook: Flight[]): Flight[] {
   const locations: LocationsFile = JSON.parse(
     readFileSync(fileName, {
       flag: 'r',
-      encoding: 'utf8'
+      encoding: 'utf8',
     })
   );
 
@@ -242,7 +247,7 @@ async function gscFlights(): Promise<Flight[]> {
   // Load up the launches
   let buffer = readFileSync('public/logbook/launches.json', {
     flag: 'r',
-    encoding: 'utf8'
+    encoding: 'utf8',
   });
   const launches: Launch[] = JSON.parse(buffer);
 
@@ -256,7 +261,8 @@ async function gscFlights(): Promise<Flight[]> {
       const igcFileInfo: FlightIgcFile = {
         filePath: f,
         fileName: basename(f),
-        fileNameWitoutExtension: basename(f).split('.')[0]
+        fileNameWitoutExtension: basename(f).split('.')[0],
+        filePathUrl: f.replace(/\/?public/, ''),
       };
 
       let ret = parseFile(igc, launches, igcFileInfo, buffer);
@@ -268,7 +274,7 @@ async function gscFlights(): Promise<Flight[]> {
       if (fs.existsSync(commentsFile)) {
         const m = matter.read(commentsFile, {
           excerpt: true,
-          excerpt_separator: '{/* EXCERPT */}'
+          excerpt_separator: '{/* EXCERPT */}',
         });
         ret.comments = m.excerpt || m.content;
         ret.commentsFileName = commentsFile;
@@ -304,6 +310,7 @@ export async function PopulateFlights() {
     f.number = i + 1;
     if (f.comments !== undefined) {
       f.commentsTruncated = truncateComments(f.comments, 100);
+      f.excerpt = getExcerpt(f.comments);
     }
   });
   // Sort from most recent first
