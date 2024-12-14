@@ -29,8 +29,9 @@ const content = marked.parse(flight?.comments ?? "");
 
 <Layout title='Flight Logbook Entry' description='Flight Logbook Entry'>
   <div class="min-h-[600px]">
-    <CesiumReplay flight={flight} />
-    <!-- <FlightPreview client:only="react" flight={flight} height={500} interactive /> -->
+    <a href={`/flying/replay/${id}`} class="hyperlink">3D Replay</a>
+    <!-- <CesiumReplay flight={flight} /> -->
+    <FlightPreview client:only="react" flight={flight} height={500} interactive />
   </div>
   <div set:html={content} />
 </Layout>

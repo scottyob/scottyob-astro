@@ -63,8 +63,15 @@ export default function FlightPreview(props: Props) {
     // debugger;
 
     
-    // Play with Threebox
+    // Render 3D overlay if interactive
     map.on('style.load', function () {
+
+      if (!interactive) {
+        // Zoom the map to fit the entire flight
+        
+        return;
+      }
+
       console.log('map loaded');
 
       let tb: Threebox | undefined = undefined;
@@ -89,21 +96,7 @@ export default function FlightPreview(props: Props) {
               opacity: 1,
             });
             tb.add(line_segment);
-
           }
-
-
-          // for (line of lines) {
-					// 	var lineOptions = {
-					// 		geometry: line,
-					// 		color: (line[1][1]/180) * 0xffffff, // color based on latitude of endpoint
-					// 		width: Math.random() + 1 // random width between 1 and 2
-					// 	}
-
-					// 	let lineMesh = tb.line(lineOptions);
-
-					// 	tb.add(lineMesh)
-					// }
 
         },
         render: function(gl, matrix) {
@@ -113,18 +106,6 @@ export default function FlightPreview(props: Props) {
         }
       })
 
-      // map.getMap().addLayer({
-      //   id: 'custom_layer',
-      //   type: 'custom',
-      //   renderingMode: '3d',
-      //   onAdd: function (map, mbxContext) {
-      //     window.tb = new Threebox(
-      //       map,
-      //       mbxContext,
-      //       { defaultLights: true }
-      //     );
-      //   }
-      // });
     });
 
 
@@ -173,10 +154,10 @@ export default function FlightPreview(props: Props) {
         // mapStyle="https://api.maptiler.com/maps/satellite/style.json?key=KFYBsfFWC5kx8RrE5mb8"
 
         // Normal Map style
-        // mapStyle="https://api.maptiler.com/maps/streets/style.json?key=KFYBsfFWC5kx8RrE5mb8"
+        mapStyle="https://api.maptiler.com/maps/streets/style.json?key=KFYBsfFWC5kx8RrE5mb8"
 
         // 3D Map Style???
-        mapStyle="mapbox://styles/mapbox/satellite-v9"
+        // mapStyle="mapbox://styles/mapbox/satellite-v9"
         mapboxAccessToken="pk.eyJ1Ijoic2NvdHR5b2IiLCJhIjoiY200bWN2ZTRxMGIzZzJpbjBrN2Z2MmgyaSJ9.uLLI2T-mOqaYejD2K3a_MQ"
         terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
         attributionControl={interactive}

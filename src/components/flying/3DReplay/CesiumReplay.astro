@@ -11,7 +11,12 @@ import type { Flight } from '@libs/flying';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 ---
 
-<div id="cesiumContainer" igc-url={flight.igcFile?.filePathUrl}></div>
+<div
+  id="cesiumContainer"
+  igc-url={flight.igcFile?.filePathUrl}
+  class="flex h-full w-full"
+>
+</div>
 
 <script>
   import axios from 'axios';
@@ -24,14 +29,12 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmNDVkNGE4Zi1lM2I3LTRjMGQtOGQ3My00MWVhYzIyMjJiNzQiLCJpZCI6MjYyMzUyLCJpYXQiOjE3MzQxMjU5MTd9.0fxkbEutErEMWN1LJfkdgVsBGxPp8JKnK3MWtvFi_yE';
   console.log(Cesium.Ion.defaultAccessToken);
 
+  const terrainProvider = Cesium.Terrain.fromWorldTerrain();
   const viewer = new Cesium.Viewer('cesiumContainer', {
-    infoBox: false,
-    shouldAnimate: true,
-    animation: true,
-    // terrain: Cesium.Terrain.fromWorldTerrain(),
+    infoBox: true,
+    sceneModePicker: true,
+    terrain: terrainProvider,
   });
-
-  // const camera = new Cesium.Camera(viewer.scene);
 
   // Extract flightId from the div with cesiumContainer
   const flightUrl = document
@@ -40,6 +43,15 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
 
   function initializeViewer(viewer: Cesium.Viewer, igc: IGCParser.IGCFile) {
     console.log('Initializing viewer');
+
+    // Zoom to the first flight fix
+    viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(
+        igc.fixes[0].longitude,
+        igc.fixes[0].latitude,
+        10
+      ),
+    });
 
     // Setup the viewer bound to the IGC file's time
     const startTime = Cesium.JulianDate.fromIso8601(
@@ -55,70 +67,69 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
     viewer.clock.shouldAnimate = true;
     viewer.timeline.zoomTo(startTime.clone(), stopTime.clone());
 
-    // Add the flight track
-    const flightTrack = new Cesium.SampledPositionProperty();
-    igc.fixes.forEach((fix) => {
-      flightTrack.addSample(
-        Cesium.JulianDate.fromDate(new Date(fix.timestamp)),
-        Cesium.Cartesian3.fromDegrees(
-          fix.longitude,
-          fix.latitude,
-          fix.gpsAltitude ?? 0
-        )
-      );
-    });
+    const trackFlight = (offsetBy: number) => {
+      // Add the flight track
+      const flightTrack = new Cesium.SampledPositionProperty();
+      igc.fixes.forEach((fix) => {
+        flightTrack.addSample(
+          Cesium.JulianDate.fromDate(new Date(fix.timestamp)),
+          Cesium.Cartesian3.fromDegrees(
+            fix.longitude,
+            fix.latitude,
+            (fix.gpsAltitude ?? 0) + offsetBy
+          )
+        );
+      });
 
-    // Interpolate the flight track to make it smoother
-    // The interpolation algorithm is LinearApproximation which will
-    // create a line that is closest to the sampled positions
-    // The interpolation degree is 1, which will create a simple line
-    // between each pair of points
-    // I wonder if this is needed???
-    flightTrack.setInterpolationOptions({
-      interpolationDegree: 1,
-      interpolationAlgorithm: Cesium.LinearApproximation,
-    });
+      const flightEntity = viewer.entities.add({
+        name: 'Flight Track',
+        position: flightTrack,
+        path: {
+          resolution: 1,
+          width: 1,
+          trailTime: 120,
+          leadTime: 0,
+          material: new Cesium.PolylineGlowMaterialProperty({
+            glowPower: 0.25,
+            color: Cesium.Color.WHEAT,
+          }),
+        },
+      });
 
-    const flightEntity = viewer.entities.add({
-      name: 'Flight Track',
-      position: flightTrack,
-      path: {
-        resolution: 1,
-        width: 1,
-        trailTime: 120,
-        leadTime: 0,
-        material: new Cesium.PolylineGlowMaterialProperty({
-          glowPower: 0.25,
-          color: Cesium.Color.WHEAT,
-        }),
-      },
-      availability: new Cesium.TimeIntervalCollection([
-        new Cesium.TimeInterval({
-          start: startTime.clone(),
-          stop: stopTime.clone(),
-        }),
-      ]),
-      // viewFrom: new Cesium.Cartesian3(100, 0, 90),
-    });
+      // STEP 4 CODE (green circle entity)
+      // Create an entity to both visualize the entire radar sample series with a line and add a point that moves along the samples.
+      const airplaneEntity = viewer.entities.add({
+        availability: new Cesium.TimeIntervalCollection([
+          new Cesium.TimeInterval({
+            start: startTime.clone(),
+            stop: stopTime.clone(),
+          }),
+        ]),
+        position: flightTrack,
+        point: { pixelSize: 1, color: Cesium.Color.GREEN },
+        // path: new Cesium.PathGraphics({ width: 3 }),
+      });
+      // Make the camera track this moving entity.
+      viewer.trackedEntity = airplaneEntity;
 
-    const track = () => {
-      viewer.trackedEntity = flightEntity;
-      // viewer.flyTo(viewer.entities.values[0]);
-      // viewer.camera.lookAt(flightEntity.position, new Cesium.HeadingPitchRoll());
-      // console.log("Zoom zoom", flightEntity);
-      setTimeout(track, 1000);
+      console.log('Viewer initialized Finished', viewer.trackedEntity);
     };
 
-    setTimeout(track, 5000); // Start the track();
+    terrainProvider.readyEvent.addEventListener(() => {
+      Cesium.sampleTerrainMostDetailed(terrainProvider.provider, [
+        Cesium.Cartographic.fromDegrees(
+          igc.fixes[0].longitude,
+          igc.fixes[0].latitude
+        ),
+      ]).then((result) => {
+        console.log('Sampled Terrain Height', result[0].height);
+        console.log('Tracklog Height: ', igc.fixes[0].gpsAltitude);
 
-    // setTimeout(() => {
-    //   console.log('Flight entity position', flightEntity.position);
-    //   viewer.selectedEntity = flightEntity;
-    //   viewer.trackedEntity = flightEntity;
-    // }, 1000);
-    // viewer.camera.lookAt(flightEntity.position, new Cesium.HeadingPitchRoll());
-
-    console.log('Viewer initialized Finished', viewer.trackedEntity);
+        const offset = result[0].height - igc.fixes[0].gpsAltitude;
+        console.log('Offset: ', offset);
+        trackFlight(offset);
+      });
+    });
   }
 
   // Initialize from flight
@@ -132,3 +143,12 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
     });
   }
 </script>
+
+<style is:global>
+  html,
+  body,
+  #cesiumContainer {
+    height: 100%;
+    width: 100%;
+  }
+</style>
