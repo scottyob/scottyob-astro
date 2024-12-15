@@ -1,0 +1,47 @@
+---
+import prettyMilliseconds from "pretty-ms";
+import Layout from "../../layouts/Layout.astro";    
+import { GetFlights } from '@libs/flying';
+
+const flights = await GetFlights();
+
+---
+
+<Layout title="Flying Log" description="Paragliding Flying Logbook">
+    <div class="data-layout-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Location</th>
+                    <th>Date</th>
+                    <th>Duration</th>
+                    <th>Max Altitude(m)</th>
+                    <th>Altitude Gain(m)</th>
+                    <th>Wing</th>
+                    <th>Comments</th>
+                </tr>
+            </thead>
+            <tbody>
+                {flights.map(flight => (
+                    <tr>
+                        <td><a target="_blank" href={`/flying/flight/${flight.id}`}>{flight.number}</a></td>
+                        <td><a target="_blank" href={`/flying/site/${flight.location?.replaceAll(" ", "-")}`}>{flight.location}</a></td>
+                        <td>{flight.date}</td>
+                        <td>{prettyMilliseconds((flight.durationSeconds ?? 0) * 1000, { verbose: false, hideSeconds: true })}</td>
+                        <td>{flight.maxAltitudeMeters}</td>
+                        <td>{flight.altitudeGainMeters}</td>
+                        <td><a target="_blank" href={`/flying/wing/${flight.wing?.replaceAll(" ", "-")}`}>{flight.wing}</a></td>
+                        <td>{flight.commentsTruncated}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    </div>
+</Layout>
+
+<style is:global>
+    html {
+        max-width: 100%
+    }
+</style>

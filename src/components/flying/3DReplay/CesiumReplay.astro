@@ -20,38 +20,83 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
 
 <script>
   import axios from 'axios';
+
   import * as Cesium from 'cesium';
   import IGCParser from 'igc-parser';
+  import { addIgcToViewer } from './pilotTrack';
+  import { addWaypointsToViewer } from './waypoints';
+  import { GscWaypoints } from '@libs/waypoints';
+
+  const POINTS_OF_INTEREST_URL = '/logbook/poi.kml';
+
+  function AddPointsOfInterest(viewer: Cesium.Viewer) {
+    // Initialize points of interest
+    Cesium.KmlDataSource.load(POINTS_OF_INTEREST_URL, {
+      camera: viewer.scene.camera,
+      canvas: viewer.scene.canvas,
+    }).then((dataSource) => {
+      dataSource.entities.values.forEach((entity) => {
+        if (entity.label) {
+          // entity.label.fillColor = Cesium.Color.BLACK;
+          // entity.label.outlineColor = Cesium.Color.WHITE;
+          // entity.label.outlineWidth = 3;
+        }
+        if (entity.billboard) {
+          entity.billboard.heightReference =
+            Cesium.HeightReference.CLAMP_TO_GROUND;
+          entity.billboard.verticalOrigin = Cesium.VerticalOrigin.BOTTOM;
+        }
+        viewer.entities.add(entity);
+      });
+      // viewer.flyTo(dataSource.entities.values);
+    });
+  }
 
   // @ts-ignore
-  window.CESIUM_BASE_URL = '/cesiumStatic';
   Cesium.Ion.defaultAccessToken =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmNDVkNGE4Zi1lM2I3LTRjMGQtOGQ3My00MWVhYzIyMjJiNzQiLCJpZCI6MjYyMzUyLCJpYXQiOjE3MzQxMjU5MTd9.0fxkbEutErEMWN1LJfkdgVsBGxPp8JKnK3MWtvFi_yE';
   console.log(Cesium.Ion.defaultAccessToken);
-
-  const terrainProvider = Cesium.Terrain.fromWorldTerrain();
-  const viewer = new Cesium.Viewer('cesiumContainer', {
-    infoBox: true,
-    sceneModePicker: true,
-    terrain: terrainProvider,
-  });
 
   // Extract flightId from the div with cesiumContainer
   const flightUrl = document
     .getElementById('cesiumContainer')
     ?.getAttribute('igc-url');
 
-  function initializeViewer(viewer: Cesium.Viewer, igc: IGCParser.IGCFile) {
+  function initializeViewer(igcFileContents: string) {
     console.log('Initializing viewer');
+    const igc = IGCParser.parse(igcFileContents);
+
+    // Load the terrain, on load adding waypoints and igc viewers
+    const terrain = Cesium.Terrain.fromWorldTerrain();
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+      infoBox: true,
+      sceneModePicker: true,
+      terrain: terrain,
+      geocoder: Cesium.IonGeocodeProviderType.BING,
+    });
+    terrain.readyEvent.addEventListener(() => {
+      console.log('Terrain loaded');
+      console.log('Adding IGC to viewer');
+      addIgcToViewer(viewer, igc, terrain.provider).finally();
+
+      // Add the waypoints
+      console.log('Adding waypoints to viewer');
+      const waypoints = GscWaypoints(igcFileContents, igc);
+      addWaypointsToViewer(viewer, waypoints);
+
+      // Add points of interest
+      console.log('Adding points of interest to viewer');
+      AddPointsOfInterest(viewer);
+    });
 
     // Zoom to the first flight fix
-    viewer.camera.setView({
-      destination: Cesium.Cartesian3.fromDegrees(
-        igc.fixes[0].longitude,
-        igc.fixes[0].latitude,
-        10
-      ),
-    });
+    // viewer.camera.setView({
+    //   destination: Cesium.Cartesian3.fromDegrees(
+    //     igc.fixes[0].longitude,
+    //     igc.fixes[0].latitude,
+    //     10
+    //   ),
+    // });
 
     // Setup the viewer bound to the IGC file's time
     const startTime = Cesium.JulianDate.fromIso8601(
@@ -67,69 +112,7 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
     viewer.clock.shouldAnimate = true;
     viewer.timeline.zoomTo(startTime.clone(), stopTime.clone());
 
-    const trackFlight = (offsetBy: number) => {
-      // Add the flight track
-      const flightTrack = new Cesium.SampledPositionProperty();
-      igc.fixes.forEach((fix) => {
-        flightTrack.addSample(
-          Cesium.JulianDate.fromDate(new Date(fix.timestamp)),
-          Cesium.Cartesian3.fromDegrees(
-            fix.longitude,
-            fix.latitude,
-            (fix.gpsAltitude ?? 0) + offsetBy
-          )
-        );
-      });
-
-      const flightEntity = viewer.entities.add({
-        name: 'Flight Track',
-        position: flightTrack,
-        path: {
-          resolution: 1,
-          width: 1,
-          trailTime: 120,
-          leadTime: 0,
-          material: new Cesium.PolylineGlowMaterialProperty({
-            glowPower: 0.25,
-            color: Cesium.Color.WHEAT,
-          }),
-        },
-      });
-
-      // STEP 4 CODE (green circle entity)
-      // Create an entity to both visualize the entire radar sample series with a line and add a point that moves along the samples.
-      const airplaneEntity = viewer.entities.add({
-        availability: new Cesium.TimeIntervalCollection([
-          new Cesium.TimeInterval({
-            start: startTime.clone(),
-            stop: stopTime.clone(),
-          }),
-        ]),
-        position: flightTrack,
-        point: { pixelSize: 1, color: Cesium.Color.GREEN },
-        // path: new Cesium.PathGraphics({ width: 3 }),
-      });
-      // Make the camera track this moving entity.
-      viewer.trackedEntity = airplaneEntity;
-
-      console.log('Viewer initialized Finished', viewer.trackedEntity);
-    };
-
-    terrainProvider.readyEvent.addEventListener(() => {
-      Cesium.sampleTerrainMostDetailed(terrainProvider.provider, [
-        Cesium.Cartographic.fromDegrees(
-          igc.fixes[0].longitude,
-          igc.fixes[0].latitude
-        ),
-      ]).then((result) => {
-        console.log('Sampled Terrain Height', result[0].height);
-        console.log('Tracklog Height: ', igc.fixes[0].gpsAltitude);
-
-        const offset = result[0].height - igc.fixes[0].gpsAltitude;
-        console.log('Offset: ', offset);
-        trackFlight(offset);
-      });
-    });
+    console.log('Viewer initialized');
   }
 
   // Initialize from flight
@@ -138,8 +121,8 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
 
     axios.get(flightUrl).then((response) => {
       // Parse the IGC file
-      const igc = IGCParser.parse(response.data);
-      initializeViewer(viewer, igc);
+      console.log('IGC File Downloaded');
+      initializeViewer(response.data);
     });
   }
 </script>

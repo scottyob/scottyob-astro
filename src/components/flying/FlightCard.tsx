@@ -13,6 +13,7 @@ const StatStyles = 'text-orange-500';
 type Format = 'meters' | 'feet';
 
 import './FlightCard.css';
+import FlightTaskProgress from './FlightTaskProgress';
 
 const s = (stat: string | number, format: Format, to?: Format) => {
   let ret = stat;
@@ -75,7 +76,7 @@ export default function FlightCard(props: Props) {
         , reaching a max altitude of{' '}
         {s(flight.maxAltitudeMeters, 'meters', 'feet')}. The flight was on a{' '}
         <a href={`/flying/wing/${flight.wing?.replaceAll(" ", "-")}`}>{s(flight.wing)}</a> wing, covering a max distance of{' '}
-        {s(flight.maxDistanceMeters, 'meters')}
+        {s(flight.maxDistanceMeters, 'meters')}. <FlightTaskProgress flight={flight} />
       </div>
       {/* Writeup */}
       <div className="w-0 min-w-[20ch] grow m-4 flight-writeup-summary">

@@ -8,7 +8,7 @@ export type Props = {
   flights: Flight[];
   itemsPerPage?: number;
 };
-
+import { FcDataSheet } from "react-icons/fc";
 
 
 type SortOrder =
@@ -26,7 +26,7 @@ function SorterSelect(props: {
 
   return (
     <div className="p-2">
-      <label className="block mb-2">
+      <label className="block mb-2 inline mr-2">
         Sort by:
       </label>
       <select
@@ -44,7 +44,7 @@ function SorterSelect(props: {
   );
 }
 
-export function FlightCardList(props: Props) {
+export default function FlightCardList(props: Props) {
   const { flights } = props;
   const itemsPerPage = props.itemsPerPage ?? 10;
 
@@ -127,6 +127,11 @@ export function FlightCardList(props: Props) {
   // Sorters
   const sorters = (
     <div className="flex flex-wrap grow min-h-9 space-x-4 items-center justify-center">
+      <div>
+        <a href="/flying/sheet">
+        <FcDataSheet className='inline' />
+        Sheet View
+      </a></div>
       <SorterSelect sorter={sorter} setSorter={setAndClear} />
       <div className="text-right mr-16">{pager}</div>
     </div>
@@ -144,5 +149,3 @@ export function FlightCardList(props: Props) {
     </div>
   );
 }
-
-export default FlightCardList;

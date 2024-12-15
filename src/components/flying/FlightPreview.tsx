@@ -7,15 +7,12 @@ type Props = {
   interactive?: boolean;
 };
 
-// import '@maptiler/leaflet-maptilersdk';
-// import 'leaflet/dist/leaflet.css';
-
 import { useEffect, useState } from 'react';
 import IGCParser, { type IGCFile } from 'igc-parser';
-import Map, { Source, Layer, type MapRef } from 'react-map-gl';
+import Map, { Source, Layer, type MapRef, NavigationControl } from 'react-map-gl';
 import axios from 'axios';
+// @ts-ignore
 import { Threebox } from 'threebox-plugin';
-// import { Threebox } from 'threebox-plugin/dist/threebox';  
 
 type LatLng = {
   lat: number;
@@ -62,13 +59,12 @@ export default function FlightPreview(props: Props) {
 
     // debugger;
 
-    
+
     // Render 3D overlay if interactive
     map.on('style.load', function () {
 
+      map.fitBounds([bounds.min, bounds.max], { animate: false, padding: 40 });
       if (!interactive) {
-        // Zoom the map to fit the entire flight
-        
         return;
       }
 
@@ -99,16 +95,13 @@ export default function FlightPreview(props: Props) {
           }
 
         },
-        render: function(gl, matrix) {
-          if(tb) {
+        render: function (gl, matrix) {
+          if (tb) {
             tb.update();
           }
         }
       })
-
     });
-
-
   }, [map]);
 
   if (!igc) {
@@ -172,7 +165,7 @@ export default function FlightPreview(props: Props) {
             id='lines'
             paint={{
               'line-width': 2,
-              'line-color': 'green',
+              'line-color': interactive ? 'lightgray' : 'green',
             }}
           />
         </Source>
@@ -183,6 +176,21 @@ export default function FlightPreview(props: Props) {
           tileSize={512}
           maxzoom={14}
         />
+        <Source
+          type='raster-dem'
+          url='https://demotiles.maplibre.org/terrain-tiles/tiles.json'
+          tileSize={256}
+        >
+          <Layer
+            type='hillshade'
+            id='hillshade'
+            layout={{
+              visibility: 'visible',
+            }}
+            paint={{"hillshade-shadow-color": "#473B24"}}
+          />
+          </Source>
+        {interactive && <NavigationControl position='top-right' showZoom={true} showCompass />}
       </Map>
     </div>
   );

@@ -10,7 +10,7 @@ import react from '@astrojs/react';
 
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 const cesiumSource = "node_modules/cesium/Build/Cesium";
-const cesiumBaseUrl = "cesiumStatic";
+const cesiumBaseUrl = "/cesiumStatic";
 
 // https://astro.build/config
 export default defineConfig({
@@ -24,9 +24,9 @@ export default defineConfig({
         'person-climbing',
         'parachute',
       ],
-      "fa-brands": [
-          '*',
-      ]
+      "flat-color-icons": [
+        "data-sheet",
+      ],
     },
   }), mdx(), react()],
   vite: {

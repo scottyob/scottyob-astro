@@ -73,49 +73,4 @@ const { title, description, hero } = Astro.props;
     @apply text-orange-600 font-bold;
   }
 
-  .data-layout-table {
-    max-width: 100%;
-    overflow-x: auto;
-
-    h2 {
-      text-align: center;
-    }
-
-    table {
-      width: 80%;
-      border-collapse: collapse;
-      margin: 20px auto;
-      font-size: 1em;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      min-width: 400px;
-      border-radius: 8px 8px 0 0;
-      overflow: hidden;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-    }
-
-    thead tr {
-      background-color: #009879;
-      color: #ffffff;
-      text-align: left;
-      font-weight: bold;
-    }
-
-    th,
-    td {
-      padding: 12px 15px;
-    }
-
-    tbody tr {
-      border-bottom: 1px solid #dddddd;
-    }
-
-    tbody tr:nth-of-type(even) {
-      background-color: #f3f3f3;
-    }
-
-    tbody tr:last-of-type {
-      border-bottom: 2px solid #009879;
-    }
-
-  }
 </style>
