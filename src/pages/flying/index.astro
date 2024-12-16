@@ -6,7 +6,6 @@ import FlyCalendar from '@components/flying/FlyCalendar';
 import prettyMs from 'pretty-ms';
 import '@fontsource/capriola/latin-400.css';
 import FlightGraphs from '@components/flying/FlightsGraphs';
-import FlightList from '@components/flying/FlightList.astro';
 import FlightCardList from '@components/flying/FlightCardList';
 
 export type Props = {
@@ -100,8 +99,9 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
               client:only="react"
               flights={flights}
               itemsPerPage={5}
-            />
-            <!-- <FlightList flights={flights} /> -->
+            >
+              <div slot="fallback" class="animate-pulse min-h-30 m-auto">Loading...</div>  
+            </FlightCardList>
           </div>
         </div>
       </div>

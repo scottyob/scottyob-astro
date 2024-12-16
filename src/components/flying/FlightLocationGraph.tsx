@@ -1,19 +1,11 @@
 import type { Flight } from '@libs/flying';
 import { Bar } from '@nivo/bar';
-import { colorSchemes } from '@nivo/colors';
-import { useState } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 export type Props = {
   height: number;
   flights: Flight[];
 };
-
-interface Group {
-  year: string;
-  location: string;
-  duration: number;
-}
 
 const getData = (flights: Flight[]) => {
   const result: { [location: string]: { [year: string]: number } } =

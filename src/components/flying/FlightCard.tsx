@@ -15,11 +15,16 @@ type Format = 'meters' | 'feet';
 import './FlightCard.css';
 import FlightTaskProgress from './FlightTaskProgress';
 
-const s = (stat: string | number, format: Format, to?: Format) => {
+const s = (stat: string | number | undefined, format?: Format, to?: Format) => {
   let ret = stat;
   const formatter = new Intl.NumberFormat('un-US', {
     maximumFractionDigits: 2,
   });
+
+  // Handle undefined use cases.
+  if (stat == undefined) {
+    return <span className={StatStyles}>N/A</span>;
+  }
 
   switch (format) {
     case 'meters':
@@ -57,7 +62,7 @@ export default function FlightCard(props: Props) {
         / >
         <div
           style={{ height: HEIGHT, borderWidth: BORDER_WIDTH, top: -1 * HEIGHT, marginBottom: -1 * HEIGHT }}
-          className={`border-gray-400 bg-white border-8 aspect-video -rotate-2 relative`}
+          className={`border-gray-400 bg-white border-8 aspect-video relative`}
         >
           <FlightPreview flight={flight} height={HEIGHT - BORDER_WIDTH * 2} />
         </div>
@@ -67,7 +72,7 @@ export default function FlightCard(props: Props) {
       <div className="w-0 min-w-[20ch] max-w-[40ch] grow m-4">
         {s(flight.date)}: Flight from <a href={`/flying/site/${flight.location?.replaceAll(" ", "-")}`}>{s(flight.location)}</a> took{' '}
         {s(
-          prettyMilliseconds(flight.durationSeconds * 1000, {
+          flight.durationSeconds && prettyMilliseconds(flight.durationSeconds * 1000, {
             hideSeconds: true,
             verbose: true,
           })

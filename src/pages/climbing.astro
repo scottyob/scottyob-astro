@@ -4,7 +4,7 @@ import Article from '../components/data/Article.astro';
 
 import hero from '../../public/climbing.jpg';
 import Calendar from '@components/climbing/Calendar.tsx';
-import { GetClimbs, type Climb } from '@libs/Climbing';
+import { GetClimbs } from '@libs/Climbing';
 import '@fontsource/capriola/latin-400.css';
 
 const climbs = await GetClimbs();

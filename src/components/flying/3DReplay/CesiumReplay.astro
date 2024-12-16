@@ -37,18 +37,17 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
     }).then((dataSource) => {
       dataSource.entities.values.forEach((entity) => {
         if (entity.label) {
-          // entity.label.fillColor = Cesium.Color.BLACK;
-          // entity.label.outlineColor = Cesium.Color.WHITE;
-          // entity.label.outlineWidth = 3;
-        }
+          (entity.label as any).fillColor = Cesium.Color.BLACK;
+          (entity.label as any).outlineColor = Cesium.Color.WHITE;
+          (entity.label as any).outlineWidth = 3;
+        } 
         if (entity.billboard) {
-          entity.billboard.heightReference =
+          (entity.billboard as any).heightReference =
             Cesium.HeightReference.CLAMP_TO_GROUND;
-          entity.billboard.verticalOrigin = Cesium.VerticalOrigin.BOTTOM;
+          (entity.billboard as any).verticalOrigin = Cesium.VerticalOrigin.BOTTOM;
         }
         viewer.entities.add(entity);
       });
-      // viewer.flyTo(dataSource.entities.values);
     });
   }
 
@@ -74,10 +73,11 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
       terrain: terrain,
       geocoder: Cesium.IonGeocodeProviderType.BING,
     });
-    terrain.readyEvent.addEventListener(() => {
+    terrain.readyEvent.addEventListener(async () => {
       console.log('Terrain loaded');
       console.log('Adding IGC to viewer');
-      addIgcToViewer(viewer, igc, terrain.provider).finally();
+      const { pilotEntity } = await addIgcToViewer(viewer, igc, terrain.provider).finally();
+      viewer.trackedEntity = pilotEntity;
 
       // Add the waypoints
       console.log('Adding waypoints to viewer');
@@ -88,15 +88,6 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
       console.log('Adding points of interest to viewer');
       AddPointsOfInterest(viewer);
     });
-
-    // Zoom to the first flight fix
-    // viewer.camera.setView({
-    //   destination: Cesium.Cartesian3.fromDegrees(
-    //     igc.fixes[0].longitude,
-    //     igc.fixes[0].latitude,
-    //     10
-    //   ),
-    // });
 
     // Setup the viewer bound to the IGC file's time
     const startTime = Cesium.JulianDate.fromIso8601(

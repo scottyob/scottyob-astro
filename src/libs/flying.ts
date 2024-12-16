@@ -60,7 +60,7 @@ export type Launch = {
 // Cache of all the flights in the database
 let flights: Flight[] = [];
 
-function getExcerpt(content: string, length = 100) {
+async function getExcerpt(content: string, length = 100) {
   const EXCERPT_SEPERATOR = '{/* --- */}';
   let excerpt = content.split(' ').slice(0, length).join(' ') + '...';
   if (content.includes(EXCERPT_SEPERATOR)) {
@@ -68,7 +68,7 @@ function getExcerpt(content: string, length = 100) {
   }
 
   excerpt = excerpt.replace(/^(import.*)\s*$/gm, '');
-  return marked.parse(excerpt);
+  return await marked.parse(excerpt);
 }
 
 function truncateComments(comments: string, maxLength: number): string {
@@ -197,8 +197,8 @@ function parseFile(
       0
     ),
     altitudeGainMeters:
-      Math.max(...igc.fixes.map((f) => f.gpsAltitude)) -
-      igc.fixes[0].gpsAltitude,
+      Math.max(...igc.fixes.map((f) => f.gpsAltitude || 0)) -
+      (igc.fixes[0].gpsAltitude || 0),
     launchTime: igc.fixes[0].timestamp,
     waypoints: GscWaypoints(rawFile, igc),
     ...(igc?.task?.comment && { comment: igc?.task?.comment }),
@@ -306,11 +306,11 @@ export async function PopulateFlights() {
   const igcFlights = await gscFlights();
   flights = [...spreadsheetFlights, ...igcFlights];
   flights.sort((a, b) => a.launchTime - b.launchTime);
-  flights.forEach((f, i) => {
+  flights.forEach(async (f, i) => {
     f.number = i + 1;
     if (f.comments !== undefined) {
       f.commentsTruncated = truncateComments(f.comments, 100);
-      f.excerpt = getExcerpt(f.comments);
+      f.excerpt = await getExcerpt(f.comments);
     }
   });
   // Sort from most recent first

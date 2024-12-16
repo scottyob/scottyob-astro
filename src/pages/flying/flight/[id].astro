@@ -23,7 +23,6 @@ if(!flight)
 import Layout from '../../../layouts/DataLayout.astro'
 import { marked } from 'marked';
 import FlightPreview from '@components/flying/FlightPreview';
-import CesiumReplay from '@components/flying/3DReplay/CesiumReplay.astro';
 const content = marked.parse(flight?.comments ?? "");
 ---
 

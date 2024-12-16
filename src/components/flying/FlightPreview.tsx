@@ -36,7 +36,6 @@ export default function FlightPreview(props: Props) {
   const { flight, height, interactive } = props;
   const [map, setMap] = useState<MapRef | null>(null);
   const [igc, setIgc] = useState<IGCFile | null>(null);
-  const [positionsRef, setPositionsRef] = useState(null);
 
   // Download the flight image
   useEffect(() => {
@@ -56,9 +55,6 @@ export default function FlightPreview(props: Props) {
     }
 
     const bounds = getBounds(positions);
-
-    // debugger;
-
 
     // Render 3D overlay if interactive
     map.on('style.load', function () {
@@ -83,9 +79,11 @@ export default function FlightPreview(props: Props) {
           for (let i = 1; i < igc.fixes.length - 1; i++) {
             // Draw a line between each point with altitude with the point before
             const line_segment = tb.line({
+              // NOTE:  Taken from example online, where the height is broken and setting a 1.5 multiplier seems to do the trick
+              // Intent is to use the 3D Cesium replayer for playback which seems to have a more accurate representation
               geometry: [
-                [igc.fixes[i].longitude, igc.fixes[i].latitude, igc.fixes[i].gpsAltitude * 1.5],
-                [igc.fixes[i - 1].longitude, igc.fixes[i - 1].latitude, igc.fixes[i - 1].gpsAltitude * 1.5],
+                [igc.fixes[i].longitude, igc.fixes[i].latitude, (igc.fixes[i].gpsAltitude || 0) * 1.5],
+                [igc.fixes[i - 1].longitude, igc.fixes[i - 1].latitude, (igc.fixes[i - 1].gpsAltitude || 0) * 1.5],
               ],
               color: '#dd0000', // color based on latitude of endpoint
               width: 4,
@@ -95,7 +93,7 @@ export default function FlightPreview(props: Props) {
           }
 
         },
-        render: function (gl, matrix) {
+        render: function (_gl, _matrix) {
           if (tb) {
             tb.update();
           }
@@ -123,7 +121,6 @@ export default function FlightPreview(props: Props) {
       alt: p.gpsAltitude,
     };
   });
-  const lastPosition = positions.at(-1) as LatLng;
 
   const data = {
     type: 'Feature',
@@ -134,7 +131,7 @@ export default function FlightPreview(props: Props) {
   };
 
   return (
-    <div className="pb-4">
+    <div className="">
       <Map
         ref={(ref) => setMap(ref)}
         initialViewState={{
@@ -158,6 +155,7 @@ export default function FlightPreview(props: Props) {
         touchZoomRotate={interactive}
         dragPan={interactive}
         doubleClickZoom={interactive}
+        interactive={interactive}
       >
         <Source type="geojson" data={data}>
           <Layer

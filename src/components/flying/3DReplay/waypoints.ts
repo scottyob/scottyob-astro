@@ -1,6 +1,4 @@
 import * as Cesium from 'cesium';
-import IGCParser from 'igc-parser';
-import type { Flight } from '@libs/flying';
 import type { Waypoint } from '@libs/waypoints';
 import { TimeInterval, TimeIntervalCollectionProperty } from 'cesium';
 
@@ -86,29 +84,6 @@ export async function addWaypointsToViewer(viewer: Cesium.Viewer, waypoints: Way
                 outlineColor: Cesium.Color.BLUE,
             }
         });
-        viewer.trackedEntity = waypointEntity;
-
-        // return (
-        //   <Cesium.Entity
-        //     key={'w-' + i.toString()}
-        //     position
-        //     name={w.description || w.name}
-        //     position={Cesium.Cartesian3.fromDegrees(
-        //       w.longitude,
-        //       w.latitude,
-        //       w.altitude
-        //     )}
-        //   >
-        //     <Cesium.CylinderGraphics
-        //       topRadius={w.radiusMeters}
-        //       bottomRadius={w.radiusMeters}
-        //       length={3000}
-        //       material={new Cesium.ColorMaterialProperty(colorAtTime)}
-        //       outline={true}
-        //       outlineColor={Cesium.Color.BLUE}
-        //     />
-        //   </Entity>
-        // );
 
     });
 }

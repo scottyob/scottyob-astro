@@ -1,6 +1,5 @@
 import type { Climb } from '@libs/Climbing';
 import { useStore } from '@nanostores/react';
-import { atom, type WritableAtom } from 'nanostores';
 import type React from 'react';
 import { useState } from 'react';
 import { $climbingFilterStore, type FilterStore } from './stores';

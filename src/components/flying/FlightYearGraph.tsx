@@ -9,12 +9,6 @@ export type Props = {
   flights: Flight[];
 };
 
-interface Group {
-  year: string;
-  location: string;
-  duration: number;
-}
-
 const getData = (flights: Flight[]) => {
   const result: { [year: string]: { [location: string]: number } } =
     flights.reduce(

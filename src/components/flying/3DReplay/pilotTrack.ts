@@ -15,7 +15,6 @@ export async function addIgcToViewer(viewer: Cesium.Viewer, igc: IGCParser.IGCFi
         new Date(igc.fixes[igc.fixes.length - 1].timestamp).toISOString()
     );
 
-
     // Add the flight track
     const aboveGroundTrack = new Cesium.SampledPositionProperty();
     const onGroundTrack = new Cesium.SampledPositionProperty();
@@ -51,7 +50,8 @@ export async function addIgcToViewer(viewer: Cesium.Viewer, igc: IGCParser.IGCFi
             material: Cesium.Color.DARKGREEN.withAlpha(0.8),
         },
     });
-    const aboveGroundPathViewer = viewer.entities.add({
+    // Above Ground Path Viewer.  Viewer that shows the path of the flight above the ground.
+    viewer.entities.add({
         name: igc.pilot ?? 'Anonymous',
         position: aboveGroundTrack,
 
@@ -87,38 +87,17 @@ export async function addIgcToViewer(viewer: Cesium.Viewer, igc: IGCParser.IGCFi
         return [currentPosition, Cesium.Cartesian3.ZERO];
     }, false);
 
-    const lineSegment = viewer.entities.add({
+    // The line that goes from the pilotEntity to the ground (center of the earth)
+    viewer.entities.add({
         parent: pilotEntity,
-        // position: Cesium.Cartesian3.fromDegrees(-70.0, 45.0, 100000.0),        
         polyline: {
             positions: lineToGroundPositions,
             width: 1,
             arcType: Cesium.ArcType.NONE,
             material: Cesium.Color.GREEN.withAlpha(0.5),
         },
-        // position: Cesium.Cartesian3.ONE,
     });
     
-
-
-    // const lineSegment = viewer.entities.add({
-    //     parent: pilotEntity,
-    //     // position: Cesium.Cartesian3.fromDegrees(-70.0, 45.0, 100000.0),
-    //     position: aboveGroundTrack,
-        
-    //     cylinder: {
-    //         length: 100.0,
-    //         topRadius: 0.10,
-    //         bottomRadius: 0.10,
-
-    //         material: Cesium.Color.GREEN,
-
-    //     },
-    //     // position: Cesium.Cartesian3.ONE,
-    // });
-
-    // viewer.trackedEntity = pilotEntity;
-
     return {
         pilotEntity,
         onGroundPathViewer,

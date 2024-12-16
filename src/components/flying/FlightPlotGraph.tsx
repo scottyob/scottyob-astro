@@ -80,7 +80,7 @@ export default function FlightPlotGraph(props: Props) {
         nodeSize={{
           key: 'data.y',
           values: [0, 180],
-          sizes: [1, 16],
+          sizes: [4, 20],
         }}
         margin={{
           bottom: 50,

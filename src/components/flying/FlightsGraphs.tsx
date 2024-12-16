@@ -1,6 +1,5 @@
 import type { Flight } from '@libs/flying';
 import FlightPlotGraph from './FlightPlotGraph';
-import AutoSizer from 'react-virtualized-auto-sizer';
 import type { Dispatch, SetStateAction } from 'react';
 import { useState } from 'react';
 import tw from 'tailwind-styled-components';

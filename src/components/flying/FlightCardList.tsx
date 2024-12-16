@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+import { useState } from 'react';
 // Assuming FlightCard is your flight card component
 import FlightCard from './FlightCard';
 import type { Flight } from '@libs/flying';
@@ -26,7 +25,7 @@ function SorterSelect(props: {
 
   return (
     <div className="p-2">
-      <label className="block mb-2 inline mr-2">
+      <label className="mb-2 inline mr-2">
         Sort by:
       </label>
       <select

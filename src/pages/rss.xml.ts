@@ -3,18 +3,17 @@ import { type APIContext } from 'astro';
 import { getAllPosts } from '@libs/Post';
 
 export async function GET(context: APIContext) {
-  console.log(context);
-
   const blog = await getAllPosts();
+  const siteUrl = context.site?.toString() || 'about:none';
 
   return rss({
     // `<title>` field in output xml
-    title: 'Scott O\'Brien’s Website',
+    title: "Scott O'Brien's Website",
     // `<description>` field in output xml
     description: 'Creative outlet for Scott.',
     // Pull in your project "site" from the endpoint context
     // https://docs.astro.build/en/reference/api-reference/#site
-    site: context.site?.toString() || 'about:none',
+    site: siteUrl,
     // Array of `<item>`s in output xml
     // See "Generating items" section for examples using content collections and glob imports
     // add `xmlns:media="http://search.yahoo.com/mrss/"`
@@ -22,22 +21,24 @@ export async function GET(context: APIContext) {
       media: "http://search.yahoo.com/mrss/",
     },
     items: blog.map((post) => {
+      const heroFormat = post.data.hero?.format;
+      const mediaContent = heroFormat === "jpg" || heroFormat === "png" 
+        ? `<media:content
+            type="image/${heroFormat === "jpg" ? "jpeg" : "png"}"
+            width="${post.data.hero?.width}"
+            height="${post.data.hero?.height}"
+            medium="image"
+            url="${siteUrl}${post.data.hero?.src}" />`
+        : undefined;
 
       return {
         title: post.data.title,
         pubDate: post.data.date,
-        description: post.data?.description,
+        description: post.data.description || '',
         link: `/post/${post.slug}`,
-        content: post.excerpt,
-        customData: (post.data.hero?.format == "jpg" ? `<media:content
-          type="image/${post.data.hero.format == "jpg" ? "jpeg" : "png"}"
-          width="${post.data.hero.width}"
-          height="${post.data.hero.height}"
-          medium="image"
-          url="${context.site + post.data.hero.src}" />
-      ` : undefined),
+        content: String(post.excerpt || ''),
+        customData: mediaContent,
       };
-
     }),
     // (optional) inject custom xml
     customData: `<language>en-us</language>`,

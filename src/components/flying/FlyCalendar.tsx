@@ -1,6 +1,5 @@
 import type { Flight } from '@libs/flying';
 import { Calendar } from '@nivo/calendar';
-import AutoSizer from 'react-virtualized-auto-sizer';
 import './flycal.css';
 import { useEffect, useRef, useState } from 'react';
 import { compute } from 'compute-scroll-into-view';
@@ -55,41 +54,39 @@ const flightsByYear = (flights: Flight[]): Flight[][] => {
 };
 
 export default function FlyCalendar(props: Props) {
-  const messagesEndRef = useRef(null);
+  // This should refer to a div element
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
   const { verticle } = props;
 
   // Effect to scroll to the bottom of chat messages
   useEffect(() => {
-    if (messagesEndRef.current) {
-      console.log('It is set');
+    if (!messagesEndRef.current) { return; }
 
-      const currentMonth = new Date().toLocaleString('en-US', {
-        month: 'short',
-      }); // e.g., "Dec"
-      const elements = Array.from(
-        messagesEndRef.current.querySelectorAll('text')
-      ); // get all descendant elements
-      const lastElementWithMonthText = elements.findLast(
-        (element) => element.textContent.trim() === currentMonth
-      );
+    const currentMonth = new Date().toLocaleString('en-US', {
+      month: 'short',
+    }); // e.g., "Dec"
+    const elements = Array.from(
+      messagesEndRef.current.querySelectorAll('text')
+    ); // get all descendant elements
+    const lastElementWithMonthText = elements.findLast(
+      (element) => element.textContent?.trim() === currentMonth
+    );
 
-      // lastElementWithMonthText.scrollIntoView({inline: "center"});
-
-      const actions = compute(lastElementWithMonthText, {
-        scrollMode: 'if-needed',
-        inline: 'center',
-      });
-
-      actions.forEach(({ el, top, left }) => {
-        // el.scrollTop = top;
-        el.scrollLeft = left;
-      });
-      // messagesEndRef.current.scrollLeft = actions.
-
-      // lastElementWithMonthText.scrollIntoView({ inline: 'start', boundary: carousel });
+    if (!lastElementWithMonthText) {
+      throw new Error('Could not find last element with month text');
     }
+
+    const actions = compute(lastElementWithMonthText, {
+      scrollMode: 'if-needed',
+      inline: 'center',
+    });
+
+    actions.forEach(({ el, left }) => {
+      el.scrollLeft = left;
+    });
+
   }, [messagesEndRef]);
 
   // Generate one calendar per year
@@ -131,7 +128,7 @@ export default function FlyCalendar(props: Props) {
               data={minutesByDay(stats.flights)}
               from={stats.from}
               to={stats.to}
-              direction={ mode == "verticle" ? 'vertical' : 'horizontal'}
+              direction={mode == "verticle" ? 'vertical' : 'horizontal'}
               emptyColor="#eeeeee"
               colors={['#61cdbb', '#97e3d5', '#e8c1a0', '#f47560']}
               margin={{
