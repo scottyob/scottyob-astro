@@ -16,6 +16,13 @@ export interface Climb {
 
 export async function GetClimbs(): Promise<Climb[]> {
   // Authenticate using your credentials
+  console.log("Google Climbing Environment vars set?", {
+    "private_key": typeof import.meta.env.PRIVATE_KEY,
+    "project_id": typeof import.meta.env.PROJECT_ID,
+    "client_email": import.meta.env.CLIENT_EMAIL,
+    "client_id": import.meta.env.CLIENT_ID,
+  });
+  
   const auth = new google.auth.GoogleAuth({
     credentials: {
       private_key: Buffer.from(
