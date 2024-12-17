@@ -10,7 +10,7 @@ import react from '@astrojs/react';
 
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 const cesiumSource = "node_modules/cesium/Build/Cesium";
-const cesiumBaseUrl = "/cesiumStatic";
+const cesiumBaseUrl = "cesiumStatic";
 
 // https://astro.build/config
 export default defineConfig({
@@ -32,7 +32,7 @@ export default defineConfig({
   vite: {
     assetsInclude: ["**/*.bin", "**/*.zip"],
     define: {
-      CESIUM_BASE_URL: JSON.stringify(cesiumBaseUrl),
+      CESIUM_BASE_URL: JSON.stringify('/' + cesiumBaseUrl),
     },
 
     plugins: [

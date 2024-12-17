@@ -1,7 +1,7 @@
 import { useState } from 'react';
 // Assuming FlightCard is your flight card component
 import FlightCard from './FlightCard';
-import type { Flight } from '@libs/flying';
+import type { Flight } from '@libs/flyingTypes';
 
 export type Props = {
   flights: Flight[];

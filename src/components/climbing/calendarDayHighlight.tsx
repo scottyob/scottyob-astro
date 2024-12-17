@@ -68,7 +68,6 @@ export default function HightlightDaysOnCalendar(props: {
         let map = $highlightedDatesStore.get();
         const newMap = {...map, [instanceKey]: getDaysOfWeekBetween(from, to, dayMap[day])}
         $highlightedDatesStore.set(newMap);
-        console.log("Map set", newMap);
   }
 
   const clearMap = () => {
@@ -76,8 +75,6 @@ export default function HightlightDaysOnCalendar(props: {
         let map = $highlightedDatesStore.get();
         const newMap = {...map, [instanceKey]: []}
         $highlightedDatesStore.set(newMap);
-        console.log("Map cleared", newMap);
-
   }
 
   return (

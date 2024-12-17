@@ -69,7 +69,8 @@ export async function addWaypointsToViewer(viewer: Cesium.Viewer, waypoints: Way
 
 
         const position = waypointGroundPositions[i];
-        const waypointEntity = viewer.entities.add({
+        // Add the Waypoint entity
+        viewer.entities.add({
             position: Cesium.Cartesian3.fromDegrees(
                 w.longitude,
                 w.latitude,

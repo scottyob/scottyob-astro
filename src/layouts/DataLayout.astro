@@ -31,6 +31,7 @@ const { title, description, hero } = Astro.props;
         <Navbar />
       </div>
       <h1 class="mt-6">{title}</h1>
+      <slot name="under-heading" />
       <main class="max-w-[120ch]">
         <slot />
       </main>
@@ -47,7 +48,7 @@ const { title, description, hero } = Astro.props;
     width: 100%;
     max-width: 100%;
   }
-  
+
   .layout-wrapper {
     color: #444;
     background-color: #eee;
@@ -72,5 +73,4 @@ const { title, description, hero } = Astro.props;
     /* border: solid green; */
     @apply text-orange-600 font-bold;
   }
-
 </style>

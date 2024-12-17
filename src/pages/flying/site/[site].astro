@@ -8,18 +8,21 @@ export async function getStaticPaths() {
     new Set(flights.map((f) => f.location).filter((s) => s))
   );
   
-  return sites.map((s) => {
+  console.log(sites);
+  return sites.filter((s) => s).map((s) => {
     if(!s) {
       throw new Error("Expected a Location");
     }
+    const site = s.replaceAll(" ", "-").replaceAll("/", "-");
+    console.log("Replaced site is: ", site);
     return {
-      params: { site : s.replaceAll(" ", "-")}
+      params: { site : site }
     }
   });
 }
 
 let { site } = Astro.params;
-site = site.replaceAll("-", " ");
+site = site.replaceAll("-", " ").replaceAll("-", "/");
 let flights = await GetFlights();
 flights = flights.filter((f) => f.location === site);
 

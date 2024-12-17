@@ -6,7 +6,6 @@ export async function getStaticPaths() {
   const flights = await GetFlights();
 
   return flights.map((f) => {
-    console.log(f.id.toString());
     return {
       params: { id: f.id.toString()},
     };
@@ -23,14 +22,96 @@ if(!flight)
 import Layout from '../../../layouts/DataLayout.astro'
 import { marked } from 'marked';
 import FlightPreview from '@components/flying/FlightPreview';
+import { Duration } from 'luxon';
+import FlightLinks from '@components/flying/FlightLinks';
+
 const content = marked.parse(flight?.comments ?? "");
+
+const headerStyles = " text-gray-700 font-bold pr-4";
+import "mapbox-gl/dist/mapbox-gl.css";
 ---
 
 <Layout title='Flight Logbook Entry' description='Flight Logbook Entry'>
   <div class="min-h-[600px]">
-    <a href={`/flying/replay/${id}`} class="hyperlink">3D Replay</a>
+    <div class="">
+      <FlightLinks flight={flight} />
     <!-- <CesiumReplay flight={flight} /> -->
+    </div>
     <FlightPreview client:only="react" flight={flight} height={500} interactive />
   </div>
-  <div set:html={content} />
+  <div class="m-4" set:html={content} />
+  <div slot="under-heading" class=" text-center">
+    <section>
+      <div class="text-sm max-w-[120ch] ml-10 bg-gray-100 text-gray-500 rounded-xl border border-gray-50 shadow-md flex flex-wrap flex-row p-4 m-4">
+        <table class="mr-4">
+          <thead>
+            <tr>
+              <th />
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class={headerStyles}>Flight Number:</td>
+              <td>{flight.number}</td>
+            </tr>
+            <tr>
+              <td class={headerStyles}>Location:</td>
+              <td>{flight.location}</td>
+            </tr>
+            <tr>
+              <td class={headerStyles}>Date:</td>
+              <td>{flight.date}</td>
+            </tr>
+            <tr>
+              <td class={headerStyles}>Duration:</td>
+              <td>{Duration.fromMillis((flight.durationSeconds || 0) * 1000).toFormat('hh:mm:ss')}</td>
+            </tr>
+            <tr>
+              <td class={headerStyles}>Launch:</td>
+              <td>{flight.launchName}</td>
+            </tr>
+          </tbody>
+        </table>
+        <table>
+          <thead>
+            <tr>
+              <th />
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class={headerStyles}>Max Distance:</td>
+              <td>{Math.round(flight.maxDistanceMeters ?? 0)}m</td>
+            </tr>
+            <tr>
+              <td class={headerStyles}>Max Altitude:</td>
+              <td>{flight.maxAltitudeMeters}m</td>
+            </tr>
+            <tr>
+              <td class={headerStyles}>Track Length:</td>
+              <td>{Math.round(flight.trackLengthMeters ?? 0)}m</td>
+            </tr>
+            <tr>
+              <td class={headerStyles}>Wing:</td>
+              <td>{flight.wing}</td>
+            </tr>
+            <tr>
+              {
+                flight.igcFile && (
+                  <>
+                    <td class={headerStyles}>IGC File:</td>
+                    <td>
+                      <a href={`/${flight.igcFile.filePath.replace(/^public\//, '')}`}>Download</a>
+                    </td>
+                  </>
+                )
+              }
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
 </Layout>

@@ -1,4 +1,4 @@
-import type { Flight } from '@libs/flying';
+import type { Flight } from '@libs/flyingTypes';
 
 export default function FlightCommentsField(props: { flight: Flight }) {
   const { flight } = props;

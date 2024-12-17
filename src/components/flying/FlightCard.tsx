@@ -1,4 +1,4 @@
-import type { Flight } from '@libs/flying';
+import type { Flight } from '@libs/flyingTypes';
 import FlightPreview from './FlightPreview';
 import prettyMilliseconds from 'pretty-ms';
 

@@ -1,4 +1,4 @@
-import type { Flight } from '@libs/flying';
+import type { Flight } from '@libs/flyingTypes';
 import { Bar } from '@nivo/bar';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
@@ -34,9 +34,7 @@ const getData = (flights: Flight[]) => {
   );
 
   const formattedResult = Object.entries(result).map(([location, years]) => {
-    console.log('Initial result was: ', result);
     const ret = { location, ...years };
-    // debugger;
     return ret;
   }).sort((a, b) => locationTotals[b.location] - locationTotals[a.location]);
 
@@ -47,7 +45,6 @@ export default function FlightYearGraph(props: Props) {
   const { flights } = props;
 
   const data = getData(flights);
-  console.log('By year data', data);
 
   const graph = (width: number) => (
     <Bar

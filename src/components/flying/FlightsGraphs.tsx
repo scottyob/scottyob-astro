@@ -1,4 +1,4 @@
-import type { Flight } from '@libs/flying';
+import type { Flight } from '@libs/flyingTypes';
 import FlightPlotGraph from './FlightPlotGraph';
 import type { Dispatch, SetStateAction } from 'react';
 import { useState } from 'react';

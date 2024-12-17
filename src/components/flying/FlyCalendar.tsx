@@ -1,4 +1,4 @@
-import type { Flight } from '@libs/flying';
+import type { Flight } from '@libs/flyingTypes';
 import { Calendar } from '@nivo/calendar';
 import './flycal.css';
 import { useEffect, useRef, useState } from 'react';

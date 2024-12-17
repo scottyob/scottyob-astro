@@ -1,61 +1,16 @@
 import { google } from 'googleapis';
 import IGCParser from 'igc-parser';
 import { distanceTo } from 'geolocation-utils';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { glob } from 'glob';
 import path from 'path';
-import fs from 'fs';
+import fs from 'node:fs';
 import matter from 'gray-matter';
 import { DateTime } from 'luxon';
 import { basename } from 'path';
-import { GscWaypoints, type Waypoint } from './waypoints';
+import { GscWaypoints } from './waypoints';
 import { marked } from 'marked';
-
-export interface FlightIgcFile {
-  fileName: string; // eg. someIgcFile.igc
-  fileNameWitoutExtension: string; // eg. someIgcFile
-  filePath: string; // eg.  ./public/logbook/flights/someIgc/someIgcFile.igc
-  filePathUrl: string; // eg.  /logbook/flights/someIgc/someIgcFile.igc
-}
-
-export interface Flight {
-  id: string; // Going to be either the IGC file name, or the google record number
-  date: string;
-  wing?: string;
-  durationSeconds?: number;
-  maxDistanceMeters?: number;
-  maxAltitudeMeters?: number;
-  trackLengthMeters?: number;
-  altitudeGainMeters?: number;
-  igcFile?: FlightIgcFile;
-  comments?: string;
-  commentsTruncated?: string;
-  excerpt?: string;
-  commentsFileName?: string;
-
-  /*
-   * Additional information from launch database (or manual CSV)
-   */
-  location?: string;
-  locationUrl?: string;
-  launchName?: string;
-
-  /*
-   * Computed fields
-   */
-  number?: number; // The record number of the flight
-  launchTime: number; //Timestamp, useful for orderinhg and sequence
-  waypoints?: Waypoint[];
-}
-
-/*
- * A launch or landing site, as pulled from the paragliding launches database
- */
-export type Launch = {
-  name: string;
-  longitude: number;
-  latitude: number;
-};
+import type { Flight, FlightIgcFile, Launch } from './flyingTypes';
 
 // Cache of all the flights in the database
 let flights: Flight[] = [];
@@ -98,13 +53,13 @@ async function getSpreadsheetFlights(): Promise<Flight[]> {
   const auth = new google.auth.GoogleAuth({
     credentials: {
       private_key: Buffer.from(
-        process.env.PRIVATE_KEY as string,
+        import.meta.env.PRIVATE_KEY as string,
         'base64'
       ).toString(),
-      client_email: process.env.CLIENT_EMAIL,
-      client_id: process.env.CLIENT_ID,
+      client_email: import.meta.env.CLIENT_EMAIL,
+      client_id: import.meta.env.CLIENT_ID,
     },
-    projectId: process.env.PROJECT_ID,
+    projectId: import.meta.env.PROJECT_ID,
     scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
   });
 
@@ -278,6 +233,9 @@ async function gscFlights(): Promise<Flight[]> {
         });
         ret.comments = m.excerpt || m.content;
         ret.commentsFileName = commentsFile;
+        if (m.data.sportsTrackLiveUrl) {
+          ret.sportsTrackLiveUrl = m.data.sportsTrackLiveUrl;
+        }
       }
 
       return ret;

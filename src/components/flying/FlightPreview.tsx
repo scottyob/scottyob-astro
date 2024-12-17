@@ -1,5 +1,4 @@
-//import { getFlightUrl, type Flight } from '@libs/flying';
-import type { Flight } from '@libs/flying';
+import type { Flight } from '@libs/flyingTypes';
 
 type Props = {
   flight: Flight;
@@ -63,8 +62,6 @@ export default function FlightPreview(props: Props) {
       if (!interactive) {
         return;
       }
-
-      console.log('map loaded');
 
       let tb: Threebox | undefined = undefined;
 

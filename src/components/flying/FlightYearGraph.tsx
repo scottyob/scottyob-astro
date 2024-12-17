@@ -1,4 +1,4 @@
-import type { Flight } from '@libs/flying';
+import type { Flight } from '@libs/flyingTypes';
 import { Bar } from '@nivo/bar';
 import { colorSchemes } from '@nivo/colors';
 import { useState } from 'react';

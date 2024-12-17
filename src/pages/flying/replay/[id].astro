@@ -6,7 +6,6 @@ export async function getStaticPaths() {
   const flights = await GetFlights();
 
   return flights.map((f) => {
-    console.log(f.id.toString());
     return {
       params: { id: f.id.toString()},
     };

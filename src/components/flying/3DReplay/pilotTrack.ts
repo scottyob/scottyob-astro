@@ -32,7 +32,8 @@ export async function addIgcToViewer(viewer: Cesium.Viewer, igc: IGCParser.IGCFi
             Cesium.Cartesian3.fromDegrees(
                 fix.longitude,
                 fix.latitude,
-                (fix.gpsAltitude ?? 0),
+                //(fix.gpsAltitude ?? 0),
+                fix.pressureAltitude ?? 0,
             )
         );
     });

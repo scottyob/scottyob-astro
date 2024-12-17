@@ -1,4 +1,4 @@
-import type { Flight } from '@libs/flying';
+import type { Flight } from '@libs/flyingTypes';
 import { ScatterPlot } from '@nivo/scatterplot';
 import prettyMilliseconds from 'pretty-ms';
 import { useState } from 'react';

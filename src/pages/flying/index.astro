@@ -1,7 +1,8 @@
 ---
 import Navbar from '@components/Navbar.astro';
 import Layout from '../../layouts/BaseLayout.astro';
-import { GetFlights, type Flight } from '@libs/flying';
+import { GetFlights } from '@libs/flying';
+import type { Flight } from '@libs/flyingTypes';
 import FlyCalendar from '@components/flying/FlyCalendar';
 import prettyMs from 'pretty-ms';
 import '@fontsource/capriola/latin-400.css';
