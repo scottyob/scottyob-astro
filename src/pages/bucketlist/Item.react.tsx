@@ -4,13 +4,18 @@ import { Modal } from 'pretty-modal'
 import { useState } from 'react';
 
 export type Props = {
-  title: string;
+  title: string | JSX.Element;
   children?: string | JSX.Element | JSX.Element[];
+  href?: string;
 }
 
 export default function Item(props: Props) {
-  const { title } = props;
+  let { title } = props;
   const [isOpen, setIsOpen] = useState(false);
+
+  if (props.href) {
+    title = <a href={props.href}>{title}</a>
+  }
 
   if (props.children === undefined) {
     return <li>{title}</li>
