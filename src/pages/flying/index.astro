@@ -10,13 +10,13 @@ import FlightGraphs from '@components/flying/FlightsGraphs';
 import FlightCardList from '@components/flying/FlightCardList';
 
 export type Props = {
-  flights?: Flight[]
+  flights?: Flight[];
   headingPostfix?: string;
-}
+};
 
 // Get filtered flights, or get directly from disk
 let { flights, headingPostfix } = Astro.props;
-if(!flights) {
+if (!flights) {
   flights = await GetFlights();
 }
 
@@ -47,8 +47,7 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
         autoplay
         loop
         muted
-        playsinline
-        ></video>
+        playsinline></video>
     </div>
 
     <header class="w-full m-0 pt-0 snap-start" style="">
@@ -74,7 +73,9 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
         <div
           class="header-middle text-center min-w-full md:order-2 md:min-w-[490px]"
         >
-          <h1 class="text-2xl text-center"><a href="/flying/">Paragliding Logbook </a>{headingPostfix}</h1>
+          <h1 class="text-2xl text-center">
+            <a href="/flying/">Paragliding Logbook </a>{headingPostfix}
+          </h1>
           <Navbar />
         </div>
 
@@ -103,7 +104,9 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
               flights={flights}
               itemsPerPage={5}
             >
-              <div slot="fallback" class="animate-pulse min-h-30 m-auto">Loading...</div>  
+              <div slot="fallback" class="animate-pulse min-h-30 m-auto">
+                Loading...
+              </div>
             </FlightCardList>
           </div>
         </div>

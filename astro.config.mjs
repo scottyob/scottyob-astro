@@ -12,6 +12,9 @@ import { viteStaticCopy } from 'vite-plugin-static-copy'
 const cesiumSource = "node_modules/cesium/Build/Cesium";
 const cesiumBaseUrl = "cesiumStatic";
 
+import rehypeSlug from 'rehype-slug'
+import rehypeAutolinkHeadings from 'rehype-autolink-headings'
+
 // https://astro.build/config
 export default defineConfig({
   integrations: [tailwind(), icon({
@@ -28,7 +31,12 @@ export default defineConfig({
         "data-sheet",
       ],
     },
-  }), mdx(), react()],
+  }), mdx({
+    rehypePlugins: [
+      rehypeSlug,
+      [rehypeAutolinkHeadings, { behavior: 'append', properties: { class: 'markdown-anchor' }}] // This is a rehype plugin
+    ]
+  }), react()],
   vite: {
     assetsInclude: ["**/*.bin", "**/*.zip"],
     define: {
@@ -45,14 +53,6 @@ export default defineConfig({
         ],
       }),
     ],
-    
-    // plugins: [
-    //   cesium({
-    //   iife: false,
-    // })],
-    // optimizeDeps: {
-    //   include: ["leaflet", "cesium"]
-    // }
   },
   site: 'https://www.scottyob.com/',
 });

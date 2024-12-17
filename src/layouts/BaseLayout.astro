@@ -59,6 +59,7 @@ const { title, description } = Astro.props;
       color: #333333;
       background-color: #fafafa;
       padding-bottom: 60px;
+      scroll-behavior: smooth;
       /* font-size: 5px; */
     }
     h1,
@@ -153,51 +154,63 @@ const { title, description } = Astro.props;
       margin-bottom: 2em;
     }
 
+    span.icon-link::before {
+      content: '📎';
+      font-size: 0.8em;
+      margin-left: 10px;
+      /* @apply text-gray-200 no-underline; */
+    }
+
+    .markdown-anchor {
+      @apply text-gray-200 no-underline;
+      /* color: orange; */
+      /* background-color: blue; */
+      /* @apply no-underline; */
+    }
+
     .data-layout-table {
-    max-width: 100%;
-    overflow-x: auto;
+      max-width: 100%;
+      overflow-x: auto;
 
-    h2 {
-      text-align: center;
+      h2 {
+        text-align: center;
+      }
+
+      table {
+        width: 80%;
+        border-collapse: collapse;
+        margin: 20px auto;
+        font-size: 1em;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-width: 400px;
+        border-radius: 8px 8px 0 0;
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+      }
+
+      thead tr {
+        background-color: #009879;
+        color: #ffffff;
+        text-align: left;
+        font-weight: bold;
+      }
+
+      th,
+      td {
+        padding: 12px 15px;
+      }
+
+      tbody tr {
+        border-bottom: 1px solid #dddddd;
+      }
+
+      tbody tr:nth-of-type(even) {
+        background-color: #f3f3f3;
+      }
+
+      tbody tr:last-of-type {
+        border-bottom: 2px solid #009879;
+      }
     }
-
-    table {
-      width: 80%;
-      border-collapse: collapse;
-      margin: 20px auto;
-      font-size: 1em;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      min-width: 400px;
-      border-radius: 8px 8px 0 0;
-      overflow: hidden;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-    }
-
-    thead tr {
-      background-color: #009879;
-      color: #ffffff;
-      text-align: left;
-      font-weight: bold;
-    }
-
-    th,
-    td {
-      padding: 12px 15px;
-    }
-
-    tbody tr {
-      border-bottom: 1px solid #dddddd;
-    }
-
-    tbody tr:nth-of-type(even) {
-      background-color: #f3f3f3;
-    }
-
-    tbody tr:last-of-type {
-      border-bottom: 2px solid #009879;
-    }
-
-  }
-
   </style>
 </html>
