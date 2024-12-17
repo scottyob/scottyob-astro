@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check --root src && astro build",
+    "build": "astro sync && astro check --root src && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check --root src",
