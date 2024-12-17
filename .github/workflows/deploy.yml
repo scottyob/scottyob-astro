@@ -17,6 +17,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment:
+      # You may need to change the environment name to match your environment.
+      name: Prod
     steps:
       - name: Checkout your repository using git
         uses: actions/checkout@v4
