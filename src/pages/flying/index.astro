@@ -28,6 +28,16 @@ const totalTime = prettyMs(totalSeconds * 1000, {
   hideSeconds: true,
 });
 
+// Calculate total Ridge vs Thermal hours
+const ridgeHours = flights.reduce(
+  (a, b) => a + (b.type === 'ridge' ? b.durationSeconds ?? 0 : 0),
+  0
+) / 60.0 / 60.0;
+const thermalHours = flights.reduce(
+  (a, b) => a + (b.type === 'thermal' ? b.durationSeconds ?? 0 : 0),
+  0
+) / 60.0 / 60.0;
+
 const statClassStyles = 'font-bold text-sm font-[capriola] italic';
 const metricClassStyles = 'text-orange-500 text-2xl not-italic';
 ---
@@ -66,6 +76,10 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
           </div>
           <div class="text-xs m-2 text-gray-300">
             (or <span class="text-orange-300">{totalTime}</span>)
+          </div>
+          <div>
+            <div><span class={metricClassStyles}>{Math.round(thermalHours)}</span> hrs <a href="/flying/type/thermal" class="text-orange-500 underline">Thermal</a></div>
+            <div><span class={metricClassStyles}>{Math.round(ridgeHours)}</span> hrs <a href="/flying/type/ridge" class="text-orange-500 underline">Ridge</a></div>
           </div>
         </div>
 

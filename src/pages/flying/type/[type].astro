@@ -1,0 +1,22 @@
+---
+
+export async function getStaticPaths() {
+    return [
+        {
+            params: { type: "thermal" },
+        },
+        {
+            params: { type: "ridge" },
+        },
+    ]
+}
+
+let type = Astro.params.type;
+
+import { GetFlights } from '@libs/flying';
+import BasePage from '../index.astro';
+
+let flights = (await GetFlights()).filter((f) => f.type == type);
+---
+
+<BasePage flights={flights} headingPostfix={`> types > ${type}`}/>

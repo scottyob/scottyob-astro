@@ -29,6 +29,7 @@ export interface FlightIgcFile {
     location?: string;
     locationUrl?: string;
     launchName?: string;
+    type?: "thermal" | "ridge";
   
     /*
      * Computed fields
@@ -47,3 +48,12 @@ export interface FlightIgcFile {
     latitude: number;
   };
   
+  /*
+   * A collection of sites from the paragliding sites.json file:w
+   */
+  export type Sites = {
+    [key: string]: {
+      aliases: string[];
+      type: "ridge" | "thermal";
+    };
+  }

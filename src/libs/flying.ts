@@ -10,7 +10,7 @@ import { DateTime } from 'luxon';
 import { basename } from 'path';
 import { GscWaypoints } from './waypoints';
 import { marked } from 'marked';
-import type { Flight, FlightIgcFile, Launch } from './flyingTypes';
+import type { Flight, FlightIgcFile, Launch, Sites } from './flyingTypes';
 
 // Cache of all the flights in the database
 let flights: Flight[] = [];
@@ -165,10 +165,7 @@ function parseFile(
  * Replace locations from a file
  */
 function replaceLocations(fileName: string, logbook: Flight[]): Flight[] {
-  type LocationsFile = {
-    [key: string]: string[];
-  };
-  const locations: LocationsFile = JSON.parse(
+  const locations: Sites = JSON.parse(
     readFileSync(fileName, {
       flag: 'r',
       encoding: 'utf8',
@@ -179,11 +176,12 @@ function replaceLocations(fileName: string, logbook: Flight[]): Flight[] {
     if (r.location != undefined) {
       return r;
     }
-    // Find location mame that matches (any really)
 
-    Object.keys(locations).forEach((key) => {
-      if (locations[key].some((l) => r.launchName?.includes(l))) {
-        r.location = key;
+    // Find location mame that matches (any really)  Set the flying type
+    Object.entries(locations).forEach(([location, locationInfo]) => {
+      if (locationInfo.aliases.some((l) => r.launchName?.includes(l))) {
+        r.location = location;
+        r.type = locationInfo.type;
         return;
       }
     });
