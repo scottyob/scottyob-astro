@@ -29,7 +29,7 @@ categories:
 tags:
  - tag
 hero: hero.jpg 
-
+# style: img-left | img-top | img-between
 ---
 
 "
