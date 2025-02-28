@@ -1,0 +1,95 @@
+<div
+  class="container mb-8"
+>
+  <!-- Headers -->
+  <div class="header-container">
+    <div class="header w-[37%]">
+      <div class="content">
+        <div>SRAM0</div>
+        <div>(192 KB)</div>
+      </div>
+    </div>
+    <div class="header w-[25%]">
+      <div class="content">
+        <div>SRAM1</div>
+        <div>(128 KB)</div>
+      </div>
+    </div>
+    <div class="header w-[38%]">
+      <div class="content">
+        <div>SRAM2</div>
+        <div>(200 KB)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Moving Ram Components -->
+  <div class="body-container">
+    <div class="body bg-sky-200 w-[62%] iram">
+      <div class="content">
+        <div>IRAM</div>
+      </div>
+    </div>
+    <div class="body bg-green-200 w-[38%] dram">
+      <div class="content">
+        <div>DRAM</div>
+        <div>(328 KB Max)</div>
+      </div>
+    </div>
+  </div>
+  <em class="font-normal">Memory Blocks Allocation</em>
+</div>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  
+  gsap.registerPlugin(ScrollTrigger);
+
+
+  gsap.to('.iram', {
+    scrollTrigger: {
+      trigger: '.container',
+      toggleActions: "play reverse play reverse", 
+
+    },
+    width: '37%',
+    duration: 0.75,
+  });
+  
+  gsap.to('.dram', {
+    scrollTrigger: {
+      trigger: '.container',
+      toggleActions: "play reverse play reverse", 
+    },
+    width: '63%',
+    duration: 0.5,
+  });
+</script>
+
+<style>
+  .container {
+    @apply font-bold w-full clear-both;
+  }
+
+  .header-container {
+    @apply flex h-16 text-white;
+  }
+
+  .body-container {
+    @apply flex h-20 text-slate-600;
+  }
+
+  .header {
+    @apply bg-sky-700 m-1;
+  }
+
+  .body {
+    @apply m-1 rounded;
+  }
+
+  .content {
+    @apply flex flex-col items-center justify-center h-full text-center;
+  }
+</style>

@@ -32,6 +32,12 @@ hero: hero.jpg
 # style: img-left | img-top | img-between
 ---
 
+Replace me with the start of your post.  An abstract
+
+{/* --- */}
+
+Content that will not show up on a page listing can continue here
+
 "
 
 # Write the content to page.mdx inside the created directory
