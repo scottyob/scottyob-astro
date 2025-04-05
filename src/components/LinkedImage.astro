@@ -1,0 +1,7 @@
+---
+const { src, alt, ...rest } = Astro.props;
+---
+
+<a href={src.src} target="_blank" rel="noopener noreferrer" class="linked-image">
+  <img src={src.src} alt={alt} {...rest} />
+</a>

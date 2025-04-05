@@ -2,6 +2,7 @@
 import { getAllPosts } from '@libs/Post';
 import Layout from '../../../layouts/ArticleLayout.astro';
 import { format, toZonedTime } from 'date-fns-tz';
+import LinkedImage from '@components/LinkedImage.astro';
 
 export async function getStaticPaths() {
   const posts = await getAllPosts();
@@ -22,7 +23,7 @@ if (post == undefined) {
   throw 'Unable to load post';
 }
 
-const { Content } = await post.content.render();
+const { Content, components } = await post.content.render();
 const zonedDate = toZonedTime(post.data.date, 'UTC');
 const dateStr = format(zonedDate, 'EEEE do MMMM, yyyy', { timeZone: 'UTC' });
 ---
@@ -34,5 +35,5 @@ const dateStr = format(zonedDate, 'EEEE do MMMM, yyyy', { timeZone: 'UTC' });
     </aside>
     <h1>{post.data.title}</h1>
   </slot>
-  <Content />
+  <Content components={{...components, img: LinkedImage}} />
 </Layout>

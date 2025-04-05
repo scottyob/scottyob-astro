@@ -154,15 +154,24 @@ const { title, description } = Astro.props;
       margin-bottom: 2em;
     }
 
-    span.icon-link::before {
+    .markdown-anchor::after {
       content: '📎';
       font-size: 0.8em;
-      margin-left: 10px;
+      margin-left: 5px;
+      opacity: 0;
+      transition: opacity 0.2s;
+
       /* @apply text-gray-200 no-underline; */
     }
 
+    .markdown-anchor:hover::after {
+      opacity: 1;
+    }
+
     .markdown-anchor {
-      @apply text-gray-200 no-underline;
+      /* @apply text-gray-200 no-underline; */
+      color: inherit;
+      text-decoration: none;
       /* color: orange; */
       /* background-color: blue; */
       /* @apply no-underline; */

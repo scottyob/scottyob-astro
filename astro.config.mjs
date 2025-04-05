@@ -34,8 +34,9 @@ export default defineConfig({
   }), mdx({
     rehypePlugins: [
       rehypeSlug,
-      [rehypeAutolinkHeadings, { behavior: 'append', properties: { class: 'markdown-anchor' }}] // This is a rehype plugin
+      [rehypeAutolinkHeadings, { behavior: 'wrap', properties: { class: 'markdown-anchor' }}] // This is a rehype plugin
     ]
+
   }), react()],
   vite: {
     assetsInclude: ["**/*.bin", "**/*.zip"],
@@ -55,4 +56,5 @@ export default defineConfig({
     ],
   },
   site: 'https://www.scottyob.com/',
+  
 });
