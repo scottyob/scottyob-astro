@@ -1,0 +1,86 @@
+---
+title: 'Borg Backups'
+type: post
+author: scottyob
+date: 2025-05-02
+categories:
+ - administration
+hero: logo.png 
+style: img-between
+---
+
+In times past, I've done backups using rsync with simple cron jobs.  This post explains how I'm now using Borg to do backups with snapshots
+and a Systemd timer to run them.  I have found [Borgmatic](https://torsion.org/borgmatic/) to be the perfect tool for this for simple remote backups!
+
+{/* --- */}
+
+Installing in Ubuntu
+```bash
+sudo apt install borgbackup borgmatic
+```
+
+The Borgmatic config file:
+```
+source_directories:
+    - /docker/node05.home.scottyob.com/minecraft
+repositories:
+    - path: ssh://root@wor-prod.home.scottyob.com/root/scott/backups
+      label: minecraft
+hooks:
+  after_backup:
+    - >
+      echo 'backup_time{target="minecraft"}' $(date +%s) > /docker/backup_success/minecraft.prom
+  on_error:
+    - >
+      curl -H "Priority: high" -d "Backup Failed" ntfy.sh/scott-random-string
+encryption_passphrase: "redacted"
+ssh_command: ssh -i ~scott/.ssh/id_ed25519
+keep_hourly: 24
+keep_daily: 7
+keep_weekly: 4
+```
+
+Initializing the backups, performing a first run:
+```bash
+borgmatic init --encryption repokey
+borgmatic --verbosity 1 --list --stats
+```
+
+Modifying systemd timer to be hourly:
+```
+systemctl edit borgmatic.timer
+
+...
+### Editing /etc/systemd/system/borgmatic.timer.d/override.conf
+### Anything between here and the comment below will become the contents of the drop-in file
+
+[Timer]
+OnCalendar=
+RandomizedDelaySec=
+OnCalendar=hourly
+
+### Edits below this comment will be discarded
+
+
+### /usr/lib/systemd/system/borgmatic.timer
+# [Unit]
+# Description=Run borgmatic backup
+#
+# [Timer]
+# OnCalendar=daily
+# Persistent=true
+# RandomizedDelaySec=3h
+#
+# [Install]
+# WantedBy=timers.target
+```
+
+Listing archives:
+```
+borgmatic list
+minecraft: Listing archives
+node05-2025-05-02T12:11:02.672489    Fri, 2025-05-02 12:11:04 [40e13b3bcab0869f0fbd5850b24e5167a1503f1a47c8442ed6529137bc576496]
+node05-2025-05-02T12:20:39.889830    Fri, 2025-05-02 12:20:42 [55d5c17bc1c290226d645426b5d69a80d77bbedb8f8b0bb0551fc3aa7342cdab]
+```
+
+Simple little tool seems to be working wonders for me 😊
