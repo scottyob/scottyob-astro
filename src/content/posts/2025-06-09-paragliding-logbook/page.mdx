@@ -16,7 +16,7 @@ I've often been asked about how the [Logbook](/flying/) section of my website wo
 
 > I e-mail the track-log to myself, and it appears on my site a couple of minutes later.
 
-This post documents how I've setup my website to keep track of my logbook, and present my flights
+This post documents how I've set up my website to keep track of my logbook, and present my flights
 and data in an easy to consume format.
 
 {/* --- */}
@@ -26,7 +26,7 @@ and hosted for free on Github Pages.  I was [previously using NextJS](/post/next
 but found it built far too slow and wanted to give Astro a try.
 
 To understand how my flight logs are published, I'll run over the pipeline from e-mailing my tracklog
-to myself, to, it appearing on the website.
+to myself, to it appearing on the website.
 
 ![Diagram of the pipeline](diagram.png)
 *Diagram of pipeline from e-mail to Github Pages*
@@ -71,13 +71,13 @@ then extract the igc file from the e-mail body,
 [upload two blobs and a commit](https://github.com/scottyob/igc-email-publisher/blob/main/src/lib.mjs#L28-L62) to my 
 [flight log github repo](https://github.com/scottyob/paragliding-logbook).
 
-While this code is a bit hap hazard, it's easy enough to modify or move things to variabels if you want to re-use it,
-but, it's been doing the job for me for the past two and a bit years so far!
+While this code is a bit haphazard, it's easy enough to modify or move things to variables if you want to re-use it,
+but it's been doing the job for me for the past two and a bit years so far!
 
 
 ## Manually Tracking Flights
 
-If I've forgot to turn on my vario, or, I'm just playing with kiting, I'll often just update a 
+If I've forgot to turn on my vario, or I'm just playing with kiting, I'll often just update a 
 [Google Sheets spreadsheet](https://docs.google.com/spreadsheets/d/1-rd2b-_l5IgavBxVe50O817AjAbI5qAVc0leU2bxUM8/edit?usp=sharing)
 by hand with my flight details to be pulled down and embedded the next time the website is built.
 
@@ -99,15 +99,15 @@ responsible for:
 
 ### Under the hood
 
-You can see how individual flight replays are created using [thus slug](https://github.com/scottyob/scottyob-astro/blob/main/src/pages/flying/flight/%5Bid%5D.astro)
+You can see how individual flight replays are created using [this slug](https://github.com/scottyob/scottyob-astro/blob/main/src/pages/flying/flight/%5Bid%5D.astro)
 
 You can use [this as a good starting point](https://github.com/scottyob/scottyob-astro/blob/61cd2e31243a91fb8fd5278f0c7642c21e3aeeae/src/libs/flying.ts#L276-L287)
 to see how my flights are fetched from the igc repo, and from google sheets to be merged on the site.
 
 
-### Seeing my logbook in actions
+### Seeing my logbook in action
 
-I'm pretty happy with how this came out, so, I'll share some nice photos of what my logbook is capable of.
+I'm pretty happy with how this came out, so I'll share some nice photos of what my logbook is capable of.
 
 ![Calendar view of my flights](calendar.png)
 *A Github style calendar view showing days I flew, and for how long that day*
