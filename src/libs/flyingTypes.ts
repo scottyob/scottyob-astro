@@ -6,6 +6,17 @@ export interface FlightIgcFile {
     filePath: string; // eg.  ./public/logbook/flights/someIgc/someIgcFile.igc
     filePathUrl: string; // eg.  /logbook/flights/someIgc/someIgcFile.igc
   }
+
+  /*
+   * A launch or landing site, as pulled from the paragliding launches database
+   */
+  export type Launch = {
+    name: string;
+    longitude: number;
+    latitude: number;
+    country: string;
+  };
+  
   
   export interface Flight {
     id: string; // Going to be either the IGC file name, or the google record number
@@ -27,7 +38,7 @@ export interface FlightIgcFile {
      */
     location?: string;
     locationUrl?: string;
-    launchName?: string;
+    launch?: Launch;
     type?: "thermal" | "ridge";
   
     /*
@@ -37,16 +48,7 @@ export interface FlightIgcFile {
     launchTime: number; //Timestamp, useful for orderinhg and sequence
     waypoints?: Waypoint[];
   }
-  
-  /*
-   * A launch or landing site, as pulled from the paragliding launches database
-   */
-  export type Launch = {
-    name: string;
-    longitude: number;
-    latitude: number;
-  };
-  
+
   /*
    * A collection of sites from the paragliding sites.json file:w
    */

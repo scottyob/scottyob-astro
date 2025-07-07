@@ -87,7 +87,7 @@ async function getSpreadsheetFlights(): Promise<Flight[]> {
       id: r.id,
       date: date,
       launchTime: DateTime.fromISO(date).toMillis() + i,
-      launchName: r.launchName ?? '',
+      launch: r.launch,
       durationSeconds: Number(r.durationSeconds ?? 0),
       wing: r.wing,
       fileName: r.fileName,
@@ -111,7 +111,7 @@ function parseFile(
   const launchDistances = launches.map((l) => distanceTo(igc.fixes[0], l));
   const shortestDistance = Math.min(...launchDistances);
   const closestLaunch =
-    shortestDistance < 1000
+    shortestDistance < 3000
       ? launches[launchDistances.indexOf(shortestDistance)]
       : undefined;
 
@@ -145,7 +145,7 @@ function parseFile(
     launchTime: igc.fixes[0].timestamp,
     waypoints: GscWaypoints(rawFile, igc),
     ...(igc?.task?.comment && { comment: igc?.task?.comment }),
-    launchName: closestLaunch?.name,
+    launch: closestLaunch,
   };
 }
 
@@ -165,14 +165,19 @@ function replaceLocations(fileName: string, logbook: Flight[]): Flight[] {
       return r;
     }
 
-    // Find location mame that matches (any really)  Set the flying type
+    // Find location name that matches (any really)  Set the flying type
     Object.entries(locations).forEach(([location, locationInfo]) => {
-      if (locationInfo.aliases.some((l) => r.launchName?.includes(l))) {
+      if (locationInfo.aliases.some((l) => r.launch?.name?.includes(l))) {
         r.location = location;
         r.type = locationInfo.type;
         return;
       }
     });
+
+    if(!r.location) {
+      // Default to the launch country
+      r.location = r.launch?.country || 'Unknown';
+    }
 
     // If there's a location, set the URL friendly location
     if (r.location) r.locationUrl = urlFriendlyLocationName(r.location);
