@@ -165,6 +165,9 @@ function replaceLocations(fileName: string, logbook: Flight[]): Flight[] {
       return r;
     }
 
+    // Default to Thermal flying
+    r.type = 'thermal';
+
     // Find location name that matches (any really)  Set the flying type
     Object.entries(locations).forEach(([location, locationInfo]) => {
       if (locationInfo.aliases.some((l) => r.launch?.name?.includes(l))) {
