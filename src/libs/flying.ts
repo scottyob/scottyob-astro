@@ -87,13 +87,12 @@ async function getSpreadsheetFlights(): Promise<Flight[]> {
       id: r.id,
       date: date,
       launchTime: DateTime.fromISO(date).toMillis() + i,
-      launch: r.launch,
       durationSeconds: Number(r.durationSeconds ?? 0),
       wing: r.wing,
       fileName: r.fileName,
       comments: r.comment,
       location: r.location,
-      locationUrl: urlFriendlyLocationName(r.location),
+      locationUrl: urlFriendlyLocationName(r.location),      
     };
   });
 }

@@ -45,7 +45,7 @@ export interface FlightIgcFile {
      * Computed fields
      */
     number?: number; // The record number of the flight
-    launchTime: number; //Timestamp, useful for orderinhg and sequence
+    launchTime: number; //Timestamp, useful for ordering and sequence
     waypoints?: Waypoint[];
   }
 
