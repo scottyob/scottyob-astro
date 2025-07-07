@@ -14,6 +14,7 @@ type Format = 'meters' | 'feet';
 
 import './FlightCard.css';
 import FlightTaskProgress from './FlightTaskProgress';
+import { getExcerpt } from '@libs/flightLib';
 
 const s = (stat: string | number | undefined, format?: Format, to?: Format) => {
   let ret = stat;
@@ -52,10 +53,13 @@ const s = (stat: string | number | undefined, format?: Format, to?: Format) => {
 export default function FlightCard(props: Props) {
   const { flight } = props;
 
+  const flightUrl = `/flying/flight/${flight.id.toString()}`;
+  const excerpt = getExcerpt(flight, undefined, flightUrl);
+
   return (
     <div className="w-full p-8 text-left border-b last:border-none border-gray-200 flex flex-wrap">
       {/* Left hand flight preview & picture */}
-      <a target='_blank' href={`/flying/flight/${flight.id.toString()}`} className="p-4 m-4 text-center ml-auto mr-auto">
+      <a target='_blank' href={flightUrl} className="p-4 m-4 text-center ml-auto mr-auto">
         <div
           style={{ height: HEIGHT, borderWidth: BORDER_WIDTH, }}
           className={`border-gray-400 bg-white border-8 aspect-video rotate-12`}
@@ -70,7 +74,7 @@ export default function FlightCard(props: Props) {
       </a>
       {/* Stats */}
       <div className="w-0 min-w-[20ch] max-w-[40ch] grow m-4">
-        {s(flight.date)}: Flight from <a href={`/flying/site/${flight.location?.replaceAll(" ", "-")}`}>{s(flight.location)}</a> took{' '}
+        {s(flight.date)}: Flight from <a href={`/flying/site/${flight.location?.replaceAll(" ", "-")}`}>{s(flight.location)}</a> lasted{' '}
         {s(
           flight.durationSeconds && prettyMilliseconds(flight.durationSeconds * 1000, {
             hideSeconds: true,
@@ -86,7 +90,7 @@ export default function FlightCard(props: Props) {
       {/* Writeup */}
       <div className="w-0 min-w-[20ch] grow m-4 flight-writeup-summary">
         <div className="max-w-[70ch]">
-          {flight.excerpt && (<div dangerouslySetInnerHTML={{ __html: flight.excerpt}}></div>)}
+          {excerpt && (<div dangerouslySetInnerHTML={{ __html: excerpt}}></div>)}
         </div>
       </div>
     </div>

@@ -9,22 +9,10 @@ import matter from 'gray-matter';
 import { DateTime } from 'luxon';
 import { basename } from 'path';
 import { GscWaypoints } from './waypoints';
-import { marked } from 'marked';
 import type { Flight, FlightIgcFile, Launch, Sites } from './flyingTypes';
 
 // Cache of all the flights in the database
 let flights: Flight[] = [];
-
-async function getExcerpt(content: string, length = 100) {
-  const EXCERPT_SEPERATOR = '{/* --- */}';
-  let excerpt = content.split(' ').slice(0, length).join(' ') + '...';
-  if (content.includes(EXCERPT_SEPERATOR)) {
-    excerpt = content.split(EXCERPT_SEPERATOR)[0].trim();
-  }
-
-  excerpt = excerpt.replace(/^(import.*)\s*$/gm, '');
-  return await marked.parse(excerpt);
-}
 
 function truncateComments(comments: string, maxLength: number): string {
   if (comments.length <= maxLength) {
@@ -266,7 +254,6 @@ export async function PopulateFlights() {
     f.number = i + 1;
     if (f.comments !== undefined) {
       f.commentsTruncated = truncateComments(f.comments, 100);
-      f.excerpt = await getExcerpt(f.comments);
     }
   });
   // Sort from most recent first

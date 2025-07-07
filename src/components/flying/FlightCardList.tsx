@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 // Assuming FlightCard is your flight card component
 import FlightCard from './FlightCard';
 import type { Flight } from '@libs/flyingTypes';
@@ -47,22 +47,56 @@ export default function FlightCardList(props: Props) {
   const { flights } = props;
   const itemsPerPage = props.itemsPerPage ?? 10;
 
+  // Read initial page from URL if available
+  const getInitialPage = () => {
+    if (typeof window !== "undefined") {
+      const params = new URL(window.location.href).searchParams;
+      const page = parseInt(params.get("page") || "1", 10);
+      return isNaN(page) || page < 1 ? 1 : page;
+    }
+    return 1;
+  };
+
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      const page = getInitialPage();
+      setCurrentPageState(page);
+      console.log("Back/forward navigation detected", window.location.pathname);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+
   // Keep track of how we're sorting the items
   const [sorter, setSorter] = useState<SortOrder>('Recent');
 
   // State to keep track of the current page
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPageState] = useState(getInitialPage());
 
   // Calculate total pages
   const totalPages = Math.ceil(flights.length / itemsPerPage);
 
+  const setCurrentPage = (page: number) => {
+    if (page < 1 || page > totalPages) {
+      return;
+    }
+    setCurrentPageState(page);
+
+    // Update the URL with the current page number
+    const url = new URL(window.location.href);
+    url.searchParams.set("page", page.toString());
+    window.history.pushState({}, '', url);
+  };
+
   // Handler functions for pagination
   const goToPreviousPage = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1));
+    setCurrentPage(Math.max(currentPage - 1, 1));
   };
 
   const goToNextPage = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    setCurrentPage(Math.min(currentPage + 1, totalPages));
   };
 
   const setAndClear = (sorter: SortOrder) => {
@@ -104,23 +138,23 @@ export default function FlightCardList(props: Props) {
   //Pager
   const pager = (
     <div>
-      <button
+      <a
+        href="#flightList"
         onClick={goToPreviousPage}
-        disabled={currentPage === 1}
-        className="text-2xl text-orange-600"
+        className={"text-2xl text-orange-600 no-underline" + (currentPage === 1 ? ' opacity-50 cursor-not-allowed' : '')}
       >
         {'<'}
-      </button>
+      </a>
       <span>
         Page {currentPage} of {totalPages}
       </span>
-      <button
+      <a
+        href="#flightList"
         onClick={goToNextPage}
-        disabled={currentPage === totalPages}
-        className="text-2xl text-orange-600"
+        className={"text-2xl text-orange-600 no-underline" + (currentPage === totalPages ? ' opacity-50 cursor-not-allowed' : '')}
       >
         {'>'}
-      </button>
+      </a>
     </div>
   );
   // Sorters
@@ -128,9 +162,9 @@ export default function FlightCardList(props: Props) {
     <div className="flex flex-wrap grow min-h-9 space-x-4 items-center justify-center">
       <div>
         <a href="/flying/sheet">
-        <FcDataSheet className='inline' />
-        Sheet View
-      </a></div>
+          <FcDataSheet className='inline' />
+          Sheet View
+        </a></div>
       <SorterSelect sorter={sorter} setSorter={setAndClear} />
       <div className="text-right mr-16">{pager}</div>
     </div>
@@ -139,7 +173,7 @@ export default function FlightCardList(props: Props) {
   return (
     <div>
       {sorters}
-      <div>
+      <div id="flightList">
         {currentFlights.map((flight) => (
           <FlightCard key={flight.number as number} flight={flight} />
         ))}

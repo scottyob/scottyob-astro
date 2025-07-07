@@ -19,7 +19,6 @@ export interface FlightIgcFile {
     igcFile?: FlightIgcFile;
     comments?: string;
     commentsTruncated?: string;
-    excerpt?: string;
     commentsFileName?: string;
     sportsTrackLiveUrl?: string;
   
