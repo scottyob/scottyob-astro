@@ -1,0 +1,24 @@
+---
+
+---
+
+<div class="lg:flex block resume-block">
+  <div class="block-header lg:w-80 lg:min-w-80">
+    <slot name="header" />
+  </div>
+  <div class="block-content">
+    <slot />
+  </div>
+</div>
+<div class="border-bottom"></div>
+
+<style>
+  .border-bottom {
+    @apply border-b-2 border-b-orange-200 w-[66%];
+  }
+
+  .block-header {
+    @apply font-bold;
+  }
+
+</style>

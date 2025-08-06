@@ -30,6 +30,9 @@ export default defineConfig({
       "flat-color-icons": [
         "data-sheet",
       ],
+      "mdi": [
+        "resume",
+      ],
     },
   }), mdx({
     rehypePlugins: [

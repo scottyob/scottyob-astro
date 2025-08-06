@@ -50,6 +50,16 @@ const pathname = Astro.url.pathname;
     }
   </li>
   <li class={liClass}>
+    <a href="/resume"><Icon name="mdi:resume" />Resume</a>
+    {
+      pathname.startsWith('/resume') ? (
+        <span class={selected} />
+      ) : (
+        <span class={unselected} />
+      )
+    }
+  </li>
+  <li class={liClass}>
     <a href="/bucketlist"><Icon name="noto:memo" />Bucket List</a>
     {
       pathname.startsWith('/bucketlist') ? (

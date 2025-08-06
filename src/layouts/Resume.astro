@@ -1,0 +1,135 @@
+---
+import type { MarkdownLayoutProps } from 'astro';
+
+// Pacifico is used for my name heading
+import '@fontsource/capriola';
+
+import '@fontsource/inter';
+import '@fontsource/bricolage-grotesque/latin-600.css';
+
+type Props = MarkdownLayoutProps<{
+  title: string;
+  description?: string;
+}>;
+const { frontmatter } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="list-disc">
+  <head>
+    <meta charset="UTF-8" />
+    {frontmatter.description && <meta name="description" content={frontmatter.description} />}
+    <meta name="viewport" content="width=device-width" />
+    <meta name="view-transition" content="same-origin" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{frontmatter.title}</title>
+  </head>
+  <body>
+    <div id="Layout">
+      <slot />
+    </div>
+  </body>
+
+  <style is:global>
+    html {
+      background-color: gray;
+      font-size: 80%;
+    }
+
+    body {
+    }
+
+    a {
+      @apply text-orange-500;
+      text-decoration: underline;
+    }
+
+    h1 a {
+      @apply text-black;
+      text-decoration: none;
+    }
+
+    #Layout {
+      background-color: white;
+      @apply max-w-screen-lg;
+      margin: 0 auto;
+      padding-top: 2em;
+      @apply min-h-full;
+    }
+
+    #Layout header {
+      @apply pl-4 pt-4
+    }
+    
+    /* .block-content {
+      @apply p-4;
+      margin-bottom: 0em;
+    } */
+
+    header h1 {
+      font-family: 'Capriola', cursive;
+      font-size: 36px;
+    }
+
+    .contact-details p {
+        @apply inline-block pr-4;
+    }
+
+    .markdown-anchor {
+      text-decoration: none;
+      color: black;
+    }
+
+    h2 {
+      @apply text-xl;
+    }
+
+    h2,
+    h3 {
+      @apply font-bold;
+    }
+
+    .block-content ul {
+      @apply list-disc list-inside;
+      li {
+        /* @apply mb-1; */
+        ul {
+          @apply pl-8;
+          li:last-child {
+            @apply mb-0;
+          }
+        }
+      }
+    }
+
+    .block-content ul li:last-child {
+      @apply mb-3;
+    }
+
+    .block-content .blockSection:not(:last-child) {
+      @apply border-b-2 mb-8;
+    }
+
+    .blockSection {
+      @apply p-4;
+      margin-bottom: 0em;
+    }
+
+    .jobTitle {
+      @apply mb-0 pb-0;
+    }
+
+    .jobRole {
+      @apply font-normal;
+    }
+
+    .jobDate {
+      @apply text-gray-500 text-sm pb-4;
+    }
+
+    p {
+      @apply mb-4;
+    }
+  </style>
+</html>
