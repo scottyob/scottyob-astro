@@ -34,7 +34,7 @@ const { frontmatter } = Astro.props;
   <style is:global>
     html {
       background-color: gray;
-      font-size: 80%;
+      font-size: 75%;
     }
 
     body {
@@ -61,11 +61,6 @@ const { frontmatter } = Astro.props;
     #Layout header {
       @apply pl-4 pt-4
     }
-    
-    /* .block-content {
-      @apply p-4;
-      margin-bottom: 0em;
-    } */
 
     header h1 {
       font-family: 'Capriola', cursive;
@@ -108,7 +103,7 @@ const { frontmatter } = Astro.props;
     }
 
     .block-content .blockSection:not(:last-child) {
-      @apply border-b-2 mb-8;
+      @apply border-b-2 mb-1;
     }
 
     .blockSection {
