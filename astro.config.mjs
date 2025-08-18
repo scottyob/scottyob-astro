@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
+import lottie from "astro-integration-lottie";
 
 import icon from 'astro-icon';
 
@@ -17,7 +18,7 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [tailwind(), icon({
+  integrations: [lottie(), tailwind(), icon({
     include: {
       noto: [
         'black-nib',
@@ -42,7 +43,7 @@ export default defineConfig({
 
   }), react()],
   vite: {
-    assetsInclude: ["**/*.bin", "**/*.zip"],
+    assetsInclude: ["**/*.bin", "**/*.zip", "**/*.json.lottie"],
     define: {
       CESIUM_BASE_URL: JSON.stringify('/' + cesiumBaseUrl),
     },
