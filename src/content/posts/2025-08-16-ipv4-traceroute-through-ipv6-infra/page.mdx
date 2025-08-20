@@ -62,7 +62,7 @@ For traceroute to continue working, we still need to generate ICMP Type 11, ttl-
 in this infra have IPv4 addresses on their loopbacks, they should be used.  In a large-scale environment, or, one where no IPv4 at all was allocated, there may not be an IPv4 address
 on the loopback!  The BGP Router-ID may be some incrementing ID in a database.  It only needs to be unique per ASN!
 
-So what *should* the source address be in this case?  It *could* be 192.168.0.0.8 (*IANA reserved "IPv4 dummy address", RFC7600*) or perhaps an anycast address (resolving to v6-deprecated-here.someorg.com).
+So what *should* the source address be in this case?  It *could* be 192.168.0.8 (*IANA reserved "IPv4 dummy address", RFC7600*) or perhaps an anycast address (resolving to v6-deprecated-here.someorg.com).
 
 But then, the last problem.  The traceroute client would start seeing lots of this same address showing up, and would not help resolve any issues in a traceroute.
 
@@ -72,20 +72,8 @@ But then, the last problem.  The traceroute client would start seeing lots of th
 To help identify devices along the path, we can use ICMP Extension Headers!  RFC4884 modifies the requirement to send the "Internet Header + 64 bits of Data Datagram", to instead
 allow us to carry extension headers and extension objects.  This is commonly used, as you can see on hop 5 to show MPLS labels to Google's DNS servers.
 
-```
-[scott@node01 ~]$ traceroute -e 8.8.8.8
-traceroute to 8.8.8.8 (8.8.8.8), 30 hops max, 60 byte packets
- 1  _gateway (10.11.1.1)  0.585 ms  0.455 ms  0.369 ms
- 2  dsldevice.attlocal.net (192.168.1.254)  1.435 ms  1.447 ms  1.317 ms
- 3  108-228-8-1.lightspeed.sntcca.sbcglobal.net (108.228.8.1)  4.082 ms  4.799 ms  4.587 ms
- 4  71.148.135.232 (71.148.135.232)  4.459 ms  5.252 ms  4.125 ms
- 5  12.242.105.110 (12.242.105.110) <MPLS:L=33434,E=0,S=1,T=1>  12.918 ms  12.584 ms  7.414 ms
- 6  * * *
- 7  32.130.26.233 (32.130.26.233)  8.608 ms  8.452 ms  8.295 ms
- 8  * * *
- 9  dns.google (8.8.8.8)  8.107 ms  8.544 ms  8.175 ms
-[scott@node01 ~]$
-```
+![MPLS Traceroute](mpls.png)
+*Traceroute often shows MPLS labels*
 
 [rfc5837](https://datatracker.ietf.org/doc/html/rfc5837) has been around since 2010 to add interface identification to this, but as my previous employer was just starting to make use of this, we're just
 now starting to see adoption in network operating systems (including FBOSS, [shameless plug](https://github.com/facebook/fboss/commit/f898646026937540f6ca5174df7997e85e52e61a))
@@ -96,3 +84,66 @@ according to the RFC.
 This functionality was [added into Traceroute 2.1.4](https://sourceforge.net/projects/traceroute/files/traceroute/traceroute%202.1.4/) too!  So may already be sitting on your Linux workstation :)
 
 This information could also be useful for other areas too, like identifying the physical interface in a bundle that would have been used had it been forwardable.
+
+## On Arista
+
+Arista added the functionality in 4.33.0, for all devices **except** cEOS.  Spinning up a little lab in my good old trusty GNS3, you can see how this traceroute looks.
+
+![Traceroute through v6-only ASs](header.png)
+*Traceroute through v6 only autonomous systems*
+
+Example Config:
+```
+r3#show run
+! Command: show running-config
+! device: r3 (vEOS-lab, EOS-4.34.2F)
+!
+! boot system flash:/vEOS-lab.swi
+!
+hostname r3
+!
+interface Ethernet1
+   no switchport
+   ipv6 enable
+!
+interface Ethernet2
+   no switchport
+   ipv6 enable
+!
+interface Loopback0
+   ip address 192.168.0.8/32
+!
+ip routing ipv6 interfaces
+!
+ipv6 unicast-routing
+!
+router bgp 65002
+   router-id 0.0.0.3
+   no bgp default ipv4-unicast
+   neighbor ebgp peer group
+   neighbor interface Et1 peer-group ebgp remote-as 65001
+   neighbor interface Et2 peer-group ebgp remote-as 65003
+   !
+   address-family ipv4
+      neighbor ebgp activate
+      neighbor ebgp next-hop address-family ipv6 originate
+!
+router general
+   icmp error extensions
+      params include hostname
+   !
+   vrf default
+      icmp error extensions
+         extensions
+!
+router multicast
+   ipv4
+      software-forwarding kernel
+   !
+   ipv6
+      software-forwarding kernel
+!
+end
+r3#
+
+```
