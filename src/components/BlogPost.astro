@@ -30,13 +30,15 @@ const floatStyle = `float: ${imageDir};`;
   </time>
   {
     post.data.hero && (
-      <Image
-        class={'p-2 clear-both'}
-        style={floatStyle}
-        src={post.data.hero}
-        alt="Article Cover Image"
-        width={200}
-      />
+      <a href={link}>
+        <Image
+          class={'p-2 clear-both'}
+          style={floatStyle}
+          src={post.data.hero}
+          alt="Article Cover Image"
+          width={200}
+        />
+      </a>
     )
   }
   <div set:html={post.excerpt} class="shrink" />
