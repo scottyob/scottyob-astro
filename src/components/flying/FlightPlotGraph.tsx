@@ -1,9 +1,51 @@
 import type { Flight } from '@libs/flyingTypes';
 import { ScatterPlot } from '@nivo/scatterplot';
 import prettyMilliseconds from 'pretty-ms';
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { colorSchemes } from '@nivo/colors';
+
+function BoundedTooltip({ color, formattedY, formattedX, flight, mouseX }: {
+  color: string; formattedY: string; formattedX: string; flight: Flight; mouseX: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Re-run on every mouseX change. useLayoutEffect fires before paint so
+  // there's no visible flash. Reset first so we measure the natural position.
+  useLayoutEffect(() => {
+    if (!ref.current) return;
+    ref.current.style.transform = '';
+    const rect = ref.current.getBoundingClientRect();
+    // Walk up to the nearest scrolling container to get its visible right edge,
+    // accounting for its scrollbar width.
+    let container: Element | null = ref.current.parentElement;
+    while (container && getComputedStyle(container).overflowY === 'visible') {
+      container = container.parentElement;
+    }
+    const containerRight = container
+      ? container.getBoundingClientRect().left + (container as HTMLElement).clientWidth
+      : document.documentElement.clientWidth;
+    const overRight = rect.right - containerRight;
+    const overTop = -rect.top;
+    const tx = overRight > 0 ? -(overRight + 8) : 0;
+    const ty = overTop > 0 ? overTop + 8 : 0;
+    if (tx !== 0 || ty !== 0) {
+      ref.current.style.transform = `translate(${tx}px, ${ty}px)`;
+    }
+  }, [mouseX]);
+
+  return (
+    <div
+      ref={ref}
+      style={{ color, backgroundColor: '#333' }}
+      className="p-1 whitespace-nowrap text-left"
+    >
+      <div className="font-bold text-center">{formattedY}</div>
+      <div className="text-sm mb-2">{formattedX}: {flight.location ?? 'Unknown'}</div>
+      <div className="whitespace-normal w-[20ch]">{flight.commentsTruncated}</div>
+    </div>
+  );
+}
 
 export type Props = {
   flights: Flight[];
@@ -45,12 +87,12 @@ function generateData(flights: Flight[]) {
 
 export default function FlightPlotGraph(props: Props) {
   const [highlighted, setHighlighted] = useState<string | undefined>();
-  // const [customLegends, setCustomLegends] = useState<LegendDatum<SampleDatum>[]>([])
+  const [mouseX, setMouseX] = useState(0);
 
   const data = generateData(props.flights);
 
   const chart = (width: number) => (
-    <div className="min-h-[400px]">
+    <div className="min-h-[400px] [&_circle]:cursor-pointer" onMouseMove={(e) => setMouseX(e.clientX)}>
       <ScatterPlot
         data={data}
         height={props.height}
@@ -101,27 +143,16 @@ export default function FlightPlotGraph(props: Props) {
           },
         ]}
         animate={false}
-        tooltip={({ node }) => {
-          const flight = node.data.flight;
-
-          return (
-            <div
-              style={{
-                color: node.color,
-                backgroundColor: '#333',
-              }}
-              className="p-1 whitespace-nowrap text-left"
-            >
-              <div className="font-bold text-center">{node.formattedY}</div>
-              <div className="text-sm mb-2">
-                {node.formattedX}: {flight.location ?? 'Unknown'}
-              </div>
-              <div className="whitespace-normal w-[20ch]">
-                {flight.commentsTruncated}
-              </div>
-            </div>
-          );
-        }}
+        onClick={({ data }) => window.open(`/flying/flight/${data.flight.id}`, '_blank')}
+        tooltip={({ node }) => (
+          <BoundedTooltip
+            color={node.color}
+            formattedY={node.formattedY}
+            formattedX={node.formattedX}
+            flight={node.data.flight}
+            mouseX={mouseX}
+          />
+        )}
       />
     </div>
   );
