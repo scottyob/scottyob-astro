@@ -141,6 +141,11 @@ function parseFile(
     altitudeGainMeters:
       Math.max(...igc.fixes.map((f) => f.gpsAltitude || 0)) -
       (igc.fixes[0].gpsAltitude || 0),
+    totalAltitudeGainMeters: igc.fixes.reduce((total, fix, i) => {
+      if (i === 0) return 0;
+      const diff = (fix.gpsAltitude || 0) - (igc.fixes[i - 1].gpsAltitude || 0);
+      return total + (diff > 0 ? diff : 0);
+    }, 0),
     launchTime: igc.fixes[0].timestamp,
     waypoints: GscWaypoints(rawFile, igc),
     ...(igc?.task?.comment && { comment: igc?.task?.comment }),

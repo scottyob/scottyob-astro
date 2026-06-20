@@ -26,7 +26,8 @@ export interface FlightIgcFile {
     maxDistanceMeters?: number;
     maxAltitudeMeters?: number;
     trackLengthMeters?: number;
-    altitudeGainMeters?: number;
+    altitudeGainMeters?: number;       // max altitude − launch altitude
+    totalAltitudeGainMeters?: number;  // cumulative altitude gained over the flight
     igcFile?: FlightIgcFile;
     comments?: string;
     commentsTruncated?: string;

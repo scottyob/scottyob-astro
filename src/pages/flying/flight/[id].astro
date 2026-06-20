@@ -1,117 +1,98 @@
 ---
 import { GetFlights } from '@libs/flying';
 
-
 export async function getStaticPaths() {
   const flights = await GetFlights();
-
-  return flights.map((f) => {
-    return {
-      params: { id: f.id.toString()},
-    };
-  });
+  return flights.map((f) => ({ params: { id: f.id.toString() } }));
 }
 
 const { id } = Astro.params;
 const flights = await GetFlights();
 const flight = flights.find((f) => f.id.toString() == id);
 
-if(!flight) 
-  throw new Error("No flight with ID found");
+if (!flight) throw new Error('No flight with ID found');
 
-import Layout from '../../../layouts/DataLayout.astro'
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Navbar from '@components/Navbar.astro';
 import { marked } from 'marked';
 import FlightPreview from '@components/flying/FlightPreview';
-import { Duration } from 'luxon';
-import FlightLinks from '@components/flying/FlightLinks';
+import FlightStats from '@components/flying/FlightStats';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
-const content = marked.parse(flight?.comments ?? "");
-
-const headerStyles = " text-gray-700 font-bold pr-4";
-import "mapbox-gl/dist/mapbox-gl.css";
+const content = marked.parse(flight?.comments ?? '');
+const pageTitle = `Flight #${flight.number} — ${flight.location ?? flight.launch?.name ?? 'Unknown'}`;
 ---
 
-<Layout title='Flight Logbook Entry' description='Flight Logbook Entry'>
-  <div class="min-h-[600px]">
-    <div class="">
-      <FlightLinks flight={flight} />
-    <!-- <CesiumReplay flight={flight} /> -->
+<BaseLayout title={pageTitle} description={`Paragliding flight on ${flight.date}`}>
+  <div class="flight-page">
+
+    <!-- Navbar -->
+    <div class="pt-2">
+      <Navbar />
     </div>
-    <FlightPreview client:only="react" flight={flight} height={500} interactive />
-  </div>
-  <div class="m-4" set:html={content} />
-  <div slot="under-heading" class=" text-center">
-    <section>
-      <div class="text-sm max-w-[120ch] ml-10 bg-gray-100 text-gray-500 rounded-xl border border-gray-50 shadow-md flex flex-wrap flex-row p-4 m-4">
-        <table class="mr-4">
-          <thead>
-            <tr>
-              <th />
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class={headerStyles}>Flight Number:</td>
-              <td>{flight.number}</td>
-            </tr>
-            <tr>
-              <td class={headerStyles}>Location:</td>
-              <td>{flight.location}</td>
-            </tr>
-            <tr>
-              <td class={headerStyles}>Date:</td>
-              <td>{flight.date}</td>
-            </tr>
-            <tr>
-              <td class={headerStyles}>Duration:</td>
-              <td>{Duration.fromMillis((flight.durationSeconds || 0) * 1000).toFormat('hh:mm:ss')}</td>
-            </tr>
-            <tr>
-              <td class={headerStyles}>Launch:</td>
-              <td>{flight.launch?.name}</td>
-            </tr>
-          </tbody>
-        </table>
-        <table>
-          <thead>
-            <tr>
-              <th />
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class={headerStyles}>Max Distance:</td>
-              <td>{Math.round(flight.maxDistanceMeters ?? 0)}m</td>
-            </tr>
-            <tr>
-              <td class={headerStyles}>Max Altitude:</td>
-              <td>{flight.maxAltitudeMeters}m</td>
-            </tr>
-            <tr>
-              <td class={headerStyles}>Track Length:</td>
-              <td>{Math.round(flight.trackLengthMeters ?? 0)}m</td>
-            </tr>
-            <tr>
-              <td class={headerStyles}>Wing:</td>
-              <td>{flight.wing}</td>
-            </tr>
-            <tr>
-              {
-                flight.igcFile && (
-                  <>
-                    <td class={headerStyles}>IGC File:</td>
-                    <td>
-                      <a href={`/${flight.igcFile.filePath.replace(/^public\//, '')}`}>Download</a>
-                    </td>
-                  </>
-                )
-              }
-            </tr>
-          </tbody>
-        </table>
+
+    <!-- Map hero with title overlay -->
+    <div class="hero-map relative w-full overflow-hidden" style="height: 480px;">
+      <div class="absolute inset-0">
+        <FlightPreview client:only="react" flight={flight} height={480} interactive />
       </div>
-    </section>
+      <!-- Bottom gradient overlay -->
+      <div class="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/65 to-transparent pointer-events-none" />
+      <div class="absolute bottom-0 inset-x-0 px-6 py-4 pointer-events-none">
+        <a href="/flying" class="text-white/60 text-xs hover:text-white/90 pointer-events-auto transition-colors">← Paragliding Logbook</a>
+        <h1 class="text-white text-2xl font-bold mt-0.5 mb-0">{pageTitle}</h1>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content-area max-w-3xl mx-auto px-6 py-6 space-y-5">
+
+      <!-- Stats card -->
+      <FlightStats client:only="react" flight={flight} />
+
+      <!-- Notes -->
+      {flight.comments && (
+        <div class="notes-section">
+          <p class="notes-heading">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="notes-heading-icon">
+              <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32l8.4-8.4z" />
+            </svg>
+            Flight Notes
+          </p>
+          <div set:html={content} />
+        </div>
+      )}
+
+    </div>
   </div>
-</Layout>
+</BaseLayout>
+
+<style>
+  .flight-page {
+    min-height: 100vh;
+    background-color: #f8f7f5;
+  }
+
+  .notes-section {
+    @apply bg-white rounded-r-xl px-5 pt-3 pb-4 text-gray-600 text-sm leading-relaxed shadow-sm;
+    border-left: 3px solid #fdba74;
+  }
+
+  .notes-heading {
+    @apply flex items-center gap-1.5 text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2 mt-0;
+  }
+
+  .notes-heading-icon {
+    @apply w-3.5 h-3.5 text-orange-400 flex-shrink-0;
+  }
+
+  /* Override BaseLayout link color inside notes */
+  .notes-section :global(a) {
+    @apply text-orange-500;
+  }
+
+  /* Compact the action links row */
+  :global(.flight-page .flex.flex-row.pb-4) {
+    @apply justify-start pb-0;
+  }
+</style>

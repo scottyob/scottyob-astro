@@ -6,7 +6,7 @@ type Props = {
   interactive?: boolean;
 };
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import IGCParser, { type IGCFile } from 'igc-parser';
 import Map, { Source, Layer, type MapRef, NavigationControl } from 'react-map-gl';
 import axios from 'axios';
@@ -35,6 +35,12 @@ export default function FlightPreview(props: Props) {
   const { flight, height, interactive } = props;
   const [map, setMap] = useState<MapRef | null>(null);
   const [igc, setIgc] = useState<IGCFile | null>(null);
+  const animFrameRef = useRef<number | null>(null);
+
+  // Cancel rotation on unmount
+  useEffect(() => {
+    return () => { if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current); };
+  }, []);
 
   // Download the flight image
   useEffect(() => {
@@ -58,7 +64,30 @@ export default function FlightPreview(props: Props) {
     // Render 3D overlay if interactive
     map.on('style.load', function () {
 
-      map.fitBounds([bounds.min, bounds.max], { animate: false, padding: 40 });
+      map.fitBounds([bounds.min, bounds.max], { animate: false, padding: 20 });
+      map.getMap().zoomTo(map.getMap().getZoom() + 0.5, { duration: 0 });
+
+      if (interactive) {
+        // Isometric pitch
+        map.getMap().setPitch(55);
+
+        // Auto-rotate — stop on user interaction
+        let bearing = 0;
+        const rotate = () => {
+          bearing = (bearing + 0.06) % 360;
+          map.getMap().setBearing(bearing);
+          animFrameRef.current = requestAnimationFrame(rotate);
+        };
+        animFrameRef.current = requestAnimationFrame(rotate);
+
+        map.getMap().on('mousedown', () => {
+          if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+        });
+        map.getMap().on('touchstart', () => {
+          if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+        });
+      }
+
       if (!interactive) {
         return;
       }
@@ -140,15 +169,15 @@ export default function FlightPreview(props: Props) {
         // Satelite Style
         // mapStyle="https://api.maptiler.com/maps/satellite/style.json?key=KFYBsfFWC5kx8RrE5mb8"
 
-        // Normal Map style
-        mapStyle="https://api.maptiler.com/maps/streets/style.json?key=KFYBsfFWC5kx8RrE5mb8"
+        // Outdoor Map style
+        mapStyle="https://api.maptiler.com/maps/outdoor-v2/style.json?key=KFYBsfFWC5kx8RrE5mb8"
 
         // 3D Map Style???
         // mapStyle="mapbox://styles/mapbox/satellite-v9"
         mapboxAccessToken="pk.eyJ1Ijoic2NvdHR5b2IiLCJhIjoiY200bWN2ZTRxMGIzZzJpbjBrN2Z2MmgyaSJ9.uLLI2T-mOqaYejD2K3a_MQ"
         terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
         attributionControl={interactive}
-        scrollZoom={interactive}
+        scrollZoom={false}
         touchZoomRotate={interactive}
         dragPan={interactive}
         doubleClickZoom={interactive}
