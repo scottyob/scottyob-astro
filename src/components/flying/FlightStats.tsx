@@ -29,15 +29,15 @@ type StatProps = {
 
 function Stat({ icon: Icon, value, unit, label }: StatProps) {
   return (
-    <div className="flex flex-col py-2 px-4">
-      <div className="flex items-baseline gap-1.5">
-        <Icon className="text-orange-400 text-lg self-center flex-shrink-0" />
+    <div className="flex flex-col py-1 px-1.5 sm:py-2 sm:px-4">
+      <div className="flex items-baseline gap-0.5 sm:gap-1">
+        <Icon className="text-orange-400 text-sm sm:text-lg self-center flex-shrink-0" />
         {typeof value === 'string'
-          ? <span className="text-base font-semibold text-gray-800 leading-none">{value}</span>
+          ? <span className="text-xs sm:text-base font-semibold text-gray-800 leading-none">{value}</span>
           : value}
-        {unit && <span className="text-xs text-gray-400">{unit}</span>}
+        {unit && <span className="text-[9px] sm:text-xs text-gray-400">{unit}</span>}
       </div>
-      <div className="text-[11px] text-gray-400 uppercase tracking-wide mt-0.5 pl-[26px]">{label}</div>
+      <div className="text-[9px] sm:text-[11px] text-gray-400 uppercase tracking-wide mt-0.5 pl-[18px] sm:pl-[26px]">{label}</div>
     </div>
   );
 }
@@ -56,11 +56,11 @@ function LinkItem({ icon: Icon, label, description, href, external }: LinkItemPr
       href={href}
       target={external ? '_blank' : undefined}
       rel={external ? 'noopener noreferrer' : undefined}
-      className="flex flex-col items-center gap-1 px-3 py-3 text-center hover:bg-orange-50 transition-colors no-underline"
+      className="flex flex-col items-center gap-0.5 px-1 py-2 sm:px-3 sm:py-3 text-center hover:bg-orange-50 transition-colors no-underline"
     >
-      <Icon className="text-orange-400 text-xl" />
-      <span className="text-xs font-semibold text-gray-700">{label}</span>
-      <span className="text-[10px] text-gray-400 leading-tight">{description}</span>
+      <Icon className="text-orange-400 text-lg sm:text-xl" />
+      <span className="text-[10px] sm:text-xs font-semibold text-gray-700 break-words w-full">{label}</span>
+      <span className="text-[9px] sm:text-[10px] text-gray-400 leading-tight">{description}</span>
     </a>
   );
 }
@@ -115,12 +115,12 @@ export default function FlightStats({ flight }: { flight: Flight }) {
   const locationUrl = flight.location ? `/flying/site/${flight.location.replaceAll(' ', '-')}` : null;
 
   const wingValue = wingUrl
-    ? <a href={wingUrl} className="text-base font-semibold text-orange-500 hover:underline leading-none">{flight.wing}</a>
-    : <span className="text-base font-semibold text-gray-800 leading-none">{flight.wing ?? '—'}</span>;
+    ? <a href={wingUrl} className="text-xs sm:text-base font-semibold text-orange-500 hover:underline leading-none">{flight.wing}</a>
+    : <span className="text-xs sm:text-base font-semibold text-gray-800 leading-none">{flight.wing ?? '—'}</span>;
 
   const locationValue = locationUrl
-    ? <a href={locationUrl} className="text-base font-semibold text-orange-500 hover:underline leading-none">{flight.location}</a>
-    : <span className="text-base font-semibold text-gray-800 leading-none">{flight.location ?? flight.launch?.name ?? '—'}</span>;
+    ? <a href={locationUrl} className="text-xs sm:text-base font-semibold text-orange-500 hover:underline leading-none">{flight.location}</a>
+    : <span className="text-xs sm:text-base font-semibold text-gray-800 leading-none">{flight.location ?? flight.launch?.name ?? '—'}</span>;
 
   const stats: StatProps[] = [
     { icon: FaCalendarAlt,        value: flight.date,                                           label: 'Date' },

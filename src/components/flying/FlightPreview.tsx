@@ -62,7 +62,16 @@ export default function FlightPreview(props: Props) {
     const bounds = getBounds(positions);
 
     // Render 3D overlay if interactive
-    map.on('style.load', function () {
+    // Safari often fires style.load before this effect runs, so check first
+    const setupOnStyleLoad = (fn: () => void) => {
+      if (map.getMap().isStyleLoaded()) {
+        fn();
+      } else {
+        map.getMap().once('style.load', fn);
+      }
+    };
+
+    setupOnStyleLoad(function () {
 
       map.fitBounds([bounds.min, bounds.max], { animate: false, padding: 20 });
       map.getMap().zoomTo(map.getMap().getZoom() + 0.5, { duration: 0 });
