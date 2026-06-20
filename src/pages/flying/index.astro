@@ -48,16 +48,42 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
     style="scroll-padding-block-start: 200px;"
   >
     <!-- Hero Image -->
-    <div
-      class="hero-container w-full max-h-[75vh] flex items-stretch content-center overflow-hidden snap-start"
-    >
+    <div id="hero-container" class="relative w-full h-[75vh] overflow-hidden snap-start">
+      <!-- Blurred background (shown in square mode) -->
       <video
+        id="hero-blur-bg"
         src="/ParaglidingHeader.mp4"
-        class="block object-cover object-center w-full"
+        class="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl"
+        style="opacity:0; transition: opacity 0.3s"
+        autoplay
+        loop
+        muted
+        playsinline
+        aria-hidden="true"></video>
+      <!-- Main video -->
+      <video
+        id="hero-video"
+        src="/ParaglidingHeader.mp4"
+        class="relative z-10 w-full h-full object-cover"
         autoplay
         loop
         muted
         playsinline></video>
+      <!-- Mode toggle -->
+      <button
+        id="hero-toggle"
+        class="absolute bottom-3 right-3 z-20 bg-black/40 hover:bg-black/60 text-white rounded-md p-1.5 transition-colors"
+        title="Toggle video display mode"
+      >
+        <!-- Shown in rect mode: click to go square -->
+        <svg id="icon-to-square" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+        </svg>
+        <!-- Shown in square mode: click to go rect -->
+        <svg id="icon-to-rect" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <rect x="2" y="6" width="20" height="12" rx="2"/>
+        </svg>
+      </button>
     </div>
 
     <header class="w-full m-0 pt-0 snap-start" style="">
@@ -132,6 +158,39 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
   </div>
 </Layout>
 
+<script>
+  const hero = document.getElementById('hero-container') as HTMLElement;
+  const blurBg = document.getElementById('hero-blur-bg') as HTMLElement;
+  const mainVideo = document.getElementById('hero-video') as HTMLVideoElement;
+  const iconToSquare = document.getElementById('icon-to-square') as HTMLElement;
+  const iconToRect = document.getElementById('icon-to-rect') as HTMLElement;
+
+  let squareMode = false;
+
+  function setMode(square: boolean) {
+    squareMode = square;
+    if (square) {
+      blurBg.style.opacity = '0.75';
+      mainVideo.style.objectFit = 'contain';
+      iconToSquare.style.display = 'none';
+      iconToRect.style.display = 'block';
+    } else {
+      blurBg.style.opacity = '0';
+      mainVideo.style.objectFit = 'cover';
+      iconToSquare.style.display = 'block';
+      iconToRect.style.display = 'none';
+    }
+  }
+
+  document.getElementById('hero-toggle')!.addEventListener('click', () => setMode(!squareMode));
+
+  mainVideo.addEventListener('loadedmetadata', () => {
+    const videoAspect = mainVideo.videoWidth / mainVideo.videoHeight;
+    const pageAspect = window.innerWidth / window.innerHeight;
+    setMode(pageAspect > 2 * videoAspect);
+  });
+</script>
+
 <style is:global>
   .slick-slider {
     /* height: 100%; */
@@ -157,5 +216,9 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
 
   main a {
     @apply font-bold text-orange-600;
+  }
+
+  [data-testid="backdrop"] {
+    z-index: 9999;
   }
 </style>
