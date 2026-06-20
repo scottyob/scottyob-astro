@@ -5,6 +5,7 @@ import { useState } from 'react';
 import tw from 'tailwind-styled-components';
 import FlightYearGraph from './FlightYearGraph';
 import FlightLocationGraph from './FlightLocationGraph';
+import FlightWingGraph from './FlightWingGraph';
 
 export type Props = {
   flights: Flight[];
@@ -80,6 +81,11 @@ export default function FlightGraphs(props: Props) {
           setSelected={setSelected}
           title="By Location"
         />
+        <TabItem
+          selected={selected}
+          setSelected={setSelected}
+          title="By Wing"
+        />
       </ul>
 
       <div
@@ -101,6 +107,12 @@ export default function FlightGraphs(props: Props) {
           )}
           {selected == 'By Location' && (
             <FlightLocationGraph
+              flights={props.flights}
+              height={graphHeight}
+            />
+          )}
+          {selected == 'By Wing' && (
+            <FlightWingGraph
               flights={props.flights}
               height={graphHeight}
             />
