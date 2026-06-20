@@ -33,7 +33,7 @@ const getBounds = (positions: LatLng[]) => {
 
 export default function FlightPreview(props: Props) {
   const { flight, height, interactive } = props;
-  const [map, setMap] = useState<MapRef | null>(null);
+  const mapRef = useRef<MapRef | null>(null);
   const [igc, setIgc] = useState<IGCFile | null>(null);
   const animFrameRef = useRef<number | null>(null);
 
@@ -42,100 +42,14 @@ export default function FlightPreview(props: Props) {
     return () => { if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current); };
   }, []);
 
-  // Download the flight image
+  // Download the flight IGC file
   useEffect(() => {
     const url = flight.igcFile?.filePathUrl;
-    if (!url) {
-      return;
-    }
+    if (!url) return;
     axios.get(url, { responseType: 'text' }).then((response) => {
       setIgc(IGCParser.parse(response.data));
     });
   }, []);
-
-  // Setup our bounds fitting on render
-  useEffect(() => {
-    if (!map) {
-      return;
-    }
-
-    const bounds = getBounds(positions);
-
-    // Render 3D overlay if interactive
-    // Safari often fires style.load before this effect runs, so check first
-    const setupOnStyleLoad = (fn: () => void) => {
-      if (map.getMap().isStyleLoaded()) {
-        fn();
-      } else {
-        map.getMap().once('style.load', fn);
-      }
-    };
-
-    setupOnStyleLoad(function () {
-
-      map.fitBounds([bounds.min, bounds.max], { animate: false, padding: 20 });
-      map.getMap().zoomTo(map.getMap().getZoom() + 0.5, { duration: 0 });
-
-      if (interactive) {
-        // Isometric pitch
-        map.getMap().setPitch(55);
-
-        // Auto-rotate — stop on user interaction
-        let bearing = 0;
-        const rotate = () => {
-          bearing = (bearing + 0.06) % 360;
-          map.getMap().setBearing(bearing);
-          animFrameRef.current = requestAnimationFrame(rotate);
-        };
-        animFrameRef.current = requestAnimationFrame(rotate);
-
-        map.getMap().on('mousedown', () => {
-          if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-        });
-        map.getMap().on('touchstart', () => {
-          if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-        });
-      }
-
-      if (!interactive) {
-        return;
-      }
-
-      let tb: Threebox | undefined = undefined;
-
-      map.getMap().addLayer({
-        id: "custom layer",
-        type: "custom",
-        renderingMode: "3d",
-        onAdd: function (map, mbxContext) {
-          tb = new Threebox(map, mbxContext, { defaultLights: true });
-          if (!igc) return;
-
-          for (let i = 1; i < igc.fixes.length - 1; i++) {
-            // Draw a line between each point with altitude with the point before
-            const line_segment = tb.line({
-              // NOTE:  Taken from example online, where the height is broken and setting a 1.5 multiplier seems to do the trick
-              // Intent is to use the 3D Cesium replayer for playback which seems to have a more accurate representation
-              geometry: [
-                [igc.fixes[i].longitude, igc.fixes[i].latitude, (igc.fixes[i].gpsAltitude || 0) * 1.5],
-                [igc.fixes[i - 1].longitude, igc.fixes[i - 1].latitude, (igc.fixes[i - 1].gpsAltitude || 0) * 1.5],
-              ],
-              color: '#dd0000', // color based on latitude of endpoint
-              width: 4,
-              opacity: 1,
-            });
-            tb.add(line_segment);
-          }
-
-        },
-        render: function (_gl, _matrix) {
-          if (tb) {
-            tb.update();
-          }
-        }
-      })
-    });
-  }, [map]);
 
   if (!igc) {
     return (
@@ -149,13 +63,12 @@ export default function FlightPreview(props: Props) {
   }
 
   const position = { lat: igc.fixes[0].latitude, lng: igc.fixes[0].longitude };
-  const positions = igc.fixes.map((p) => {
-    return {
-      lat: p.latitude,
-      lng: p.longitude,
-      alt: p.gpsAltitude,
-    };
-  });
+  const positions = igc.fixes.map((p) => ({
+    lat: p.latitude,
+    lng: p.longitude,
+    alt: p.gpsAltitude,
+  }));
+  const bounds = getBounds(positions);
 
   const data = {
     type: 'Feature',
@@ -165,24 +78,74 @@ export default function FlightPreview(props: Props) {
     },
   };
 
+  // Called by react-map-gl's onLoad — fires exactly once after style + resources are ready.
+  // Avoids the style.load timing race that breaks Safari.
+  const handleLoad = () => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    map.fitBounds([bounds.min, bounds.max], { animate: false, padding: 20 });
+    map.getMap().zoomTo(map.getMap().getZoom() + 0.5, { duration: 0 });
+
+    if (!interactive) return;
+
+    map.getMap().setPitch(55);
+
+    let bearing = 0;
+    const rotate = () => {
+      bearing = (bearing + 0.06) % 360;
+      map.getMap().setBearing(bearing);
+      animFrameRef.current = requestAnimationFrame(rotate);
+    };
+    animFrameRef.current = requestAnimationFrame(rotate);
+
+    map.getMap().on('mousedown', () => {
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    });
+    map.getMap().on('touchstart', () => {
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    });
+
+    let tb: Threebox | undefined = undefined;
+    map.getMap().addLayer({
+      id: 'custom layer',
+      type: 'custom',
+      renderingMode: '3d',
+      onAdd: function (map, mbxContext) {
+        tb = new Threebox(map, mbxContext, { defaultLights: true });
+        for (let i = 1; i < igc.fixes.length - 1; i++) {
+          // NOTE: height multiplier is a known Threebox quirk — 1.5x matches visual expectations
+          const line_segment = tb.line({
+            geometry: [
+              [igc.fixes[i].longitude, igc.fixes[i].latitude, (igc.fixes[i].gpsAltitude || 0) * 1.5],
+              [igc.fixes[i - 1].longitude, igc.fixes[i - 1].latitude, (igc.fixes[i - 1].gpsAltitude || 0) * 1.5],
+            ],
+            color: '#dd0000',
+            width: 4,
+            opacity: 1,
+          });
+          tb.add(line_segment);
+        }
+      },
+      render: function (_gl, _matrix) {
+        if (tb) tb.update();
+      },
+    });
+  };
+
   return (
     <div className="">
       <Map
-        ref={(ref) => setMap(ref)}
+        ref={mapRef}
+        onLoad={handleLoad}
         initialViewState={{
           longitude: position.lng,
           latitude: position.lat,
           zoom: 10,
         }}
         style={{ width: '100%', height: height }}
-        // Satelite Style
-        // mapStyle="https://api.maptiler.com/maps/satellite/style.json?key=KFYBsfFWC5kx8RrE5mb8"
-
         // Outdoor Map style
         mapStyle="https://api.maptiler.com/maps/outdoor-v2/style.json?key=KFYBsfFWC5kx8RrE5mb8"
-
-        // 3D Map Style???
-        // mapStyle="mapbox://styles/mapbox/satellite-v9"
         mapboxAccessToken="pk.eyJ1Ijoic2NvdHR5b2IiLCJhIjoiY200bWN2ZTRxMGIzZzJpbjBrN2Z2MmgyaSJ9.uLLI2T-mOqaYejD2K3a_MQ"
         terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
         attributionControl={interactive}
@@ -217,12 +180,10 @@ export default function FlightPreview(props: Props) {
           <Layer
             type='hillshade'
             id='hillshade'
-            layout={{
-              visibility: 'visible',
-            }}
+            layout={{ visibility: 'visible' }}
             paint={{"hillshade-shadow-color": "#473B24"}}
           />
-          </Source>
+        </Source>
         {interactive && <NavigationControl position='top-right' showZoom={true} showCompass />}
       </Map>
     </div>
