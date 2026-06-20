@@ -6,7 +6,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { colorSchemes } from '@nivo/colors';
 
 function BoundedTooltip({ color, formattedY, formattedX, flight, mouseX }: {
-  color: string; formattedY: string; formattedX: string; flight: Flight; mouseX: number;
+  color: string; formattedY: string | number; formattedX: string | number; flight: Flight; mouseX: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
