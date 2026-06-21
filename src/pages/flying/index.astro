@@ -48,13 +48,12 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
     style="scroll-padding-block-start: 200px;"
   >
     <!-- Hero Image -->
-    <div id="hero-container" class="relative w-full h-[75vh] overflow-hidden snap-start">
+    <div id="hero-container" class="hero-video hero-video--cover relative w-full h-[75vh] overflow-hidden snap-start">
       <!-- Blurred background (shown in square mode) -->
       <video
         id="hero-blur-bg"
         src="/ParaglidingHeader.mp4"
-        class="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl"
-        style="opacity:0; transition: opacity 0.3s"
+        class="hero-video__blur"
         autoplay
         loop
         muted
@@ -64,7 +63,7 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
       <video
         id="hero-video"
         src="/ParaglidingHeader.mp4"
-        class="relative z-10 w-full h-full object-cover"
+        class="hero-video__main"
         autoplay
         loop
         muted
@@ -80,7 +79,7 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
           <rect x="3" y="3" width="18" height="18" rx="2"/>
         </svg>
         <!-- Shown in square mode: click to go rect -->
-        <svg id="icon-to-rect" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+        <svg id="icon-to-rect" class="hero-toggle__icon--hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="2" y="6" width="20" height="12" rx="2"/>
         </svg>
       </button>
@@ -159,38 +158,98 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
 </Layout>
 
 <script>
-  const blurBg = document.getElementById('hero-blur-bg') as HTMLElement;
+  const heroContainer = document.getElementById('hero-container') as HTMLElement;
+  const blurBg = document.getElementById('hero-blur-bg') as HTMLVideoElement;
   const mainVideo = document.getElementById('hero-video') as HTMLVideoElement;
   const iconToSquare = document.getElementById('icon-to-square') as HTMLElement;
   const iconToRect = document.getElementById('icon-to-rect') as HTMLElement;
 
-  let squareMode = false;
+  let containMode = false;
+  let userMode: boolean | undefined;
 
-  function setMode(square: boolean) {
-    squareMode = square;
-    if (square) {
-      blurBg.style.opacity = '0.75';
-      mainVideo.style.objectFit = 'contain';
-      iconToSquare.style.display = 'none';
-      iconToRect.style.display = 'block';
-    } else {
-      blurBg.style.opacity = '0';
-      mainVideo.style.objectFit = 'cover';
-      iconToSquare.style.display = 'block';
-      iconToRect.style.display = 'none';
-    }
+  function setMode(contain: boolean) {
+    containMode = contain;
+    heroContainer.classList.toggle('hero-video--contain', contain);
+    heroContainer.classList.toggle('hero-video--cover', !contain);
+    iconToSquare.classList.toggle('hero-toggle__icon--hidden', contain);
+    iconToRect.classList.toggle('hero-toggle__icon--hidden', !contain);
   }
 
-  document.getElementById('hero-toggle')!.addEventListener('click', () => setMode(!squareMode));
+  function applyAutoMode() {
+    if (!mainVideo.videoWidth || !mainVideo.videoHeight) return;
+    if (userMode !== undefined) {
+      setMode(userMode);
+      return;
+    }
 
-  mainVideo.addEventListener('loadedmetadata', () => {
     const videoAspect = mainVideo.videoWidth / mainVideo.videoHeight;
-    const pageAspect = window.innerWidth / window.innerHeight;
-    setMode(pageAspect > 2 * videoAspect);
+    const heroAspect = heroContainer.clientWidth / heroContainer.clientHeight;
+    setMode(heroAspect > 2 * videoAspect);
+  }
+
+  function syncBlurVideo(force = false) {
+    if (!mainVideo.duration || !blurBg.duration) return;
+    const drift = Math.abs(blurBg.currentTime - mainVideo.currentTime);
+    if (force || drift > 0.1) {
+      blurBg.currentTime = mainVideo.currentTime;
+    }
+    blurBg.playbackRate = mainVideo.playbackRate;
+  }
+
+  document.getElementById('hero-toggle')!.addEventListener('click', () => {
+    userMode = !containMode;
+    setMode(userMode);
   });
+
+  const resizeObserver = new ResizeObserver(applyAutoMode);
+  resizeObserver.observe(heroContainer);
+
+  mainVideo.addEventListener('loadedmetadata', applyAutoMode);
+  mainVideo.addEventListener('loadeddata', () => syncBlurVideo(true));
+  mainVideo.addEventListener('play', () => syncBlurVideo(true));
+  mainVideo.addEventListener('seeking', () => syncBlurVideo(true));
+  mainVideo.addEventListener('ratechange', () => syncBlurVideo(true));
+  mainVideo.addEventListener('timeupdate', () => syncBlurVideo());
 </script>
 
 <style is:global>
+  .hero-video__blur,
+  .hero-video__main {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-video__blur {
+    object-fit: cover;
+    transform: scale(1.1);
+    filter: blur(24px);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .hero-video__main {
+    z-index: 10;
+    object-fit: cover;
+  }
+
+  .hero-video--contain .hero-video__blur {
+    opacity: 0.75;
+  }
+
+  .hero-video--contain .hero-video__main {
+    object-fit: contain;
+  }
+
+  .hero-video--cover .hero-video__main {
+    object-fit: cover;
+  }
+
+  .hero-toggle__icon--hidden {
+    display: none;
+  }
+
   .slick-slider {
     /* height: 100%; */
   }
