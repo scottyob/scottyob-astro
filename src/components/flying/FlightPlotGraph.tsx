@@ -7,7 +7,17 @@ import { colorSchemes } from '@nivo/colors';
 
 type CardFlight = { flight: Flight; x: number; y: number };
 
-function FlightCard({ flight, x, y }: { flight: Flight; x: number; y: number }) {
+function FlightCard({
+  flight,
+  x,
+  y,
+  interactive,
+}: {
+  flight: Flight;
+  x: number;
+  y: number;
+  interactive: boolean;
+}) {
   const ref = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -32,8 +42,9 @@ function FlightCard({ flight, x, y }: { flight: Flight; x: number; y: number }) 
     <div
       ref={ref}
       style={{ position: 'absolute', left: x, top: y, zIndex: 100, backgroundColor: '#333' }}
-      className="text-white p-2 rounded shadow-lg text-left"
+      className={`text-white p-2 rounded shadow-lg text-left ${interactive ? '' : 'pointer-events-none'}`}
       onClick={(e) => e.stopPropagation()}
+      onMouseMove={(e) => e.stopPropagation()}
       onPointerMove={(e) => e.stopPropagation()}
     >
       <a
@@ -200,6 +211,7 @@ export default function FlightPlotGraph(props: Props) {
           flight={displayedFlight.flight}
           x={displayedFlight.x}
           y={displayedFlight.y}
+          interactive={displayedFlight === pinnedFlight}
         />
       )}
     </div>
