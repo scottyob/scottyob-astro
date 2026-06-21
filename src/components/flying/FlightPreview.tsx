@@ -36,6 +36,8 @@ export default function FlightPreview(props: Props) {
   const mapRef = useRef<MapRef | null>(null);
   const [igc, setIgc] = useState<IGCFile | null>(null);
   const animFrameRef = useRef<number | null>(null);
+  const [controlsEnabled, setControlsEnabled] = useState(false);
+  const controlsEnabledRef = useRef(false);
 
   // Cancel rotation on unmount
   useEffect(() => {
@@ -91,50 +93,99 @@ export default function FlightPreview(props: Props) {
 
     map.getMap().setPitch(55);
 
-    let bearing = 0;
-    const rotate = () => {
-      bearing = (bearing + 0.06) % 360;
-      map.getMap().setBearing(bearing);
-      animFrameRef.current = requestAnimationFrame(rotate);
-    };
-    animFrameRef.current = requestAnimationFrame(rotate);
-
     map.getMap().on('mousedown', () => {
+      if (!controlsEnabledRef.current) return;
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     });
     map.getMap().on('touchstart', () => {
+      if (!controlsEnabledRef.current) return;
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     });
 
-    let tb: Threebox | undefined = undefined;
-    map.getMap().addLayer({
-      id: 'custom layer',
-      type: 'custom',
-      renderingMode: '3d',
-      onAdd: function (map, mbxContext) {
-        tb = new Threebox(map, mbxContext, { defaultLights: true });
-        for (let i = 1; i < igc.fixes.length - 1; i++) {
-          // NOTE: height multiplier is a known Threebox quirk — 1.5x matches visual expectations
-          const line_segment = tb.line({
-            geometry: [
-              [igc.fixes[i].longitude, igc.fixes[i].latitude, (igc.fixes[i].gpsAltitude || 0) * 1.5],
-              [igc.fixes[i - 1].longitude, igc.fixes[i - 1].latitude, (igc.fixes[i - 1].gpsAltitude || 0) * 1.5],
-            ],
-            color: '#dd0000',
-            width: 4,
-            opacity: 1,
-          });
-          tb.add(line_segment);
-        }
-      },
-      render: function (_gl, _matrix) {
-        if (tb) tb.update();
-      },
-    });
+    // Poll on each render frame until the DEM source is loaded and terrain is active.
+    // We can't use 'idle' because other tile sources (hillshade, outdoor style) may
+    // keep the map busy indefinitely after DEM tiles arrive. And we can't add the
+    // Threebox layer before DEM tiles load because Threebox's CameraSync only syncs
+    // its camera on 'move' events — if terrain isn't loaded yet when CameraSync
+    // initialises, t._camera.position[2] is wrong and the track floats above terrain.
+    let trackLayerAdded = false;
+    const addWhenDemReady = () => {
+      if (trackLayerAdded) return;
+      try {
+        if (!map.getMap().getTerrain() || !map.getMap().isSourceLoaded('mapbox-dem')) return;
+      } catch (_) {
+        return; // source not yet registered
+      }
+      trackLayerAdded = true;
+      map.getMap().off('render', addWhenDemReady);
+
+      const logCameraState = (label: string) => {
+        const t = (map.getMap() as any).transform;
+        console.log(`[FlightPreview] ${label}`, {
+          'camera.position[2]': t._camera?.position[2],
+          'camera.position': t._camera?.position?.slice(),
+          'elevation set': !!t.elevation,
+          'centerAltitude': t._centerAltitude,
+          'zoom': t._zoom,
+          'pitch': t._pitch * 180 / Math.PI,
+        });
+      };
+
+      logCameraState('DEM ready → adding layer');
+      map.getMap().on('move', () => logCameraState('move event'));
+
+      let tb: Threebox | undefined = undefined;
+      let frameCount = 0;
+      map.getMap().addLayer({
+        id: 'custom layer',
+        type: 'custom',
+        renderingMode: '3d',
+        onAdd: function (map, mbxContext) {
+          logCameraState('onAdd');
+          tb = new Threebox(map, mbxContext, { defaultLights: true });
+          logCameraState('after Threebox init');
+          for (let i = 1; i < igc.fixes.length - 1; i++) {
+            // NOTE: height multiplier is a known Threebox quirk — 1.5x matches visual expectations
+            const line_segment = tb.line({
+              geometry: [
+                [igc.fixes[i].longitude, igc.fixes[i].latitude, (igc.fixes[i].gpsAltitude || 0) * 1.5],
+                [igc.fixes[i - 1].longitude, igc.fixes[i - 1].latitude, (igc.fixes[i - 1].gpsAltitude || 0) * 1.5],
+              ],
+              color: '#dd0000',
+              width: 4,
+              opacity: 1,
+            });
+            tb.add(line_segment);
+          }
+        },
+        render: function (_gl, _matrix) {
+          if (tb) {
+            frameCount++;
+            if (frameCount <= 5) {
+              const t = (map as any).transform;
+              console.log(`[FlightPreview] render #${frameCount}`, {
+                'camera.position[2]': t._camera?.position[2],
+                'tb.camera.matrixWorld[14]': tb.camera.matrixWorld.elements[14],
+              });
+            }
+            tb.update();
+          }
+        },
+      });
+
+      let bearing = 0;
+      const rotate = () => {
+        bearing = (bearing + 0.06) % 360;
+        map.getMap().setBearing(bearing);
+        animFrameRef.current = requestAnimationFrame(rotate);
+      };
+      animFrameRef.current = requestAnimationFrame(rotate);
+    };
+    map.getMap().on('render', addWhenDemReady);
   };
 
   return (
-    <div className="">
+    <div className="relative">
       <Map
         ref={mapRef}
         onLoad={handleLoad}
@@ -149,10 +200,12 @@ export default function FlightPreview(props: Props) {
         mapboxAccessToken="pk.eyJ1Ijoic2NvdHR5b2IiLCJhIjoiY200bWN2ZTRxMGIzZzJpbjBrN2Z2MmgyaSJ9.uLLI2T-mOqaYejD2K3a_MQ"
         terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
         attributionControl={interactive}
-        scrollZoom={false}
-        touchZoomRotate={interactive}
-        dragPan={interactive}
-        doubleClickZoom={interactive}
+        scrollZoom={interactive && controlsEnabled}
+        touchZoomRotate={interactive && controlsEnabled}
+        dragPan={interactive && controlsEnabled}
+        dragRotate={interactive && controlsEnabled}
+        doubleClickZoom={interactive && controlsEnabled}
+        keyboard={interactive && controlsEnabled}
         interactive={interactive}
       >
         <Source type="geojson" data={data}>
@@ -184,8 +237,25 @@ export default function FlightPreview(props: Props) {
             paint={{"hillshade-shadow-color": "#473B24"}}
           />
         </Source>
-        {interactive && <NavigationControl position='top-right' showZoom={true} showCompass />}
+        {interactive && controlsEnabled && <NavigationControl position='top-right' showZoom={true} showCompass />}
       </Map>
+      {interactive && (
+        <button
+          onClick={() => {
+            const next = !controlsEnabledRef.current;
+            controlsEnabledRef.current = next;
+            setControlsEnabled(next);
+          }}
+          title={controlsEnabled ? 'Disable camera controls' : 'Enable camera controls'}
+          className="absolute top-2.5 left-2.5 w-9 h-9 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors pointer-events-auto"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+            {!controlsEnabled && <line x1="2" y1="2" x2="22" y2="22"/>}
+          </svg>
+        </button>
+      )}
     </div>
   );
 }
