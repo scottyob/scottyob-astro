@@ -5,43 +5,45 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { colorSchemes } from '@nivo/colors';
 
-function BoundedTooltip({ color, formattedY, formattedX, flight, mouseX }: {
-  color: string; formattedY: string | number; formattedX: string | number; flight: Flight; mouseX: number;
-}) {
+type CardFlight = { flight: Flight; x: number; y: number };
+
+function FlightCard({ flight, x, y }: { flight: Flight; x: number; y: number }) {
   const ref = useRef<HTMLDivElement>(null);
 
-  // Re-run on every mouseX change. useLayoutEffect fires before paint so
-  // there's no visible flash. Reset first so we measure the natural position.
   useLayoutEffect(() => {
     if (!ref.current) return;
     ref.current.style.transform = '';
-    const rect = ref.current.getBoundingClientRect();
-    // Walk up to the nearest scrolling container to get its visible right edge,
-    // accounting for its scrollbar width.
-    let container: Element | null = ref.current.parentElement;
-    while (container && getComputedStyle(container).overflowY === 'visible') {
-      container = container.parentElement;
-    }
-    const containerRight = container
-      ? container.getBoundingClientRect().left + (container as HTMLElement).clientWidth
-      : document.documentElement.clientWidth;
-    const overRight = rect.right - containerRight;
-    const overTop = -rect.top;
-    const tx = overRight > 0 ? -(overRight + 8) : 0;
-    const ty = overTop > 0 ? overTop + 8 : 0;
+    const cardRect = ref.current.getBoundingClientRect();
+    const overRight = cardRect.right - window.innerWidth + 24;
+    const overBottom = cardRect.bottom - window.innerHeight + 8;
+    const tx = overRight > 0 ? -overRight : 0;
+    const ty = overBottom > 0 ? -overBottom : 0;
     if (tx !== 0 || ty !== 0) {
       ref.current.style.transform = `translate(${tx}px, ${ty}px)`;
     }
-  }, [mouseX]);
+  }, [x, y]);
+
+  const flightUrl = `/flying/flight/${flight.id}`;
+  const duration = flight.durationSeconds
+    ? prettyMilliseconds(flight.durationSeconds * 1000, { hideSeconds: true })
+    : undefined;
 
   return (
     <div
       ref={ref}
-      style={{ color, backgroundColor: '#333' }}
-      className="p-1 whitespace-nowrap text-left"
+      style={{ position: 'absolute', left: x, top: y, zIndex: 100, backgroundColor: '#333' }}
+      className="text-white p-2 rounded shadow-lg text-left"
+      onClick={(e) => e.stopPropagation()}
+      onPointerMove={(e) => e.stopPropagation()}
     >
-      <div className="font-bold text-center">{formattedY}</div>
-      <div className="text-sm mb-2">{formattedX}: {flight.location ?? 'Unknown'}</div>
+      <a
+        href={flightUrl}
+        target="_blank"
+        className="font-bold text-center block text-blue-300 hover:underline"
+      >
+        {duration}
+      </a>
+      <div className="text-sm mb-2">{flight.date}: {flight.location ?? 'Unknown'}</div>
       <div className="whitespace-normal w-[20ch]">{flight.commentsTruncated}</div>
     </div>
   );
@@ -87,19 +89,56 @@ function generateData(flights: Flight[]) {
 
 export default function FlightPlotGraph(props: Props) {
   const [highlighted, setHighlighted] = useState<string | undefined>();
-  const [mouseX, setMouseX] = useState(0);
+  const [pinnedFlight, setPinnedFlightState] = useState<CardFlight | null>(null);
+  const [hoveredFlight, setHoveredFlight] = useState<CardFlight | null>(null);
+  const pinnedRef = useRef<CardFlight | null>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const lastPointerRef = useRef({ x: 0, y: 0 });
+
+  const supportsHover = typeof window !== 'undefined' && window.matchMedia('(hover: hover)').matches;
+  // Set to true by nivo's onMouseMove before the event bubbles to the wrapper div.
+  // Wrapper checks this flag: if set, we're over a circle (don't clear hover); if not, we're on empty space.
+  const nivoMovedRef = useRef(false);
+
+  const setPinnedFlight = (pf: CardFlight | null) => {
+    pinnedRef.current = pf;
+    setPinnedFlightState(pf);
+  };
 
   const data = generateData(props.flights);
+  const displayedFlight = pinnedFlight ?? hoveredFlight;
 
   const chart = (width: number) => (
-    <div className="min-h-[400px] [&_circle]:cursor-pointer" onMouseMove={(e) => setMouseX(e.clientX)}>
+    <div
+      ref={wrapperRef}
+      className="min-h-[400px] [&_circle]:cursor-pointer relative"
+      onMouseMove={(e) => {
+        if (!wrapperRef.current) return;
+        const rect = wrapperRef.current.getBoundingClientRect();
+        lastPointerRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        if (supportsHover && !pinnedRef.current) {
+          if (nivoMovedRef.current) {
+            nivoMovedRef.current = false;
+          } else {
+            setHoveredFlight(null);
+          }
+        }
+      }}
+      onMouseLeave={() => {
+        if (supportsHover && !pinnedRef.current) setHoveredFlight(null);
+      }}
+      onPointerDown={(e) => {
+        if (!wrapperRef.current) return;
+        const rect = wrapperRef.current.getBoundingClientRect();
+        lastPointerRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      }}
+      onClick={() => setPinnedFlight(null)}
+    >
       <ScatterPlot
         data={data}
         height={props.height}
         width={width}
-        colors={{
-          scheme: 'set3',
-        }}
+        colors={{ scheme: 'set3' }}
         xScale={{
           type: 'time',
           format: '%Y-%m-%d',
@@ -133,9 +172,7 @@ export default function FlightPlotGraph(props: Props) {
         annotations={[
           {
             type: 'rect',
-            match: {
-              serieId: highlighted ?? undefined,
-            },
+            match: { serieId: highlighted ?? undefined },
             note: '',
             noteX: 0,
             noteY: 0,
@@ -143,17 +180,28 @@ export default function FlightPlotGraph(props: Props) {
           },
         ]}
         animate={false}
-        onClick={({ data }) => window.open(`/flying/flight/${data.flight.id}`, '_blank')}
-        tooltip={({ node }) => (
-          <BoundedTooltip
-            color={node.color}
-            formattedY={node.formattedY}
-            formattedX={node.formattedX}
-            flight={node.data.flight}
-            mouseX={mouseX}
-          />
-        )}
+        useMesh={false}
+        tooltip={() => null}
+        onClick={({ data }, event) => {
+          event.stopPropagation();
+          setPinnedFlight({ flight: data.flight, ...lastPointerRef.current });
+        }}
+        onMouseMove={supportsHover ? (node) => {
+          nivoMovedRef.current = true;
+          if (pinnedRef.current) return;
+          setHoveredFlight((prev) => {
+            if (prev?.flight.id === node.data.flight.id) return prev;
+            return { flight: node.data.flight, ...lastPointerRef.current };
+          });
+        } : undefined}
       />
+      {displayedFlight && (
+        <FlightCard
+          flight={displayedFlight.flight}
+          x={displayedFlight.x}
+          y={displayedFlight.y}
+        />
+      )}
     </div>
   );
 
