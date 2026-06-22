@@ -45,10 +45,6 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
 ---
 
 <Layout title="Flying Log" description="Paragliding Flying Logbook">
-  <div
-    class="flyingpage-layout-container overflow-y-scroll overflow-x-hidden h-lvh w-full bg-[#fefefe] text-[#444]"
-    style="scroll-padding-block-start: 200px;"
-  >
     <!-- Hero Image -->
     {showHero && (
     <div id="hero-container" class="hero-video hero-video--cover relative w-full h-[75vh] overflow-hidden snap-start">
@@ -150,7 +146,6 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
         </div>
       </div>
     </main>
-  </div>
 </Layout>
 
 <script>
@@ -243,6 +238,12 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
 </script>
 
 <style is:global>
+  body {
+    background-color: #fefefe;
+    color: #444;
+    overflow-x: hidden;
+  }
+
   .hero-video__blur,
   .hero-video__main {
     position: absolute;

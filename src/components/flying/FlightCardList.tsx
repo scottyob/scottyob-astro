@@ -136,7 +136,7 @@ export default function FlightCardList(props: Props) {
   );
 
   return (
-    <div>
+    <div id="flightList">
       <div className="flex flex-wrap grow min-h-9 space-x-4 items-center justify-center">
         <div>
           <a href="/flying/sheet">
@@ -178,7 +178,7 @@ export default function FlightCardList(props: Props) {
           </button>
         </div>
       )}
-      <div id="flightList">
+      <div>
         {currentFlights.map((flight) => (
           <FlightCard key={flight.number as number} flight={flight} />
         ))}
