@@ -2,6 +2,7 @@ import type { Flight } from '@libs/flyingTypes';
 import { Calendar } from '@nivo/calendar';
 import './flycal.css';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { compute } from 'compute-scroll-into-view';
 import { Modal } from 'pretty-modal';
 
@@ -38,6 +39,23 @@ const minutesByDay = (flights: Flight[]) => {
   }));
 };
 
+const flightsByDay = (flights: Flight[]): { [date: string]: Flight[] } => {
+  const map: { [date: string]: Flight[] } = {};
+  flights.forEach((f) => {
+    if (!map[f.date]) map[f.date] = [];
+    map[f.date].push(f);
+  });
+  return map;
+};
+
+const formatDuration = (minutes: number): string => {
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+};
+
 // Returns flights grouped by year
 const flightsByYear = (flights: Flight[]): Flight[][] => {
   const byYear: { [year: string]: Flight[] } = {};
@@ -53,23 +71,25 @@ const flightsByYear = (flights: Flight[]): Flight[][] => {
   );
 };
 
+type HoveredDay = { day: string; value: number; x: number; y: number };
+
 export default function FlyCalendar(props: Props) {
-  // This should refer to a div element
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [hovered, setHovered] = useState<HoveredDay | null>(null);
 
   const { verticle } = props;
+  const allDayMap = flightsByDay(props.flights);
 
-  // Effect to scroll to the bottom of chat messages
   useEffect(() => {
     if (!messagesEndRef.current) { return; }
 
     const currentMonth = new Date().toLocaleString('en-US', {
       month: 'short',
-    }); // e.g., "Dec"
+    });
     const elements = Array.from(
       messagesEndRef.current.querySelectorAll('text')
-    ); // get all descendant elements
+    );
     const lastElementWithMonthText = elements.findLast(
       (element) => element.textContent?.trim() === currentMonth
     );
@@ -145,7 +165,15 @@ export default function FlyCalendar(props: Props) {
               minValue={stats.minValue}
               maxValue={stats.maxValue}
               legends={[]}
-              height={height} // width / 8}
+              tooltip={() => null}
+              onMouseEnter={(datum, event) => {
+                setHovered({ day: datum.day, value: datum.value ?? 0, x: event.clientX, y: event.clientY });
+              }}
+              onMouseMove={(datum, event) => {
+                setHovered((h) => h ? { ...h, x: event.clientX, y: event.clientY } : h);
+              }}
+              onMouseLeave={() => setHovered(null)}
+              height={height}
               width={width}
             />
           </div>
@@ -154,8 +182,33 @@ export default function FlyCalendar(props: Props) {
     });
   };
 
+  const dayFlights = hovered ? (allDayMap[hovered.day] ?? []) : [];
+  const locations = [...new Set(dayFlights.map((f) => f.location).filter(Boolean))];
+
   return (
     <>
+      {hovered && createPortal(
+        <div style={{
+          position: 'fixed',
+          left: hovered.x + 12,
+          top: hovered.y + 12,
+          background: 'white',
+          padding: '8px 10px',
+          border: '1px solid #ccc',
+          borderRadius: '4px',
+          fontSize: '12px',
+          lineHeight: '1.6',
+          pointerEvents: 'none',
+          zIndex: 9999,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+        }}>
+          <div><strong>{hovered.day}</strong></div>
+          <div>{formatDuration(hovered.value)} &mdash; {dayFlights.length} flight{dayFlights.length !== 1 ? 's' : ''}</div>
+          {locations.length > 0 && <div style={{ color: '#666' }}>{locations.join(', ')}</div>}
+        </div>,
+        document.body
+      )}
+
       <Modal
         open={isOpen}
         onClose={() => {
