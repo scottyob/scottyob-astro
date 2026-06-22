@@ -88,7 +88,7 @@ export default function FlightPreview(props: Props) {
 
     map.fitBounds([bounds.min, bounds.max], { animate: false, padding: 20 });
     map.getMap().zoomTo(map.getMap().getZoom() + 0.5, { duration: 0 });
-    map.getMap().setPitch(interactive ? 70 : 0);
+    map.getMap().setPitch(interactive ? 75 : 0);
 
     if (!interactive) return;
 
