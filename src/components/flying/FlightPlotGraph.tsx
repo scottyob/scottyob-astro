@@ -4,6 +4,8 @@ import prettyMilliseconds from 'pretty-ms';
 import { useLayoutEffect, useRef, useState } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { colorSchemes } from '@nivo/colors';
+import { useStore } from '@nanostores/react';
+import { $siteFilter } from '@libs/flightFilterStore';
 
 type CardFlight = { flight: Flight; x: number; y: number };
 
@@ -99,7 +101,9 @@ function generateData(flights: Flight[]) {
 }
 
 export default function FlightPlotGraph(props: Props) {
-  const [highlighted, setHighlighted] = useState<string | undefined>();
+  const pinnedHighlight = useStore($siteFilter);
+  const [hoverHighlight, setHoverHighlight] = useState<string | undefined>();
+  const highlighted = pinnedHighlight ?? hoverHighlight;
   const [pinnedFlight, setPinnedFlightState] = useState<CardFlight | null>(null);
   const [hoveredFlight, setHoveredFlight] = useState<CardFlight | null>(null);
   const pinnedRef = useRef<CardFlight | null>(null);
@@ -117,12 +121,20 @@ export default function FlightPlotGraph(props: Props) {
   };
 
   const data = generateData(props.flights);
+  // Stable color map keyed by series id so reordering doesn't shift colors
+  const colorById = Object.fromEntries(
+    data.map((d, i) => [d.id, colorSchemes.set3[i % colorSchemes.set3.length]])
+  );
+  // Render highlighted series last so its dots paint on top of others
+  const orderedData = highlighted
+    ? [...data.filter((d) => d.id !== highlighted), ...data.filter((d) => d.id === highlighted)]
+    : data;
   const displayedFlight = pinnedFlight ?? hoveredFlight;
 
   const chart = (width: number) => (
     <div
       ref={wrapperRef}
-      className="min-h-[400px] [&_circle]:cursor-pointer relative"
+      className="min-h-[400px] [&_circle]:cursor-pointer [&_rect]:pointer-events-none relative"
       onMouseMove={(e) => {
         if (!wrapperRef.current) return;
         const rect = wrapperRef.current.getBoundingClientRect();
@@ -143,13 +155,13 @@ export default function FlightPlotGraph(props: Props) {
         const rect = wrapperRef.current.getBoundingClientRect();
         lastPointerRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
       }}
-      onClick={() => setPinnedFlight(null)}
+      onClick={() => { setPinnedFlight(null); $siteFilter.set(undefined); setHoverHighlight(undefined); }}
     >
       <ScatterPlot
-        data={data}
+        data={orderedData}
         height={props.height}
         width={width}
-        colors={{ scheme: 'set3' }}
+        colors={(serie) => colorById[serie.serieId] ?? colorSchemes.set3[0]}
         xScale={{
           type: 'time',
           format: '%Y-%m-%d',
@@ -190,6 +202,7 @@ export default function FlightPlotGraph(props: Props) {
             noteWidth: 0,
           },
         ]}
+        layers={['grid', 'axes', 'annotations', 'nodes', 'markers', 'mesh', 'legends']}
         animate={false}
         useMesh={false}
         tooltip={() => null}
@@ -200,6 +213,7 @@ export default function FlightPlotGraph(props: Props) {
         onMouseMove={supportsHover ? (node) => {
           nivoMovedRef.current = true;
           if (pinnedRef.current) return;
+          if (pinnedHighlight && node.serieId !== pinnedHighlight) return;
           setHoveredFlight((prev) => {
             if (prev?.flight.id === node.data.flight.id) return prev;
             return { flight: node.data.flight, ...lastPointerRef.current };
@@ -218,22 +232,21 @@ export default function FlightPlotGraph(props: Props) {
   );
 
   const legend = data.map((d, i) => {
-    const color = colorSchemes.set3[i % colorSchemes.set3.length];
-    let backgroundColor = color + (highlighted == d.id ? 'FF' : 'AA');
+    const color = colorById[d.id];
+    const isPinned = pinnedHighlight === d.id;
+    const backgroundColor = color + (highlighted === d.id ? 'FF' : '88');
 
     return (
       <div
         key={i}
-        className="flex m-2 items-center"
-        onClick={() => {
-          setHighlighted(highlighted ? undefined : d.id);
-        }}
-        onMouseLeave={() => setHighlighted(undefined)}
-        onMouseOver={() => setHighlighted(d.id)}
+        className="flex m-2 items-center cursor-pointer select-none"
+        onClick={() => $siteFilter.set(isPinned ? undefined : d.id)}
+        onMouseEnter={() => { if (!pinnedHighlight) setHoverHighlight(d.id); }}
+        onMouseLeave={() => { if (!pinnedHighlight) setHoverHighlight(undefined); }}
       >
         <div
-          className="inline h-full min-w-5 aspect-square mr-1"
-          style={{ backgroundColor: backgroundColor }}
+          className={`inline h-full min-w-5 aspect-square mr-1 ${isPinned ? 'ring-2 ring-white ring-offset-1 ring-offset-black' : ''}`}
+          style={{ backgroundColor }}
         />
         <div className="">{d.id}</div>
       </div>

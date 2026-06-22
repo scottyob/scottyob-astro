@@ -28,6 +28,8 @@ const totalTime = prettyMs(totalSeconds * 1000, {
   hideSeconds: true,
 });
 
+const showHero = headingPostfix === undefined;
+
 // Calculate total Ridge vs Thermal hours
 const ridgeHours = flights.reduce(
   (a, b) => a + (b.type === 'ridge' ? b.durationSeconds ?? 0 : 0),
@@ -48,6 +50,7 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
     style="scroll-padding-block-start: 200px;"
   >
     <!-- Hero Image -->
+    {showHero && (
     <div id="hero-container" class="hero-video hero-video--cover relative w-full h-[75vh] overflow-hidden snap-start">
       <!-- Blurred background (shown in square mode) -->
       <canvas id="hero-blur-bg" class="hero-video__blur" aria-hidden="true"></canvas>
@@ -76,6 +79,7 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
         </svg>
       </button>
     </div>
+    )}
 
     <header class="w-full m-0 pt-0 snap-start" style="">
       <div class="flex flex-grow flex-wrap items-center justify-center" }>
@@ -150,7 +154,8 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
 </Layout>
 
 <script>
-  const heroContainer = document.getElementById('hero-container') as HTMLElement;
+  const heroContainer = document.getElementById('hero-container');
+  if (heroContainer) {
   const blurCanvas = document.getElementById('hero-blur-bg') as HTMLCanvasElement;
   const ctx = blurCanvas.getContext('2d');
   const mainVideo = document.getElementById('hero-video') as HTMLVideoElement;
@@ -233,6 +238,7 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
 
   resizeCanvas();
   startDrawing();
+  } // end if (heroContainer)
 </script>
 
 <style is:global>

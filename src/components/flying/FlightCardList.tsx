@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
-// Assuming FlightCard is your flight card component
 import FlightCard from './FlightCard';
 import type { Flight } from '@libs/flyingTypes';
+import { FcDataSheet } from "react-icons/fc";
+import { FiFilter } from "react-icons/fi";
+import { useStore } from '@nanostores/react';
+import { $siteFilter } from '@libs/flightFilterStore';
 
 export type Props = {
   flights: Flight[];
   itemsPerPage?: number;
 };
-import { FcDataSheet } from "react-icons/fc";
-
 
 type SortOrder =
   | 'Recent'
@@ -22,12 +23,9 @@ function SorterSelect(props: {
   setSorter: (value: SortOrder) => void;
 }) {
   const { sorter, setSorter } = props;
-
   return (
     <div className="p-2">
-      <label className="mb-2 inline mr-2">
-        Sort by:
-      </label>
+      <label className="mb-2 inline mr-2">Sort by:</label>
       <select
         value={sorter}
         onChange={(e) => setSorter(e.target.value as SortOrder)}
@@ -47,7 +45,8 @@ export default function FlightCardList(props: Props) {
   const { flights } = props;
   const itemsPerPage = props.itemsPerPage ?? 10;
 
-  // Read initial page from URL if available
+  const siteFilter = useStore($siteFilter);
+
   const getInitialPage = () => {
     if (typeof window !== "undefined") {
       const params = new URL(window.location.href).searchParams;
@@ -58,84 +57,60 @@ export default function FlightCardList(props: Props) {
   };
 
   useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      const page = getInitialPage();
-      setCurrentPageState(page);
-      console.log("Back/forward navigation detected", window.location.pathname);
-    };
-
+    const handlePopState = () => setCurrentPageState(getInitialPage());
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
+  // Reset to page 1 when the site filter changes
+  useEffect(() => {
+    setCurrentPageState(1);
+  }, [siteFilter]);
 
-  // Keep track of how we're sorting the items
   const [sorter, setSorter] = useState<SortOrder>('Recent');
-
-  // State to keep track of the current page
   const [currentPage, setCurrentPageState] = useState(getInitialPage());
 
-  // Calculate total pages
-  const totalPages = Math.ceil(flights.length / itemsPerPage);
+  // Apply filter
+  const filteredFlights = siteFilter
+    ? flights.filter((f) => f.location === siteFilter)
+    : flights;
+
+  const totalPages = Math.ceil(filteredFlights.length / itemsPerPage);
 
   const setCurrentPage = (page: number) => {
-    if (page < 1 || page > totalPages) {
-      return;
-    }
+    if (page < 1 || page > totalPages) return;
     setCurrentPageState(page);
-
-    // Update the URL with the current page number
     const url = new URL(window.location.href);
     url.searchParams.set("page", page.toString());
     window.history.pushState({}, '', url);
   };
 
-  // Handler functions for pagination
-  const goToPreviousPage = () => {
-    setCurrentPage(Math.max(currentPage - 1, 1));
-  };
+  const goToPreviousPage = () => setCurrentPage(Math.max(currentPage - 1, 1));
+  const goToNextPage = () => setCurrentPage(Math.min(currentPage + 1, totalPages));
+  const setAndClear = (s: SortOrder) => { setSorter(s); setCurrentPage(1); };
 
-  const goToNextPage = () => {
-    setCurrentPage(Math.min(currentPage + 1, totalPages));
-  };
-
-  const setAndClear = (sorter: SortOrder) => {
-    setSorter(sorter);
-    setCurrentPage(1);
-  };
-
-  // Sort flights by the sorter
-  let sortedFlights = flights;
+  // Sort
+  let sortedFlights = filteredFlights;
   switch (sorter) {
     case 'Altitude Gain':
-      sortedFlights = [...flights].sort(
-        (a, b) => (b.altitudeGainMeters ?? 0) - (a.altitudeGainMeters ?? 0)
-      );
+      sortedFlights = [...filteredFlights].sort((a, b) => (b.altitudeGainMeters ?? 0) - (a.altitudeGainMeters ?? 0));
       break;
     case 'Duration':
-      sortedFlights = [...flights].sort(
-        (a, b) => (b.durationSeconds ?? 0) - (a.durationSeconds ?? 0)
-      );
+      sortedFlights = [...filteredFlights].sort((a, b) => (b.durationSeconds ?? 0) - (a.durationSeconds ?? 0));
       break;
     case 'Maximum Altitude':
-      sortedFlights = [...flights].sort(
-        (a, b) => (b.maxAltitudeMeters ?? 0) - (a.maxAltitudeMeters ?? 0)
-      );
+      sortedFlights = [...filteredFlights].sort((a, b) => (b.maxAltitudeMeters ?? 0) - (a.maxAltitudeMeters ?? 0));
       break;
     case 'Maximum Distance':
-      sortedFlights = [...flights].sort(
-        (a, b) => (b.maxDistanceMeters ?? 0) - (a.maxDistanceMeters ?? 0)
-      );
+      sortedFlights = [...filteredFlights].sort((a, b) => (b.maxDistanceMeters ?? 0) - (a.maxDistanceMeters ?? 0));
       break;
   }
 
-  // Determine which flights to display on current page
   const currentFlights = sortedFlights.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  //Pager
   const pager = (
     <div>
       <a
@@ -145,9 +120,7 @@ export default function FlightCardList(props: Props) {
       >
         {'<'}
       </a>
-      <span>
-        Page {currentPage} of {totalPages}
-      </span>
+      <span>Page {currentPage} of {totalPages}</span>
       <a
         href="#flightList"
         onClick={goToNextPage}
@@ -157,22 +130,32 @@ export default function FlightCardList(props: Props) {
       </a>
     </div>
   );
-  // Sorters
-  const sorters = (
-    <div className="flex flex-wrap grow min-h-9 space-x-4 items-center justify-center">
-      <div>
-        <a href="/flying/sheet">
-          <FcDataSheet className='inline' />
-          Sheet View
-        </a></div>
-      <SorterSelect sorter={sorter} setSorter={setAndClear} />
-      <div className="text-right mr-16">{pager}</div>
-    </div>
-  );
 
   return (
     <div>
-      {sorters}
+      <div className="flex flex-wrap grow min-h-9 space-x-4 items-center justify-center">
+        <div>
+          <a href="/flying/sheet">
+            <FcDataSheet className='inline' />
+            Sheet View
+          </a>
+        </div>
+        <SorterSelect sorter={sorter} setSorter={setAndClear} />
+        <div className="text-right mr-16">{pager}</div>
+      </div>
+      {siteFilter && (
+        <div className="flex items-center gap-2 px-4 py-1 text-sm text-orange-600">
+          <FiFilter className="inline shrink-0" />
+          <span>Filters: <span className="font-semibold">{siteFilter}</span></span>
+          <button
+            onClick={() => $siteFilter.set(undefined)}
+            className="font-bold leading-none hover:text-orange-400"
+            aria-label="Remove site filter"
+          >
+            ×
+          </button>
+        </div>
+      )}
       <div id="flightList">
         {currentFlights.map((flight) => (
           <FlightCard key={flight.number as number} flight={flight} />
