@@ -3,6 +3,8 @@ import { Bar } from '@nivo/bar';
 import { colorSchemes } from '@nivo/colors';
 import { useState } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
+import { useStore } from '@nanostores/react';
+import { $siteFilter, $yearFilter } from '@libs/flightFilterStore';
 
 export type Props = {
   height: number;
@@ -37,11 +39,12 @@ const getData = (flights: Flight[]) => {
 
 export default function FlightYearGraph(props: Props) {
   const { flights } = props;
-  const [disabled, setDisabled] = useState<string[]>([]);
+  const siteFilter = useStore($siteFilter);
+  const yearFilter = useStore($yearFilter);
+  const [hoverHighlight, setHoverHighlight] = useState<string | undefined>();
+  const highlighted = siteFilter ?? hoverHighlight;
 
-  const data = getData(
-    flights.filter((f) => !disabled.includes(f.location ?? 'Unknown'))
-  );
+  const data = getData(flights);
   const locationColors: { [color: string]: string } = {};
   Array.from(
     new Set(props.flights.map((f) => f.location ?? 'Unknown'))
@@ -51,67 +54,85 @@ export default function FlightYearGraph(props: Props) {
   );
 
   const graph = (width: number) => (
-    <Bar
-      data={data}
-      totalsOffset={10}
-      enableTotals
-      width={width}
-      height={props.height}
-      indexBy={'year'}
-      colors={(props) => locationColors[props.id as string]}
-      margin={{
-        bottom: 30,
-        top: 30,
-        left: 50,
-        right: 30,
-      }}
-      indexScale={{ type: 'band', round: true }}
-      keys={Array.from(new Set(flights.map((f) => f.location || 'Unknown')))}
-      axisLeft={{
-        legend: 'Hours Flying',
-        legendOffset: -40,
-        legendPosition: 'middle',
-      }}
-      labelSkipHeight={20}
-      valueFormat={'0.2f'}
-    />
+    <div onClick={() => { $siteFilter.set(undefined); $yearFilter.set(undefined); setHoverHighlight(undefined); }}>
+      <Bar
+        data={data}
+        totalsOffset={10}
+        enableTotals
+        width={width}
+        height={props.height}
+        indexBy={'year'}
+        colors={(barProps) => {
+          const base = locationColors[barProps.id as string] ?? colorSchemes.set3[0];
+          const locationDimmed = highlighted && barProps.id !== highlighted;
+          const yearDimmed = yearFilter && barProps.indexValue !== yearFilter;
+          return locationDimmed || yearDimmed ? base + '44' : base;
+        }}
+        onClick={(datum, event) => {
+          event.stopPropagation();
+          const location = datum.id as string;
+          $siteFilter.set(siteFilter === location ? undefined : location);
+        }}
+        margin={{ bottom: 60, top: 30, left: 50, right: 30 }}
+        indexScale={{ type: 'band', round: true }}
+        keys={Array.from(new Set(flights.map((f) => f.location || 'Unknown')))}
+        axisLeft={{
+          legend: 'Hours Flying',
+          legendOffset: -40,
+          legendPosition: 'middle',
+        }}
+        axisBottom={{
+          renderTick: ({ x, y, value }) => {
+            const isSelected = yearFilter === value;
+            const isDimmed = yearFilter && yearFilter !== value;
+            return (
+              <g
+                transform={`translate(${x},${y})`}
+                style={{ cursor: 'pointer' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  $yearFilter.set(yearFilter === value ? undefined : String(value));
+                }}
+              >
+                <line x1={0} x2={0} y1={0} y2={5} stroke="currentColor" strokeOpacity={isDimmed ? 0.3 : 1} />
+                <text
+                  textAnchor="middle"
+                  transform="translate(0,16)"
+                  style={{
+                    fontSize: 11,
+                    fill: isSelected ? '#f97316' : isDimmed ? '#aaa' : 'currentColor',
+                    fontWeight: isSelected ? 'bold' : 'normal',
+                  }}
+                >
+                  {value}
+                </text>
+              </g>
+            );
+          },
+        }}
+        labelSkipHeight={20}
+        valueFormat={'0.2f'}
+      />
+    </div>
   );
 
   const legend = Object.entries(locationColors).map(([location, color]) => {
-    const backgroundColor = color + (disabled.includes(location) ? '88' : 'FF');
+    const isPinned = siteFilter === location;
+    const backgroundColor = color + (highlighted === location ? 'FF' : '88');
 
     return (
       <div
         key={location}
-        className="flex m-2 items-center"
-        onClick={(event) => {
-          if (!event.ctrlKey) {
-            // Toggle single item unless control key is selected
-            if (disabled.includes(location)) {
-              setDisabled(disabled.filter((d) => d != location));
-            } else {
-              setDisabled([...disabled, location]);
-            }
-          } else {
-            // Isolate selection with the ctrl key
-            if (disabled.length && !disabled.includes(location)) {
-              setDisabled([]);
-            } else {
-              // Everythingn except this location
-              setDisabled(
-                Object.keys(locationColors).filter((l) => l != location)
-              );
-            }
-          }
-        }}
+        className="flex m-2 items-center cursor-pointer select-none"
+        onClick={() => $siteFilter.set(isPinned ? undefined : location)}
+        onMouseEnter={() => { if (!siteFilter) setHoverHighlight(location); }}
+        onMouseLeave={() => { if (!siteFilter) setHoverHighlight(undefined); }}
       >
         <div
-          className="inline h-full min-w-5 aspect-square mr-1"
-          style={{ backgroundColor: backgroundColor }}
+          className={`inline h-full min-w-5 aspect-square mr-1 ${isPinned ? 'ring-2 ring-white ring-offset-1 ring-offset-black' : ''}`}
+          style={{ backgroundColor }}
         />
-        <div className="" style={{
-            color: disabled.includes(location) ? "#888" : "inherit"
-        }}>{location}</div>
+        <div>{location}</div>
       </div>
     );
   });

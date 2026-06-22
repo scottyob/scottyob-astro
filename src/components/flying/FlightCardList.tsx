@@ -4,7 +4,7 @@ import type { Flight } from '@libs/flyingTypes';
 import { FcDataSheet } from "react-icons/fc";
 import { FiFilter } from "react-icons/fi";
 import { useStore } from '@nanostores/react';
-import { $siteFilter } from '@libs/flightFilterStore';
+import { $siteFilter, $yearFilter, $wingFilter } from '@libs/flightFilterStore';
 
 export type Props = {
   flights: Flight[];
@@ -46,6 +46,8 @@ export default function FlightCardList(props: Props) {
   const itemsPerPage = props.itemsPerPage ?? 10;
 
   const siteFilter = useStore($siteFilter);
+  const yearFilter = useStore($yearFilter);
+  const wingFilter = useStore($wingFilter);
 
   const getInitialPage = () => {
     if (typeof window !== "undefined") {
@@ -62,18 +64,20 @@ export default function FlightCardList(props: Props) {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
-  // Reset to page 1 when the site filter changes
-  useEffect(() => {
-    setCurrentPageState(1);
-  }, [siteFilter]);
+  // Reset to page 1 when any filter changes
+  useEffect(() => { setCurrentPageState(1); }, [siteFilter]);
+  useEffect(() => { setCurrentPageState(1); }, [yearFilter]);
+  useEffect(() => { setCurrentPageState(1); }, [wingFilter]);
 
   const [sorter, setSorter] = useState<SortOrder>('Recent');
   const [currentPage, setCurrentPageState] = useState(getInitialPage());
 
-  // Apply filter
-  const filteredFlights = siteFilter
+  // Apply filters
+  let filteredFlights = siteFilter
     ? flights.filter((f) => f.location === siteFilter)
     : flights;
+  if (yearFilter) filteredFlights = filteredFlights.filter((f) => f.date.startsWith(yearFilter));
+  if (wingFilter) filteredFlights = filteredFlights.filter((f) => f.wing === wingFilter);
 
   const totalPages = Math.ceil(filteredFlights.length / itemsPerPage);
 
@@ -143,16 +147,34 @@ export default function FlightCardList(props: Props) {
         <SorterSelect sorter={sorter} setSorter={setAndClear} />
         <div className="text-right mr-16">{pager}</div>
       </div>
-      {siteFilter && (
+      {(siteFilter || yearFilter || wingFilter) && (
         <div className="flex items-center gap-2 px-4 py-1 text-sm text-orange-600">
           <FiFilter className="inline shrink-0" />
-          <span>Filters: <span className="font-semibold">{siteFilter}</span></span>
+          <span>Filters:</span>
+          {siteFilter && (
+            <>
+              <span className="font-semibold">{siteFilter}</span>
+              <button onClick={() => $siteFilter.set(undefined)} className="font-bold leading-none hover:text-orange-400" aria-label="Remove site filter">×</button>
+            </>
+          )}
+          {yearFilter && (
+            <>
+              <span className="font-semibold">{yearFilter}</span>
+              <button onClick={() => $yearFilter.set(undefined)} className="font-bold leading-none hover:text-orange-400" aria-label="Remove year filter">×</button>
+            </>
+          )}
+          {wingFilter && (
+            <>
+              <span className="font-semibold">{wingFilter}</span>
+              <button onClick={() => $wingFilter.set(undefined)} className="font-bold leading-none hover:text-orange-400" aria-label="Remove wing filter">×</button>
+            </>
+          )}
           <button
-            onClick={() => $siteFilter.set(undefined)}
-            className="font-bold leading-none hover:text-orange-400"
-            aria-label="Remove site filter"
+            onClick={() => { $siteFilter.set(undefined); $yearFilter.set(undefined); $wingFilter.set(undefined); }}
+            className="ml-2 text-xs underline hover:text-orange-400"
+            aria-label="Clear all filters"
           >
-            ×
+            Clear all
           </button>
         </div>
       )}
