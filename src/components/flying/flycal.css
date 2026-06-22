@@ -1,3 +1,11 @@
+/* Widen the pretty-modal on small screens for the fly calendar */
+@media (max-width: 767px) {
+  .fly-calendar-modal .modal-container {
+    --pretty-modal-modal-container-max-width: 96%;
+    --pretty-modal-modal-container-padding: 8px;
+  }
+}
+
 .calendar-fade {
   --mask: linear-gradient(
       to right,

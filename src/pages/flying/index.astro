@@ -156,6 +156,7 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
 <script>
   const heroContainer = document.getElementById('hero-container');
   if (heroContainer) {
+  const container = heroContainer as HTMLElement;
   const blurCanvas = document.getElementById('hero-blur-bg') as HTMLCanvasElement;
   const ctx = blurCanvas.getContext('2d');
   const mainVideo = document.getElementById('hero-video') as HTMLVideoElement;
@@ -167,8 +168,8 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
 
   function setMode(contain: boolean) {
     containMode = contain;
-    heroContainer.classList.toggle('hero-video--contain', contain);
-    heroContainer.classList.toggle('hero-video--cover', !contain);
+    container.classList.toggle('hero-video--contain', contain);
+    container.classList.toggle('hero-video--cover', !contain);
     iconToSquare.classList.toggle('hero-toggle__icon--hidden', contain);
     iconToRect.classList.toggle('hero-toggle__icon--hidden', !contain);
   }
@@ -181,13 +182,13 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
     }
 
     const videoAspect = mainVideo.videoWidth / mainVideo.videoHeight;
-    const heroAspect = heroContainer.clientWidth / heroContainer.clientHeight;
+    const heroAspect = container.clientWidth / container.clientHeight;
     setMode(heroAspect > 2 * videoAspect);
   }
 
   function resizeCanvas() {
-    blurCanvas.width = heroContainer.clientWidth;
-    blurCanvas.height = heroContainer.clientHeight;
+    blurCanvas.width = container.clientWidth;
+    blurCanvas.height = container.clientHeight;
   }
 
   document.getElementById('hero-toggle')!.addEventListener('click', () => {
@@ -199,7 +200,7 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
     applyAutoMode();
     resizeCanvas();
   });
-  resizeObserver.observe(heroContainer);
+  resizeObserver.observe(container);
 
   mainVideo.addEventListener('loadedmetadata', applyAutoMode);
 
@@ -234,7 +235,7 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
       }
     },
     { threshold: 0.01 }
-  ).observe(heroContainer);
+  ).observe(container);
 
   resizeCanvas();
   startDrawing();
