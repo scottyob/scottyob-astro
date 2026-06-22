@@ -88,10 +88,9 @@ export default function FlightPreview(props: Props) {
 
     map.fitBounds([bounds.min, bounds.max], { animate: false, padding: 20 });
     map.getMap().zoomTo(map.getMap().getZoom() + 0.5, { duration: 0 });
+    map.getMap().setPitch(interactive ? 70 : 0);
 
     if (!interactive) return;
-
-    map.getMap().setPitch(55);
 
     map.getMap().on('mousedown', () => {
       if (!controlsEnabledRef.current) return;
@@ -246,12 +245,14 @@ export default function FlightPreview(props: Props) {
             controlsEnabledRef.current = next;
             setControlsEnabled(next);
           }}
-          title={controlsEnabled ? 'Disable camera controls' : 'Enable camera controls'}
+          title={controlsEnabled ? 'Disable map controls' : 'Enable map controls'}
           className="absolute top-2.5 left-2.5 w-9 h-9 flex items-center justify-center rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors pointer-events-auto"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-            <circle cx="12" cy="13" r="4"/>
+            <path d="M18 11V6a2 2 0 0 0-4 0"/>
+            <path d="M14 10V4a2 2 0 0 0-4 0v2"/>
+            <path d="M10 10.5V6a2 2 0 0 0-4 0v8"/>
+            <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
             {!controlsEnabled && <line x1="2" y1="2" x2="22" y2="22"/>}
           </svg>
         </button>
