@@ -50,15 +50,7 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
     <!-- Hero Image -->
     <div id="hero-container" class="hero-video hero-video--cover relative w-full h-[75vh] overflow-hidden snap-start">
       <!-- Blurred background (shown in square mode) -->
-      <video
-        id="hero-blur-bg"
-        src="/ParaglidingHeader.mp4"
-        class="hero-video__blur"
-        autoplay
-        loop
-        muted
-        playsinline
-        aria-hidden="true"></video>
+      <canvas id="hero-blur-bg" class="hero-video__blur" aria-hidden="true"></canvas>
       <!-- Main video -->
       <video
         id="hero-video"
@@ -159,7 +151,8 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
 
 <script>
   const heroContainer = document.getElementById('hero-container') as HTMLElement;
-  const blurBg = document.getElementById('hero-blur-bg') as HTMLVideoElement;
+  const blurCanvas = document.getElementById('hero-blur-bg') as HTMLCanvasElement;
+  const ctx = blurCanvas.getContext('2d');
   const mainVideo = document.getElementById('hero-video') as HTMLVideoElement;
   const iconToSquare = document.getElementById('icon-to-square') as HTMLElement;
   const iconToRect = document.getElementById('icon-to-rect') as HTMLElement;
@@ -187,13 +180,9 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
     setMode(heroAspect > 2 * videoAspect);
   }
 
-  function syncBlurVideo(force = false) {
-    if (!mainVideo.duration || !blurBg.duration) return;
-    const drift = Math.abs(blurBg.currentTime - mainVideo.currentTime);
-    if (force || drift > 0.1) {
-      blurBg.currentTime = mainVideo.currentTime;
-    }
-    blurBg.playbackRate = mainVideo.playbackRate;
+  function resizeCanvas() {
+    blurCanvas.width = heroContainer.clientWidth;
+    blurCanvas.height = heroContainer.clientHeight;
   }
 
   document.getElementById('hero-toggle')!.addEventListener('click', () => {
@@ -201,15 +190,49 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
     setMode(userMode);
   });
 
-  const resizeObserver = new ResizeObserver(applyAutoMode);
+  const resizeObserver = new ResizeObserver(() => {
+    applyAutoMode();
+    resizeCanvas();
+  });
   resizeObserver.observe(heroContainer);
 
   mainVideo.addEventListener('loadedmetadata', applyAutoMode);
-  mainVideo.addEventListener('loadeddata', () => syncBlurVideo(true));
-  mainVideo.addEventListener('play', () => syncBlurVideo(true));
-  mainVideo.addEventListener('seeking', () => syncBlurVideo(true));
-  mainVideo.addEventListener('ratechange', () => syncBlurVideo(true));
-  mainVideo.addEventListener('timeupdate', () => syncBlurVideo());
+
+  // Canvas-based blur: draw frames from the main video via rAF.
+  // Stops when hero is offscreen so Safari doesn't do needless GPU work.
+  let rafId: number | null = null;
+
+  function startDrawing() {
+    if (rafId !== null) return;
+    function loop() {
+      if (ctx && containMode && mainVideo.readyState >= 2) {
+        ctx.drawImage(mainVideo, 0, 0, blurCanvas.width, blurCanvas.height);
+      }
+      rafId = requestAnimationFrame(loop);
+    }
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function stopDrawing() {
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+  }
+
+  new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        startDrawing();
+      } else {
+        stopDrawing();
+      }
+    },
+    { threshold: 0.01 }
+  ).observe(heroContainer);
+
+  resizeCanvas();
+  startDrawing();
 </script>
 
 <style is:global>
@@ -222,7 +245,6 @@ const metricClassStyles = 'text-orange-500 text-2xl not-italic';
   }
 
   .hero-video__blur {
-    object-fit: cover;
     transform: scale(1.1);
     filter: blur(24px);
     opacity: 0;
