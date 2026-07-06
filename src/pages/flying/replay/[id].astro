@@ -1,13 +1,16 @@
 ---
 import { GetFlights } from '@libs/flying';
-
+import { GetLandmarks } from '@libs/landmarks';
+import IGCViewer from 'igc-viewer/astro';
+import { glob } from 'glob';
+import { basename, dirname, extname } from 'node:path';
 
 export async function getStaticPaths() {
   const flights = await GetFlights();
 
   return flights.map((f) => {
     return {
-      params: { id: f.id.toString()},
+      params: { id: f.id.toString() },
     };
   });
 }
@@ -16,10 +19,31 @@ const { id } = Astro.params;
 const flights = await GetFlights();
 const flight = flights.find((f) => f.id.toString() == id);
 
-if(!flight) 
-  throw new Error("No flight with ID found");
+if (!flight) {
+  throw new Error('No flight with ID found');
+}
 
-import CesiumReplay from '@components/flying/3DReplay/CesiumReplay.astro';
+if (!flight.igcFile?.filePathUrl) {
+  throw new Error('Flight has no IGC file to replay');
+}
+
+// The primary track goes first: the viewer focuses on it and takes its task.
+// Any IGC files in the flight's "others" sub-folder load as secondary tracks.
+const otherIgcs = await glob(`${dirname(flight.igcFile.filePath)}/others/*.igc`, { nocase: true });
+const tracks = [
+  {
+    url: flight.igcFile.filePathUrl,
+    label: `Flight #${flight.number ?? flight.id}`,
+  },
+  ...otherIgcs.sort().map((f) => ({
+    url: encodeURI(f.replace(/^\/?public/, '')),
+    label: basename(f, extname(f)),
+  })),
+];
+
+const landmarks = await GetLandmarks();
+
+const googleApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
 ---
 
 <!doctype html>
@@ -40,6 +64,24 @@ import CesiumReplay from '@components/flying/3DReplay/CesiumReplay.astro';
     <title>Flight Replay</title>
   </head>
   <body>
-    <CesiumReplay flight={flight} />
+    <IGCViewer googleApiKey={googleApiKey} tracks={tracks} landmarks={landmarks} autoTracking />
   </body>
 </html>
+
+<style is:global>
+  html,
+  body,
+  igc-viewer {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    overflow: hidden;
+  }
+
+  igc-viewer {
+    display: block;
+  }
+</style>

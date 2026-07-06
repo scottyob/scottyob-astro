@@ -1,7 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import tailwind from '@astrojs/tailwind';
-import lottie from "astro-integration-lottie";
+import lottie from 'astro-integration-lottie';
 
 import icon from 'astro-icon';
 
@@ -9,16 +8,12 @@ import mdx from '@astrojs/mdx';
 
 import react from '@astrojs/react';
 
-import { viteStaticCopy } from 'vite-plugin-static-copy'
-const cesiumSource = "node_modules/cesium/Build/Cesium";
-const cesiumBaseUrl = "cesiumStatic";
-
-import rehypeSlug from 'rehype-slug'
-import rehypeAutolinkHeadings from 'rehype-autolink-headings'
+import rehypeSlug from 'rehype-slug';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [lottie(), tailwind(), icon({
+  integrations: [lottie(), icon({
     include: {
       noto: [
         'black-nib',
@@ -28,11 +23,11 @@ export default defineConfig({
         'person-climbing',
         'parachute',
       ],
-      "flat-color-icons": [
-        "data-sheet",
+      'flat-color-icons': [
+        'data-sheet',
       ],
-      "mdi": [
-        "resume",
+      mdi: [
+        'resume',
       ],
     },
   }), mdx({
@@ -43,21 +38,10 @@ export default defineConfig({
 
   }), react()],
   vite: {
-    assetsInclude: ["**/*.bin", "**/*.zip", "**/*.json.lottie"],
-    define: {
-      CESIUM_BASE_URL: JSON.stringify('/' + cesiumBaseUrl),
+    assetsInclude: ['**/*.bin', '**/*.zip', '**/*.json.lottie'],
+    server: {
+      allowedHosts: ['scotts-macbook-air.mackarel-in.ts.net'],
     },
-
-    plugins: [
-      viteStaticCopy({
-        targets: [
-          { src: `${cesiumSource}/ThirdParty`, dest: cesiumBaseUrl },
-          { src: `${cesiumSource}/Workers`, dest: cesiumBaseUrl },
-          { src: `${cesiumSource}/Assets`, dest: cesiumBaseUrl },
-          { src: `${cesiumSource}/Widgets`, dest: cesiumBaseUrl },
-        ],
-      }),
-    ],
   },
   site: 'https://www.scottyob.com/',
   

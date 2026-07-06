@@ -204,7 +204,11 @@ async function gscFlights(): Promise<Flight[]> {
   });
   const launches: Launch[] = JSON.parse(buffer);
 
-  const igcs = await glob('public/logbook/flights/**/*.igc', { nocase: true });
+  // "others" sub-folders hold other pilots' tracks for the replay viewer, not logbook flights
+  const igcs = await glob('public/logbook/flights/**/*.igc', {
+    nocase: true,
+    ignore: 'public/logbook/flights/**/others/**',
+  });
   const flights = await Promise.all(
     igcs.map(async (f) => {
       // Load the igc file into memory

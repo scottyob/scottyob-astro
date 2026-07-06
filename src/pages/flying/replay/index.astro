@@ -1,0 +1,47 @@
+---
+import { GetLandmarks } from '@libs/landmarks';
+import IGCViewer from 'igc-viewer/astro';
+
+const landmarks = await GetLandmarks();
+const googleApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Flight Replay" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="view-transition" content="same-origin" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Scott O'Brien\'s Website"
+      href={new URL('rss.xml', Astro.site)}
+    />
+    <title>Flight Replay</title>
+  </head>
+  <body>
+    <IGCViewer googleApiKey={googleApiKey} landmarks={landmarks} autoTracking />
+  </body>
+</html>
+
+<style is:global>
+  html,
+  body,
+  igc-viewer {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    overflow: hidden;
+  }
+
+  igc-viewer {
+    display: block;
+  }
+</style>

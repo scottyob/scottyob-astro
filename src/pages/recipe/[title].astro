@@ -1,5 +1,6 @@
 ---
 import { getAllRecipes } from '@libs/Recipes';
+import { render } from 'astro:content';
 
 export async function getStaticPaths() {
   const recipes = await getAllRecipes();
@@ -22,7 +23,7 @@ if (!recipe) {
 
 import Layout from '../../layouts/ArticleLayout.astro';
 import { Image } from 'astro:assets';
-const { Content } = await recipe.content.render();
+const { Content } = await render(recipe.content);
 ---
 
 <Layout article={recipe.content}>

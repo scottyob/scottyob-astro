@@ -91,14 +91,13 @@ const pathname = Astro.url.pathname;
   </li>
   <li class={liClass}>
     <a href="/flying"><Icon name="noto:parachute" />Flying</a>
-      {
-        pathname.startsWith('/flying') ? (
-          <span class={selected} />
-        ) : (
-          <span class={unselected} />
-        )
-      }
-    </a>
+    {
+      pathname.startsWith('/flying') ? (
+        <span class={selected} />
+      ) : (
+        <span class={unselected} />
+      )
+    }
   </li>
 </ul>
 

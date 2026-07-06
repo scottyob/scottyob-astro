@@ -1,5 +1,6 @@
 ---
 import { getAllPosts } from '@libs/Post';
+import { render } from 'astro:content';
 import Layout from '../../../layouts/ArticleLayout.astro';
 import { format, toZonedTime } from 'date-fns-tz';
 import LinkedImage from '@components/LinkedImage.astro';
@@ -23,7 +24,7 @@ if (post == undefined) {
   throw 'Unable to load post';
 }
 
-const { Content, components } = await post.content.render();
+const { Content } = await render(post.content);
 const zonedDate = toZonedTime(post.data.date, 'UTC');
 const dateStr = format(zonedDate, 'EEEE do MMMM, yyyy', { timeZone: 'UTC' });
 ---
@@ -35,5 +36,5 @@ const dateStr = format(zonedDate, 'EEEE do MMMM, yyyy', { timeZone: 'UTC' });
     </aside>
     <h1>{post.data.title}</h1>
   </slot>
-  <Content components={{...components, img: LinkedImage}} />
+  <Content components={{ img: LinkedImage }} />
 </Layout>

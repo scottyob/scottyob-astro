@@ -15,17 +15,26 @@ export interface Climb {
 };
 
 export async function GetClimbs(): Promise<Climb[]> {
+  const privateKey = import.meta.env.PRIVATE_KEY;
+  const clientEmail = import.meta.env.CLIENT_EMAIL;
+  const clientId = import.meta.env.CLIENT_ID;
+  const projectId = import.meta.env.PROJECT_ID;
+
+  if (!privateKey || !clientEmail || !clientId || !projectId) {
+    console.warn(
+      'Unable to load climbs from spreadsheet. Carrying on without any. Check your google auth settings'
+    );
+    return [];
+  }
+
   // Authenticate using your credentials  
   const auth = new google.auth.GoogleAuth({
     credentials: {
-      private_key: Buffer.from(
-        import.meta.env.PRIVATE_KEY as string,
-        'base64'
-      ).toString(),
-      client_email: import.meta.env.CLIENT_EMAIL,
-      client_id: import.meta.env.CLIENT_ID
+      private_key: Buffer.from(privateKey, 'base64').toString(),
+      client_email: clientEmail,
+      client_id: clientId
     },
-    projectId: import.meta.env.PROJECT_ID,
+    projectId,
     scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
   });
 
@@ -37,10 +46,18 @@ export async function GetClimbs(): Promise<Climb[]> {
   const range = 'Sheet1!A:D';
 
   // Retrieve the values from the specified range
-  const response = await sheets.spreadsheets.values.get({
-    spreadsheetId,
-    range
-  });
+  let response;
+  try {
+    response = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range
+    });
+  } catch (e) {
+    console.warn(
+      'Unable to load climbs from spreadsheet. Carrying on without any. Check your google auth settings'
+    );
+    return [];
+  }
 
   // Extract the values from the response
   const values = response.data.values as string[][];

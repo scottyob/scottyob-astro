@@ -31,6 +31,8 @@ jobs:
       PRIVATE_KEY: ${{ vars.PRIVATE_KEY }}
       PRIVATE_KEY_ID: ${{ vars.PRIVATE_KEY_ID }}
       PROJECT_ID: ${{ vars.PROJECT_ID }}
+      # Baked into the replay pages at build time (browser key, restrict by referrer)
+      PUBLIC_GOOGLE_MAPS_API_KEY: ${{ vars.PUBLIC_GOOGLE_MAPS_API_KEY }}
 
     steps:
       - name: Checkout your repository using git
@@ -42,9 +44,10 @@ jobs:
           git submodule foreach git pull origin origin
       - name: Install, build, and upload your site
         uses: withastro/action@v3
-        # with:
+        with:
+          # igc-viewer requires node >= 22.12 (also matches .nvmrc)
+          node-version: 22
           # path: . # The root location of your Astro project inside the repository. (optional)
-          # node-version: 20 # The specific version of Node that should be used to build your site. Defaults to 20. (optional)
           # package-manager: pnpm@latest # The Node package manager that should be used to install dependencies and build your site. Automatically detected based on your lockfile. (optional)
 
   deploy:

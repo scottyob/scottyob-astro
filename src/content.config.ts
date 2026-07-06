@@ -1,14 +1,13 @@
-// 1. Import utilities from `astro:content`
-import { defineCollection, z, type ImageFunction } from 'astro:content';
+import { defineCollection, type ImageFunction } from 'astro:content';
+import { glob } from 'astro/loaders';
+import { z } from 'astro/zod';
 
-// Define common styles
 const ArticleStyles: readonly [string, ...string[]] = [
   'img-left',
   'img-top',
   'img-between',
 ];
 
-// Define a base schema with common fields
 const baseSchema = (image: ImageFunction) =>
   z.object({
     title: z.string(),
@@ -18,9 +17,8 @@ const baseSchema = (image: ImageFunction) =>
     heroObjectPosition: z.string().optional(),
   });
 
-// 2. Define your collection(s)
 const blogCollection = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/posts' }),
   schema: ({ image }) =>
     baseSchema(image).extend({
       tags: z.array(z.string()).optional(),
@@ -30,23 +28,15 @@ const blogCollection = defineCollection({
     }),
 });
 
-// Recipe collection
 const recipeCollection = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/recipes' }),
   schema: ({ image }) =>
     baseSchema(image).extend({
       categories: z.array(z.string()).optional(),
     }),
 });
 
-const baseCollection = defineCollection({
-  type: 'content',
-  schema: ({ image }) => baseSchema(image),
-});
-
-// 3. Export a single `collections` object to register your collection(s)
 export const collections = {
   posts: blogCollection,
   recipes: recipeCollection,
-  base: baseCollection, // Used for layouts that can handle base content
 };

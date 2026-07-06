@@ -31,13 +31,12 @@ export async function getAllPosts(): Promise<Post[]> {
         return {
             "content": post,
             "data": post.data,
-            "excerpt": await getExcerpt(post.body),
-            "slug": post.slug.replace(/\/page$/, ""),
+            "excerpt": await getExcerpt(post.body ?? ''),
+            "slug": post.id.replace(/\/page$/, ""),
         }
     }))
 
     return pages.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 }
-
 
 

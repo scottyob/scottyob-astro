@@ -10,13 +10,41 @@ import { useEffect, useRef, useState } from 'react';
 import IGCParser, { type IGCFile } from 'igc-parser';
 import Map, { Source, Layer, type MapRef, NavigationControl } from 'react-map-gl';
 import axios from 'axios';
-// @ts-ignore
-import { Threebox } from 'threebox-plugin';
 
 type LatLng = {
   lat: number;
   lng: number;
 };
+
+type ThreeboxConstructor = new (
+  map: unknown,
+  glContext: WebGLRenderingContext,
+  options: { defaultLights: boolean }
+) => {
+  add: (object: unknown) => void;
+  line: (options: {
+    geometry: [number, number, number][];
+    color: string;
+    width: number;
+    opacity: number;
+  }) => unknown;
+  update: () => void;
+  camera: { matrixWorld: { elements: number[] } };
+};
+
+declare global {
+  interface Window {
+    Threebox?: ThreeboxConstructor;
+  }
+}
+
+async function loadThreebox(): Promise<ThreeboxConstructor> {
+  await import('threebox-plugin/dist/threebox.js');
+  if (!window.Threebox) {
+    throw new Error('Threebox failed to load');
+  }
+  return window.Threebox;
+}
 
 const getBounds = (positions: LatLng[]) => {
   return {
@@ -82,7 +110,7 @@ export default function FlightPreview(props: Props) {
 
   // Called by react-map-gl's onLoad — fires exactly once after style + resources are ready.
   // Avoids the style.load timing race that breaks Safari.
-  const handleLoad = () => {
+  const handleLoad = async () => {
     const map = mapRef.current;
     if (!map) return;
 
@@ -91,6 +119,8 @@ export default function FlightPreview(props: Props) {
     map.getMap().setPitch(interactive ? 75 : 0);
 
     if (!interactive) return;
+
+    const Threebox = await loadThreebox();
 
     map.getMap().on('mousedown', () => {
       if (!controlsEnabledRef.current) return;
@@ -133,7 +163,7 @@ export default function FlightPreview(props: Props) {
       logCameraState('DEM ready → adding layer');
       map.getMap().on('move', () => logCameraState('move event'));
 
-      let tb: Threebox | undefined = undefined;
+      let tb: InstanceType<ThreeboxConstructor> | undefined = undefined;
       let frameCount = 0;
       map.getMap().addLayer({
         id: 'custom layer',
