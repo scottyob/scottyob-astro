@@ -8,11 +8,14 @@ import { basename, dirname, extname } from 'node:path';
 export async function getStaticPaths() {
   const flights = await GetFlights();
 
-  return flights.map((f) => {
-    return {
-      params: { id: f.id.toString() },
-    };
-  });
+  // Only flights with a tracklog get a replay page (spreadsheet-only flights have no IGC)
+  return flights
+    .filter((f) => f.igcFile?.filePathUrl)
+    .map((f) => {
+      return {
+        params: { id: f.id.toString() },
+      };
+    });
 }
 
 const { id } = Astro.params;

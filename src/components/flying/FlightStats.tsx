@@ -160,8 +160,10 @@ export default function FlightStats({ flight }: { flight: Flight }) {
         <div className="px-4 pt-3 pb-1">
           <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">View Flight</span>
         </div>
-        <div className="grid divide-x divide-gray-100" style={{ gridTemplateColumns: `repeat(${[true, !!flight.sportsTrackLiveUrl, !!flightUrl, !!igcUrl].filter(Boolean).length}, minmax(0, 1fr))` }}>
-          <LinkItem icon={FaPlayCircle}      label="Replay"          description="Replay with tasks"       href={`/flying/replay/${flight.id}`} />
+        <div className="grid divide-x divide-gray-100" style={{ gridTemplateColumns: `repeat(${[!!flight.igcFile, !!flight.sportsTrackLiveUrl, !!flightUrl, !!igcUrl].filter(Boolean).length}, minmax(0, 1fr))` }}>
+          {flight.igcFile && (
+            <LinkItem icon={FaPlayCircle}      label="Replay"          description="Replay with tasks"       href={`/flying/replay/${flight.id}`} />
+          )}
           {flight.sportsTrackLiveUrl && (
             <LinkItem icon={FaExternalLinkAlt} label="SportsTrackLive" description="View flying with others!" href={flight.sportsTrackLiveUrl} external />
           )}
