@@ -68,7 +68,7 @@
     "gsap": "^3.12.7",
     "hast-util-to-string": "^3.0.1",
     "igc-parser": "^1.1.0",
-    "igc-viewer": "^0.0.2",
+    "igc-viewer": "^0.0.3",
     "leaflet": "^1.9.4",
     "lottie-web": "^5.13.0",
     "luxon": "^3.5.0",
